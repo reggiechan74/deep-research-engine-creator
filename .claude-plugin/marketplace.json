@@ -1,0 +1,19 @@
+{
+  "name": "deep-research-engine-creator",
+  "owner": {
+    "name": "Reggie Chan",
+    "email": "reggie.chan@gmail.com"
+  },
+  "metadata": {
+    "description": "Create domain-specialized deep-research engines as standalone Claude Code plugins",
+    "homepage": "https://github.com/reggiechan74/deep-research-engine-creator"
+  },
+  "plugins": [
+    {
+      "name": "deep-research-engine-creator",
+      "version": "1.2.0",
+      "source": ".",
+      "description": "Create domain-specialized deep-research engines as standalone Claude Code plugins. Interviews users on their research domain, generates customized multi-agent research pipelines with Verify-Validate-Cite (VVC) source integrity."
+    }
+  ]
+}

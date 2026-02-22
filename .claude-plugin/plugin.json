@@ -4,7 +4,7 @@
   "description": "Create domain-specialized deep-research engines as standalone Claude Code plugins. Interviews users on their research domain, generates customized multi-agent research pipelines.",
   "author": {
     "name": "Reggie Chan",
-    "email": "reggiechan74@gmail.com"
+    "email": "reggie.chan@gmail.com"
   },
   "repository": "https://github.com/reggiechan74/deep-research-engine-creator",
   "license": "MIT",
