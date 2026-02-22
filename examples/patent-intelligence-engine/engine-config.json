@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "1.0",
+  "engineMeta": {
+    "name": "patent-intelligence-engine",
+    "displayName": "Patent Intelligence Engine",
+    "domain": "Intellectual property and patent landscape analysis",
+    "audience": "IP attorneys, technology transfer officers, and R&D strategists",
+    "version": "1.0.0",
+    "mode": "self-contained",
+    "createdAt": "2026-02-21T19:00:00-05:00",
+    "createdBy": "deep-research-engine-creator v1.0.0"
+  },
+  "sampleQuestions": [
+    "What is the patent landscape for solid-state battery technology?",
+    "Who are the top filers in autonomous vehicle LiDAR patents since 2020?",
+    "Are there freedom-to-operate risks for our graphene-based electrode invention?",
+    "What patent trends exist in CRISPR gene editing therapeutics?",
+    "Map the IP portfolio of Tesla vs BYD in battery technology"
+  ],
+  "scope": {
+    "questionTypes": [
+      "landscape analysis",
+      "prior art search",
+      "freedom-to-operate assessment",
+      "competitive portfolio analysis",
+      "technology trend mapping"
+    ],
+    "geographic": ["global", "USPTO", "EPO", "WIPO", "JPO", "KIPO", "CNIPA", "CIPO"],
+    "temporal": "2015-present with historical context for foundational patents",
+    "deliverable": "Patent landscape report with competitive matrix and FTO assessment"
+  },
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Patent Databases",
+        "sources": [
+          "USPTO PATFT and AppFT (patents.google.com, patft.uspto.gov)",
+          "European Patent Office (EPO) Espacenet and Global Patent Index",
+          "WIPO PATENTSCOPE and PCT publications",
+          "Google Patents with full-text search and classification browsing",
+          "National patent office databases (JPO J-PlatPat, KIPO KIPRIS, CNIPA, CIPO)"
+        ]
+      },
+      "tier2": {
+        "name": "Patent Analytics & Legal Sources",
+        "sources": [
+          "Patent prosecution histories (USPTO PAIR, EPO Register)",
+          "Patent litigation databases (PACER, Docket Navigator, Lex Machina)",
+          "Published patent examiner search reports and office actions",
+          "PTAB decisions and inter partes review proceedings",
+          "Patent classification systems (CPC, IPC) official documentation"
+        ]
+      },
+      "tier3": {
+        "name": "Technical & Scientific Literature",
+        "sources": [
+          "Peer-reviewed technical journals related to the patent domain",
+          "Conference proceedings from major technical conferences",
+          "Standards body publications (IEEE, ISO, ASTM) relevant to patent claims",
+          "Published doctoral dissertations and technical reports",
+          "ArXiv preprints and academic working papers with disclosed methodology"
+        ]
+      },
+      "tier4": {
+        "name": "Industry & Commercial Sources",
+        "sources": [
+          "Patent analytics platform reports (PatSnap, Orbit Intelligence, Innography)",
+          "Industry news and trade publications covering patent activity",
+          "Company press releases and investor presentations mentioning IP",
+          "Technology blog posts from recognized patent attorneys and IP professionals",
+          "Patent valuation and licensing market reports"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable / Unverified",
+        "sources": [
+          "Anonymous forum posts and unattributed patent commentary",
+          "Marketing materials claiming patent-pending status without application numbers",
+          "AI-generated patent summaries without verification against original filings",
+          "Unverified patent ownership claims on company websites",
+          "Social media discussions about patent disputes without case citations"
+        ]
+      }
+    },
+    "preferredSites": [
+      "patents.google.com",
+      "patft.uspto.gov",
+      "appft.uspto.gov",
+      "worldwide.espacenet.com",
+      "patentscope.wipo.int",
+      "epo.org",
+      "scholar.google.com",
+      "lens.org",
+      "ipo.gov.uk",
+      "cipo.ic.gc.ca"
+    ],
+    "excludedSources": [
+      "wikipedia.org",
+      "quora.com",
+      "reddit.com",
+      "yahoo-answers.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "patent-number-lookup",
+        "pattern": "\"{patent_number}\" patent claims abstract assignee site:{preferred_site}"
+      },
+      {
+        "name": "technology-landscape",
+        "pattern": "\"{technology_keyword}\" patent landscape {cpc_class} filing trend {year_range}"
+      },
+      {
+        "name": "assignee-portfolio",
+        "pattern": "\"{assignee_name}\" patent portfolio {technology_area} site:{preferred_site}"
+      },
+      {
+        "name": "classification-search",
+        "pattern": "{cpc_code} OR {ipc_code} \"{technology_keyword}\" patent site:patents.google.com"
+      },
+      {
+        "name": "prior-art-search",
+        "pattern": "\"{invention_keyword}\" prior art {technical_field} before:{priority_date}"
+      },
+      {
+        "name": "patent-family",
+        "pattern": "\"{patent_number}\" family continuation divisional priority claim"
+      },
+      {
+        "name": "fto-risk-search",
+        "pattern": "\"{technology_keyword}\" patent infringement freedom-to-operate {jurisdiction}"
+      },
+      {
+        "name": "patent-litigation",
+        "pattern": "\"{patent_number}\" OR \"{assignee_name}\" patent litigation lawsuit infringement {year}"
+      },
+      {
+        "name": "patent-citation-network",
+        "pattern": "\"{patent_number}\" cited-by references forward-citation backward-citation"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["patent-search-specialist"]
+      },
+      "standard": {
+        "agents": ["patent-search-specialist", "prior-art-analyst"]
+      },
+      "deep": {
+        "agents": ["patent-search-specialist", "prior-art-analyst", "ip-landscape-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["patent-search-specialist", "prior-art-analyst", "ip-landscape-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "patent-search-specialist",
+        "role": "Patent Search Specialist",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions. Extracts key data points: patent numbers, filing dates, grant dates, assignees, inventors, claim counts, and citation metrics.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "prior-art-analyst",
+        "role": "Prior Art Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes patent claims for novelty and non-obviousness against the prior art landscape. Applies the Teaching-Suggestion-Motivation (TSM) test and KSR obviousness framework to evaluate patentability. Reviews prosecution histories to understand claim scope evolution and examiner objections. Identifies relevant prior art references including patents, published applications, technical papers, conference proceedings, and commercial products. Assesses claim construction and identifies potential invalidity arguments.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "ip-landscape-mapper",
+        "role": "IP Landscape Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official patent office databases (USPTO, EPO, WIPO). Patent numbers confirmed as valid with current status checked. Claim analysis based on actual claim text from granted patents. Multiple authoritative sources agree on assignee, dates, and classification.",
+      "MEDIUM": "Supported by patent analytics platforms or secondary patent databases, corroborated by at least 1 official patent office source. Patent family connections inferred from priority claims and verified where possible. Claim scope assessments are consistent with prosecution history.",
+      "LOW": "Based on a single commercial patent database, industry report, or news source without verification against official patent office records. Patent status may not be current. Claim analysis based on abstracts rather than full claim text.",
+      "SPECULATIVE": "Based on published patent applications (not yet granted), roadmap announcements of IP strategy, or extrapolation from filing trends. Represents projected IP positions rather than confirmed rights. Includes freedom-to-operate assessments based on pending claims that may change during prosecution."
+    },
+    "minimumEvidence": "All patent claims require patent number verification against at least one official patent office database (USPTO, EPO, WIPO). Patent status (active, expired, abandoned, pending) must be confirmed. Claim scope assessments require reference to actual claim text. FTO conclusions require identification of specific patent claims and their relationship to the subject technology.",
+    "validationRules": [
+      "Verify all patent numbers against official patent office databases (USPTO PATFT/AppFT, EPO Espacenet, WIPO PATENTSCOPE) and confirm current legal status.",
+      "Confirm patent assignee information is current by checking assignment records -- patents may have been transferred, licensed, or sold.",
+      "Distinguish between granted patents and pending applications when assessing IP strength and enforceability.",
+      "Validate CPC and IPC classification codes against official classification schemes to ensure accuracy of landscape mapping.",
+      "Cross-check patent family connections using priority claim data from multiple patent offices.",
+      "Verify that cited prior art references are actually relevant to the claims under analysis, not just topically related.",
+      "Flag any patent status data older than 6 months as potentially outdated -- maintenance fees, assignments, and litigation may have changed status.",
+      "Assess patent term calculations considering any patent term adjustments (PTA) or terminal disclaimers.",
+      "Confirm that freedom-to-operate assessments reference specific claim elements, not just patent titles or abstracts."
+    ],
+    "citationStandard": "APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available."
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Patent Landscape Overview",
+      "Key Patent Families",
+      "Claims Analysis",
+      "Prior Art Assessment",
+      "Competitive Portfolio Matrix",
+      "Freedom-to-Operate Assessment",
+      "Whitespace & Opportunity Analysis",
+      "IP Risk Matrix",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_patent_intelligence.md",
+    "specialDeliverables": [
+      "patent-family-tree",
+      "competitive-portfolio-matrix",
+      "fto-risk-heatmap",
+      "filing-trend-timeline",
+      "cpc-cluster-map"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting patent intelligence analysis to the standard expected by a senior IP attorney or head of technology transfer evaluating patent landscapes for strategic decision-making. Accuracy of patent data is paramount: every patent number, filing date, assignee, and claim reference must be verified against official patent office records. Distinguish between granted patents (enforceable rights) and published applications (potential future rights with claims subject to change). When assessing patent strength, consider claim breadth, prosecution history estoppel, geographic coverage, and remaining patent term. Evaluate not just individual patents but portfolio-level metrics: filing velocity, technology concentration, geographic strategy, and citation influence. Always consider the practical enforceability of patent rights in the relevant jurisdictions.",
+    "agentOverrides": {
+      "patent-search-specialist": "Search across all major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO as relevant). For each key patent, document: patent number, title, abstract summary, filing date, grant date (or publication date for applications), current assignee, independent claim count, total claim count, CPC/IPC classifications, and forward citation count. Identify patent families by tracing priority claims across jurisdictions. Track prosecution history for key patents to assess claim scope evolution, examiner rejections, and any narrowing amendments.",
+      "prior-art-analyst": "For each technology area under investigation, build a comprehensive prior art map including: (1) patent prior art -- earlier patents and published applications with relevant claims, (2) non-patent literature -- technical papers, conference proceedings, standards documents, (3) commercial prior art -- products or services publicly available before the priority date. Apply the TSM (Teaching-Suggestion-Motivation) framework and KSR v. Teleflex obviousness analysis where assessing patentability. Document claim-by-claim mapping between subject patents and identified prior art.",
+      "ip-landscape-mapper": "Build a comprehensive IP landscape showing: filing trends over time by year, top assignees ranked by patent count and claim breadth, geographic filing patterns across major jurisdictions, and technology cluster mapping using CPC classification hierarchies. Create competitive portfolio matrices comparing key players across dimensions: portfolio size, average claim count, geographic spread, average remaining patent life, and citation impact. Identify whitespace regions in the CPC/IPC classification space where filing density is low relative to commercial activity. Assess freedom-to-operate risks by mapping potentially blocking patent claims against the subject technology."
+    },
+    "synthesisInstructions": "Structure the analysis to support strategic IP decisions. Lead with the patent landscape overview showing the competitive environment. Present filing trend data with clear temporal patterns. Build competitive matrices that enable side-by-side portfolio comparison. For FTO assessments, clearly map the relationship between identified patent claims and the subject technology, using a risk-rating system (High/Medium/Low) for each potentially blocking patent. Quantify IP risks where possible: number of potentially blocking patents, years of remaining patent life, geographic coverage gaps, and litigation history of key patent holders. Identify actionable whitespace opportunities with supporting evidence from the landscape analysis.",
+    "reportingTone": "Professional patent intelligence assessment suitable for IP attorneys, technology transfer officers, and C-suite decision-makers. Precise, evidence-based, and legally informed without constituting legal advice. Use correct patent terminology (claims, specifications, prosecution history, continuations, divisionals, priority dates) but define specialized terms on first use. Write for an audience that understands IP fundamentals but may not be specialists in the specific technology domain. Include appropriate disclaimers that the analysis is informational and does not constitute a legal opinion."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 18000,
+      "synthesis": 12000,
+      "reporting": 12000
+    }
+  }
+}
