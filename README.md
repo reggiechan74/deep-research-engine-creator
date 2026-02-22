@@ -88,27 +88,27 @@ Presets pre-fill the wizard with domain-specific defaults for source hierarchies
 
 | Preset Flag | Domain | Key Features |
 |-------------|--------|--------------|
-| `--preset legal` | Legal Research | Bluebook citations, case law databases, statutory analysis |
-| `--preset market` | Market Intelligence | SEC filings, competitive analysis, market sizing |
 | `--preset academic` | Academic Research | Peer-reviewed sources, systematic review methodology |
-| `--preset osint` | OSINT Investigation | Multi-source correlation, digital footprint analysis |
-| `--preset techdd` | Technical Due Diligence | Patent databases, standards compliance, IP landscape |
+| `--preset ai` | AI & Agentic Engineering | LLM benchmarks, agent frameworks, MCP/tool use, model landscape, RAG |
+| `--preset aml` | AML & Regulatory Compliance | FATF, FinCEN, sanctions screening, PEP, beneficial ownership |
+| `--preset biotech` | Biotechnology & Life Sciences | Drug pipelines, GenBank, clinical stages, PTRS assessment |
 | `--preset cre` | Real Estate & CRE | Property valuations, cap rates, zoning, municipal records |
 | `--preset cyber` | Cybersecurity & Threat Intel | CVE/NVD, MITRE ATT&CK, IOC tracking, attack surface mapping |
-| `--preset medical` | Healthcare & Medical | PubMed, clinical trials, FDA/EMA, GRADE evidence grading |
-| `--preset findd` | Financial Due Diligence | SEC filings, beneficial ownership, litigation, M&A analysis |
+| `--preset defense` | Aerospace & Defense | DSCA, SAM.gov procurement, TRL, ITAR/EAR compliance |
 | `--preset energy` | Energy & Utilities | EIA, FERC, IESO, ISO/RTO markets, LCOE, rate cases |
-| `--preset infra` | Infrastructure & Development | EA registries, municipal planning, corridor analysis, P3 |
 | `--preset esg` | ESG & Climate Risk | CDP, TCFD/ISSB, carbon accounting, governance scoring |
+| `--preset findd` | Financial Due Diligence | SEC filings, beneficial ownership, litigation, M&A analysis |
+| `--preset geopolit` | Geopolitical & Political Risk | Country risk, sanctions, conflict monitoring, scenario planning |
+| `--preset infra` | Infrastructure & Development | EA registries, municipal planning, corridor analysis, P3 |
+| `--preset insurance` | Insurance & Actuarial | NAIC filings, AM Best, catastrophe models, loss ratios |
+| `--preset investigate` | Investigative Journalism | Public records, corporate registries, FOI, evidence chains |
+| `--preset legal` | Legal Research | Bluebook citations, case law databases, statutory analysis |
+| `--preset market` | Market Intelligence | SEC filings, competitive analysis, market sizing |
+| `--preset medical` | Healthcare & Medical | PubMed, clinical trials, FDA/EMA, GRADE evidence grading |
+| `--preset osint` | OSINT Investigation | Multi-source correlation, digital footprint analysis |
 | `--preset policy` | Government & Public Policy | Legislative tracking, lobbying disclosure, policy impact |
 | `--preset supply` | Supply Chain & Logistics | WTO/Comtrade, tariff analysis, supplier risk, freight data |
-| `--preset geopolit` | Geopolitical & Political Risk | Country risk, sanctions, conflict monitoring, scenario planning |
-| `--preset insurance` | Insurance & Actuarial | NAIC filings, AM Best, catastrophe models, loss ratios |
-| `--preset biotech` | Biotechnology & Life Sciences | Drug pipelines, GenBank, clinical stages, PTRS assessment |
-| `--preset defense` | Aerospace & Defense | DSCA, SAM.gov procurement, TRL, ITAR/EAR compliance |
-| `--preset investigate` | Investigative Journalism | Public records, corporate registries, FOI, evidence chains |
-| `--preset aml` | AML & Regulatory Compliance | FATF, FinCEN, sanctions screening, PEP, beneficial ownership |
-| `--preset ai` | AI & Agentic Engineering | LLM benchmarks, agent frameworks, MCP/tool use, model landscape, RAG |
+| `--preset techdd` | Technical Due Diligence | Patent databases, standards compliance, IP landscape |
 
 Or choose **Custom** during the wizard to build a configuration from scratch.
 
