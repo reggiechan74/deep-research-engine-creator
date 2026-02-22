@@ -158,7 +158,19 @@
       "Identify and disclose any circuit splits, conflicting appellate authority, or areas of legal uncertainty.",
       "Reject claims sourced exclusively from tier-4 or tier-5 sources without corroboration from primary legal materials."
     ],
-    "citationStandard": "Bluebook (21st Edition) citation format for U.S. sources; McGill Guide (10th Edition) for Canadian sources. Inline citations use footnote-style numbered references [1] with full case citations (party names, reporter volume, page, court, year) in the bibliography. Statutes cited with full title, section, and jurisdiction."
+    "citationStandard": "Bluebook (21st Edition) citation format for U.S. sources; McGill Guide (10th Edition) for Canadian sources. Inline citations use footnote-style numbered references [1] with full case citations (party names, reporter volume, page, court, year) in the bibliography. Statutes cited with full title, section, and jurisdiction.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "5-year",
+      "deadLinkHandling": "flag-only",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-sources"
+      }
+    }
   },
   "outputStructure": {
     "reportSections": [

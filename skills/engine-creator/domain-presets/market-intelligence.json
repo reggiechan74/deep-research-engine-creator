@@ -158,7 +158,19 @@
       "Reject market sizing claims sourced exclusively from vendor marketing materials or press releases.",
       "Distinguish between total addressable market (TAM), serviceable addressable market (SAM), and serviceable obtainable market (SOM) when market sizing."
     ],
-    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Financial filings cited with company name, filing type, filing date, and SEC accession number where available."
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Financial filings cited with company name, filing type, filing date, and SEC accession number where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
   },
   "outputStructure": {
     "reportSections": [

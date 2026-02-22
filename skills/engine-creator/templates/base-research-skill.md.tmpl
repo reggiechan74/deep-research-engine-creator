@@ -402,6 +402,7 @@ Research reports will be saved to:
 ├── [TOPIC_SLUG]_Methodology_Log.md
 ├── [TOPIC_SLUG]_Synthesis_Report.md
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
+├── [TOPIC_SLUG]_Citation_Verification_Report.md  # When verification enabled
 └── [TOPIC_SLUG]_Master_Bibliography.md
 ```
 
@@ -454,6 +455,83 @@ File naming follows the convention: {{fileNaming}}
 - Same content, different URLs --> note both, mark canonical
 - Different editions/versions --> keep most recent unless historical context needed
 - Conflicting information from same source --> note both dates and what changed
+
+---
+
+## Source Verification Protocol
+
+Every research run must include source verification proportional to the configured
+verification mode. This protocol prevents citation rot, dead links, and claim-source
+mismatches from undermining research quality.
+
+### Verification Mode: {{verificationMode}}
+
+{{verificationModeInstructions}}
+
+### Probe on Discovery: {{probeOnDiscovery}}
+
+When probe-on-discovery is enabled, each Phase 2 research agent must:
+- Verify source URL resolves (HTTP 200) immediately when found
+- If source is unreachable, note in Methodology_Log.md and do NOT use for HIGH confidence claims
+- Attempt archive.org fallback if configured: `https://web.archive.org/web/*/[URL]`
+- This prevents wasted analysis on sources that cannot be independently verified
+
+### URL Liveness Checking: {{urlLivenessCheck}}
+
+When enabled, the reporting agent (Phase 4) or a dedicated verification pass must:
+- Check every cited URL in the master bibliography resolves
+- Record HTTP status codes for each URL
+- Flag any non-200 responses in the verification report
+
+### Source Freshness: {{sourceFreshnessThreshold}}
+
+Sources older than the freshness threshold are flagged (not automatically excluded):
+- Flag in claims tables with `[STALE: published YYYY]` marker
+- Stale sources cannot be the sole basis for HIGH confidence claims
+- Stale but still-relevant sources should note: "Historical source — verify current applicability"
+
+### Dead Link Handling: {{deadLinkHandling}}
+
+{{deadLinkInstructions}}
+
+### Content-Claim Matching: {{contentClaimMatching}}
+
+When enabled (token-expensive):
+- For each HIGH confidence claim, fetch the cited source
+- Verify the claim accurately reflects the source content
+- Flag mismatches as: CONFIRMED (exact match), PARAPHRASED (reasonable interpretation), DISPUTED (source says something different), UNSUPPORTED (claim not found in source)
+- Record results in the verification report
+
+### Citation Verification Report
+
+{{verificationReportConfig}}
+
+When verification reporting is enabled, generate:
+`BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md`
+
+Report structure:
+```
+## Citation Verification Report: [TOPIC]
+
+### Summary
+- Total citations: N
+- Verified: N (%)
+- URL alive: N (%)
+- URL dead/unreachable: N
+- Stale sources (> threshold): N
+- Content-claim matches: N/A or N verified
+
+### Verification Details
+| Citation ID | URL | Status | Freshness | Content Match | Notes |
+|-------------|-----|--------|-----------|---------------|-------|
+| [W-01] | url | ALIVE/DEAD/REDIRECT | Current/Stale(YYYY) | N/A or CONFIRMED/DISPUTED | ... |
+
+### Issues Found
+[List any dead links, stale sources, content mismatches, or unverifiable claims]
+
+### Recommendations
+[Suggested actions: replace dead sources, update stale references, verify disputed claims]
+```
 
 ---
 
@@ -567,6 +645,17 @@ engine configuration (engine-config.json).
 - `{{researchBudget}}` -- token budget for research phase (per agent)
 - `{{synthesisBudget}}` -- token budget for synthesis phase
 - `{{reportingBudget}}` -- token budget for reporting phase
+
+### Citation Management
+- `{{verificationMode}}` -- source verification depth (none, spot-check, comprehensive)
+- `{{verificationModeInstructions}}` -- expanded instructions for the selected verification mode
+- `{{urlLivenessCheck}}` -- whether to verify URL resolution
+- `{{contentClaimMatching}}` -- whether to verify claims match source content
+- `{{sourceFreshnessThreshold}}` -- age threshold for flagging stale sources
+- `{{deadLinkHandling}}` -- how to handle dead/unreachable URLs
+- `{{deadLinkInstructions}}` -- expanded instructions for the selected dead link strategy
+- `{{probeOnDiscovery}}` -- whether to verify sources immediately when found
+- `{{verificationReportConfig}}` -- verification report generation instructions
 
 ### Operational
 - `{{operationalLessons}}` -- accumulated post-mortem findings from past research runs

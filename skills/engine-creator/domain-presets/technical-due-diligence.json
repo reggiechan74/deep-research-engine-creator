@@ -159,7 +159,19 @@
       "Assess open-source dependencies for license compatibility and maintenance status.",
       "Distinguish between granted patents and pending applications when assessing IP strength."
     ],
-    "citationStandard": "APA 7th Edition with patent-specific extensions. Patents cited as: Inventor(s), Patent Title, Patent Number, Filing Date, Grant Date, Assignee. Standards cited as: Standards Body, Standard Number:Year, Title, Section. Inline numbered references [1] with full bibliography. Include patent office URLs and DOIs where available."
+    "citationStandard": "APA 7th Edition with patent-specific extensions. Patents cited as: Inventor(s), Patent Title, Patent Number, Filing Date, Grant Date, Assignee. Standards cited as: Standards Body, Standard Number:Year, Title, Section. Inline numbered references [1] with full bibliography. Include patent office URLs and DOIs where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
   },
   "outputStructure": {
     "reportSections": [

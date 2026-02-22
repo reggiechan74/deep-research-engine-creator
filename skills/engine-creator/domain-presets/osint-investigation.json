@@ -163,7 +163,19 @@
       "Apply the two-source rule: no factual claim enters the report without at least 2 independent sources unless explicitly marked as single-source intelligence.",
       "Assess potential for deliberate misinformation or planted evidence, especially from anonymous sources."
     ],
-    "citationStandard": "Custom intelligence-style citation. Inline source tags [SOURCE: type, reliability tier, access date] with full source log in methodology section. Each source entry includes: source description, URL/reference, date accessed, reliability assessment, and any caveats. Distinguish between primary observation and secondary reporting."
+    "citationStandard": "Custom intelligence-style citation. Inline source tags [SOURCE: type, reliability tier, access date] with full source log in methodology section. Each source entry includes: source description, URL/reference, date accessed, reliability assessment, and any caveats. Distinguish between primary observation and secondary reporting.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "1-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-sources"
+      }
+    }
   },
   "outputStructure": {
     "reportSections": [

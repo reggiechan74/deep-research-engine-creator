@@ -352,6 +352,68 @@
           "type": "string",
           "description": "Citation format and inline referencing style used in generated reports.",
           "examples": ["Inline numbered references [1] with full URL bibliography at end of report."]
+        },
+        "citationManagement": {
+          "type": "object",
+          "description": "Controls how citations are verified, validated, and reported",
+          "properties": {
+            "verificationMode": {
+              "type": "string",
+              "enum": ["none", "spot-check", "comprehensive"],
+              "default": "spot-check",
+              "description": "none: trust agent-reported citations. spot-check: verify a random sample of HIGH-confidence citations. comprehensive: verify every cited source."
+            },
+            "urlLivenessCheck": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to verify that all cited URLs resolve (HTTP 200) during verification"
+            },
+            "contentClaimMatching": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to fetch cited sources and verify that claims accurately reflect source content (token-expensive)"
+            },
+            "sourceFreshnessThreshold": {
+              "type": "string",
+              "enum": ["none", "1-year", "2-year", "5-year", "custom"],
+              "default": "2-year",
+              "description": "Flag sources older than this threshold. 'none' means no freshness requirement."
+            },
+            "sourceFreshnessCustomYears": {
+              "type": "integer",
+              "description": "Custom freshness threshold in years (only used when sourceFreshnessThreshold is 'custom')",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "deadLinkHandling": {
+              "type": "string",
+              "enum": ["flag-only", "archive-fallback", "exclude-from-high"],
+              "default": "archive-fallback",
+              "description": "flag-only: mark dead links in report. archive-fallback: attempt Wayback Machine retrieval. exclude-from-high: downgrade claims relying solely on dead-link sources."
+            },
+            "probeOnDiscovery": {
+              "type": "boolean",
+              "default": true,
+              "description": "Verify source accessibility immediately when discovered, rather than deferring to post-research verification (learned from post-mortem: prevents wasted analysis on unreachable sources)"
+            },
+            "verificationReport": {
+              "type": "object",
+              "description": "Configuration for the standalone citation verification report",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether to generate a standalone Citation Verification Report"
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["high-confidence-only", "all-sources"],
+                  "default": "high-confidence-only",
+                  "description": "Which citations to verify in the report"
+                }
+              }
+            }
+          }
         }
       }
     },

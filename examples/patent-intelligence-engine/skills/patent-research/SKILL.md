@@ -533,6 +533,7 @@ Research reports will be saved to:
 ├── [TOPIC_SLUG]_Methodology_Log.md
 ├── [TOPIC_SLUG]_Synthesis_Report.md
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
+├── [TOPIC_SLUG]_Citation_Verification_Report.md  # When verification enabled
 └── [TOPIC_SLUG]_Master_Bibliography.md
 ```
 
@@ -595,6 +596,89 @@ File naming follows the convention: {date}_{topic_slug}_patent_intelligence.md
 - Same content, different URLs --> note both, mark canonical (prefer official patent office)
 - Different editions/versions --> keep most recent unless historical context needed
 - Conflicting information from same source --> note both dates and what changed
+
+---
+
+## Source Verification Protocol
+
+Every research run must include source verification proportional to the configured
+verification mode. This protocol prevents citation rot, dead links, and claim-source
+mismatches from undermining research quality.
+
+### Verification Mode: spot-check
+
+**Spot-Check Mode:** After Phase 2 research completes, randomly select 30% of HIGH-confidence
+citations (minimum 5 citations). For each selected citation:
+1. Verify URL resolves (HTTP 200)
+2. Confirm source title/author matches citation
+3. Check publication date is within freshness threshold
+4. Flag any discrepancies in the verification report
+
+### Probe on Discovery: enabled
+
+When probe-on-discovery is enabled, each Phase 2 research agent must:
+- Verify source URL resolves (HTTP 200) immediately when found
+- If source is unreachable, note in Methodology_Log.md and do NOT use for HIGH confidence claims
+- Attempt archive.org fallback if configured: `https://web.archive.org/web/*/[URL]`
+- This prevents wasted analysis on sources that cannot be independently verified
+
+### URL Liveness Checking: enabled
+
+When enabled, the reporting agent (Phase 4) or a dedicated verification pass must:
+- Check every cited URL in the master bibliography resolves
+- Record HTTP status codes for each URL
+- Flag any non-200 responses in the verification report
+
+### Source Freshness: 2-year
+
+Sources older than the freshness threshold are flagged (not automatically excluded):
+- Flag in claims tables with `[STALE: published YYYY]` marker
+- Stale sources cannot be the sole basis for HIGH confidence claims
+- Stale but still-relevant sources should note: "Historical source — verify current applicability"
+
+### Dead Link Handling: archive-fallback
+
+When a cited URL returns non-200 status:
+1. Attempt Wayback Machine retrieval: `https://web.archive.org/web/*/[URL]`
+2. If archived version found, update citation with archive URL and note: "[Accessed via Wayback Machine, archived YYYY-MM-DD]"
+3. If no archive found, flag citation as UNVERIFIABLE
+4. UNVERIFIABLE sources cannot be sole basis for HIGH confidence claims — downgrade or find alternative source
+
+### Content-Claim Matching: disabled
+
+Content-claim matching is not enabled for this engine. Claims are verified through
+the standard multi-source corroboration process defined in the Confidence Scoring Framework.
+
+### Citation Verification Report
+
+Verification reporting is enabled with scope: HIGH-confidence sources only.
+
+When verification reporting is enabled, generate:
+`BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md`
+
+Report structure:
+```
+## Citation Verification Report: [TOPIC]
+
+### Summary
+- Total citations: N
+- Verified: N (%)
+- URL alive: N (%)
+- URL dead/unreachable: N
+- Stale sources (> threshold): N
+- Content-claim matches: N/A or N verified
+
+### Verification Details
+| Citation ID | URL | Status | Freshness | Content Match | Notes |
+|-------------|-----|--------|-----------|---------------|-------|
+| [PS-01] | url | ALIVE/DEAD/REDIRECT | Current/Stale(YYYY) | N/A | ... |
+
+### Issues Found
+[List any dead links, stale sources, content mismatches, or unverifiable claims]
+
+### Recommendations
+[Suggested actions: replace dead sources, update stale references, verify disputed claims]
+```
 
 ---
 

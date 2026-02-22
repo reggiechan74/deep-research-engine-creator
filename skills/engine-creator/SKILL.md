@@ -65,6 +65,40 @@ Show preset values or defaults; ask to confirm or customize:
 3. **Validation rules** -- Show numbered list. AskUserQuestion: Accept, Add Rule, Remove Rule.
 4. **Citation standard** -- AskUserQuestion: APA 7th (default), Bluebook, Chicago, Custom.
 
+#### Citation Management
+
+After configuring the citation standard, ask about source verification:
+
+Use AskUserQuestion: "How should this engine verify cited sources?"
+- Options:
+  - "Spot-check (Recommended)" -- verify a random sample of HIGH-confidence citations
+  - "Comprehensive" -- verify every cited source (thorough but slower)
+  - "None" -- trust agent-reported citations without verification
+
+Use AskUserQuestion: "Should sources be verified immediately when discovered, or in a batch after research?"
+- Options:
+  - "Probe on discovery (Recommended)" -- verify source accessibility when found (prevents wasted analysis on dead sources)
+  - "Batch verification after research" -- verify all sources in a post-research pass
+
+Use AskUserQuestion: "How should the engine handle dead links?"
+- Options:
+  - "Archive.org fallback (Recommended)" -- attempt Wayback Machine retrieval for dead URLs
+  - "Flag only" -- mark dead links in the report but don't attempt recovery
+  - "Exclude from HIGH claims" -- downgrade claims that rely solely on unreachable sources
+
+Use AskUserQuestion: "What source freshness threshold should be enforced?"
+- Options:
+  - "2 years (Recommended)" -- flag sources older than 2 years
+  - "5 years" -- more lenient for slower-moving domains
+  - "1 year" -- strict for fast-moving domains
+  - "No limit" -- no freshness requirement
+
+Use AskUserQuestion: "Generate a standalone Citation Verification Report?"
+- Options:
+  - "Yes, for HIGH-confidence sources (Recommended)" -- audit HIGH-confidence citations
+  - "Yes, for all sources" -- comprehensive audit
+  - "No" -- skip verification report
+
 ### Section 6: Output Structure
 
 1. **Report sections** -- Show ordered list. AskUserQuestion: Accept, Add, Remove, Reorder.

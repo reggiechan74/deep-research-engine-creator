@@ -157,7 +157,19 @@
       "Reject claims sourced exclusively from predatory journals or unreferenced sources.",
       "Note the recency of cited research and flag if the field has seen significant developments since publication."
     ],
-    "citationStandard": "APA 7th Edition (or Chicago Author-Date where discipline conventions prefer it). Inline author-date citations (Author, Year) with full reference list. Include DOI for all available entries. For pre-prints, note the repository and submission date. Distinguish between peer-reviewed and non-peer-reviewed sources in the bibliography."
+    "citationStandard": "APA 7th Edition (or Chicago Author-Date where discipline conventions prefer it). Inline author-date citations (Author, Year) with full reference list. Include DOI for all available entries. For pre-prints, note the repository and submission date. Distinguish between peer-reviewed and non-peer-reviewed sources in the bibliography.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "5-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-sources"
+      }
+    }
   },
   "outputStructure": {
     "reportSections": [
