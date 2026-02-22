@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Domain-specialized deep-research engine for intellectual property and patent landscape analysis. Generates comprehensive patent research reports with prior art analysis, IP landscape mapping, and freedom-to-operate assessments.",
   "author": {
-    "name": "Deep Research Engine Creator",
-    "email": ""
+    "name": "Deep Research Engine Creator"
   },
   "keywords": ["patent", "intellectual-property", "research", "deep-research", "landscape-analysis"],
   "license": "MIT"
