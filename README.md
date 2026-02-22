@@ -5,7 +5,7 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet?logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=)](https://github.com/reggiechan74/deep-research-engine-creator)
 [![GitHub last commit](https://img.shields.io/github/last-commit/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/commits/main)
 [![GitHub stars](https://img.shields.io/github/stars/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/stargazers)
-[![Domain Presets](https://img.shields.io/badge/Domain_Presets-21-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/skills/engine-creator/domain-presets)
+[![Domain Presets](https://img.shields.io/badge/Domain_Presets-21-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/plugin/skills/engine-creator/domain-presets)
 
 **Deep research tools answer questions. This builds the tools.**
 
@@ -501,53 +501,28 @@ Source: [DRACO benchmark paper (arXiv 2602.11685)](https://arxiv.org/html/2602.1
 
 ```
 deep-research-engine-creator/
-├── .claude-plugin/plugin.json                          # This plugin's manifest
-├── commands/
-│   ├── create-engine.md                                # /create-engine wizard
-│   ├── update-engine.md                                # /update-engine reconfiguration
-│   ├── test-engine.md                                  # /test-engine validation suite
-│   ├── preview-engine.md                               # /preview-engine read-only preview
-│   └── list-engines.md                                 # /list-engines directory scanner
-├── skills/engine-creator/
-│   ├── SKILL.md                                        # Core wizard + generation logic
-│   ├── domain-presets/                                    # 21 domain presets
-│   │   ├── academic-research.json
-│   │   ├── aerospace-defense.json
-│   │   ├── ai-agentic-engineering.json
-│   │   ├── aml-compliance.json
-│   │   ├── biotechnology.json
-│   │   ├── cybersecurity-threat-intel.json
-│   │   ├── energy-utilities.json
-│   │   ├── esg-climate.json
-│   │   ├── financial-due-diligence.json
-│   │   ├── geopolitical-risk.json
-│   │   ├── government-policy.json
-│   │   ├── healthcare-medical.json
-│   │   ├── infrastructure-development.json
-│   │   ├── insurance-actuarial.json
-│   │   ├── investigative-journalism.json
-│   │   ├── legal-research.json
-│   │   ├── market-intelligence.json
-│   │   ├── osint-investigation.json
-│   │   ├── real-estate-cre.json
-│   │   ├── supply-chain-logistics.json
-│   │   └── technical-due-diligence.json
-│   └── templates/
-│       ├── base-research-skill.md.tmpl                 # Self-contained SKILL.md template
-│       ├── extension-skill.md.tmpl                     # Extension SKILL.md template
-│       ├── command-template.md.tmpl                    # /research command template
-│       ├── sources-command-template.md.tmpl            # /sources command template
-│       ├── agent-template.md.tmpl                      # Per-agent definition template
-│       ├── plugin-json.tmpl                            # plugin.json template
-│       ├── readme-template.md.tmpl                     # Generated README template
-│       ├── engine-config-schema.json                   # Config validation schema
-│       ├── preset-schema.json                          # Domain preset validation schema
-│       └── plugin-manifest-schema.json                 # Plugin manifest validation schema
-├── scripts/
-│   └── publish-engine.sh                               # Marketplace publishing script
-├── examples/
-│   └── patent-intelligence-engine/                     # Complete reference implementation
-└── README.md                                           # This file
+├── .claude-plugin/marketplace.json                     # Marketplace registry (plugin discovery)
+├── .gitignore
+├── CHANGELOG.md
+├── LICENSE
+├── README.md                                           # This file
+└── plugin/                                             # The plugin itself
+    ├── .claude-plugin/plugin.json                      # Plugin manifest
+    ├── commands/
+    │   ├── create-engine.md                            # /create-engine wizard
+    │   ├── update-engine.md                            # /update-engine reconfiguration
+    │   ├── test-engine.md                              # /test-engine validation suite
+    │   ├── preview-engine.md                           # /preview-engine read-only preview
+    │   └── list-engines.md                             # /list-engines directory scanner
+    ├── skills/engine-creator/
+    │   ├── SKILL.md                                    # Core wizard + generation logic
+    │   ├── domain-presets/                             # 21 domain presets
+    │   └── templates/                                  # 10 generation templates
+    ├── scripts/
+    │   └── publish-engine.sh                           # Marketplace publishing script
+    ├── examples/
+    │   └── patent-intelligence-engine/                 # Complete reference implementation
+    └── docs/                                           # Design and planning documents
 ```
 
 ## License
