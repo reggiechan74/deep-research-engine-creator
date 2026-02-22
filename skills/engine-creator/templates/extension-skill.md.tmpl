@@ -1,0 +1,222 @@
+---
+name: {{engineDisplayName}} Research Engine (Extension)
+description: >-
+  This skill extends the base /deep-research command with domain-specialized
+  configuration for {{domain}} research. It overrides source hierarchy, agent
+  pipeline, quality framework, output structure, and prompts while delegating
+  core pipeline logic to the base skill. Requires the base deep-research skill
+  to be installed.
+version: {{engineVersion}}
+---
+
+# {{engineDisplayName}} Research Engine (Extension)
+
+A domain-specialized research extension for **{{domain}}**, serving **{{audience}}**.
+
+This engine is an **extension** of the base `/deep-research` skill. It does NOT embed
+the full research pipeline. Instead, it declares dependency on the base deep-research
+skill and overlays domain-specific customizations for source hierarchy, agent pipeline,
+quality framework, output structure, and prompts.
+
+**Dependency:** This engine REQUIRES the base `/deep-research` skill to be installed
+and available. All core pipeline logic -- phased execution, iterative search-assess-refine,
+cross-agent coordination, failure recovery, context management -- is inherited from the
+base skill.
+
+**What this extension customizes:**
+- Source credibility hierarchy and preferred search sites
+- Agent pipeline composition and tier configuration
+- Confidence scoring criteria and validation rules
+- Report sections, file naming, and special deliverables
+- Domain preamble, agent-specific prompts, and reporting tone
+
+---
+
+## Dependency Check
+
+Before executing any research, verify the base `/deep-research` skill is available:
+
+1. Check for the file `.claude/commands/deep-research.md` in the project root
+2. If the file exists, proceed with the overrides defined below
+3. If the file does NOT exist, stop and inform the user:
+   > "This engine requires the base `/deep-research` skill to be installed.
+   > Please install it first, then re-run this command."
+
+Do not attempt to execute any research phases without the base skill present.
+
+---
+
+## Domain Configuration Overrides
+
+When executing `/deep-research` for this engine, apply the following overrides to the
+base skill's defaults. Each section below replaces the corresponding section in the
+base deep-research skill. Sections not listed here are inherited unchanged.
+
+### Source Credibility Hierarchy Override
+
+Replace the base skill's source credibility hierarchy with:
+
+```
+Tier 1 ({{tier1Name}}):  {{tier1Sources}}
+Tier 2 ({{tier2Name}}):  {{tier2Sources}}
+Tier 3 ({{tier3Name}}):  {{tier3Sources}}
+Tier 4 ({{tier4Name}}):  {{tier4Sources}}
+Tier 5 ({{tier5Name}}):  {{tier5Sources}}
+```
+
+**Preferred sites for targeted queries:**
+
+{{preferredSites}}
+
+**Excluded sources:**
+
+{{excludedSources}}
+
+**Domain-specific search templates:**
+
+{{additionalSearchTemplates}}
+
+### Agent Pipeline Override
+
+Replace the base skill's tier configuration table with:
+
+| Tier | Planning | Research Agents | Synthesis | Report | User Gate |
+|------|----------|----------------|-----------|--------|-----------|
+{{tierConfigTable}}
+
+Replace the base skill's agent deployment blocks with the following agent definitions.
+Each agent below replaces the corresponding phase 2 agent slot in the base pipeline:
+
+{{agentDeploymentBlocks}}
+
+### Quality Framework Override
+
+Replace the base skill's confidence scoring with:
+
+```
+HIGH        (●●●): {{confidenceHigh}}
+MEDIUM      (●●○): {{confidenceMedium}}
+LOW         (●○○): {{confidenceLow}}
+SPECULATIVE (○○○): {{confidenceSpeculative}}
+```
+
+**Evidence threshold:** {{minimumEvidence}}
+
+**Validation rules:**
+
+{{validationRules}}
+
+**Citation standard:** {{citationStandard}}
+
+### Output Structure Override
+
+Replace the base skill's report sections with:
+
+{{reportSections}}
+
+**File naming convention:** {{fileNaming}}
+
+**Special deliverables:**
+
+{{specialDeliverables}}
+
+---
+
+## Custom Prompts
+
+These prompts are injected into the base skill's agent instructions during execution.
+
+**Global preamble** -- prepended to every agent's instructions:
+
+{{globalPreamble}}
+
+**Per-agent overrides** -- merged into specific agent instructions by agent ID:
+
+{{agentOverrides}}
+
+**Synthesis instructions** -- appended to the synthesis agent's task:
+
+{{synthesisInstructions}}
+
+**Reporting tone** -- applied to the reporting agent's output style:
+
+{{reportingTone}}
+
+---
+
+## Execution Instructions
+
+To execute this extension engine, Claude must merge these overrides with the base
+`/deep-research` skill in the following order:
+
+1. **Read** the base deep-research skill (`.claude/commands/deep-research.md`)
+2. **Replace** the Source Credibility Hierarchy section with the overrides above
+3. **Replace** the tier configuration table and agent deployment blocks with the
+   Agent Pipeline Override above
+4. **Replace** the Confidence Scoring Framework and validation rules with the
+   Quality Framework Override above
+5. **Replace** the report sections, file naming, and special deliverables with
+   the Output Structure Override above
+6. **Inject** the Global Preamble into every agent's instructions; merge
+   per-agent overrides by agent ID; append synthesis instructions and reporting
+   tone to their respective agents
+7. **Set** `ENGINE_ID = "{{engineName}}"` in Phase 0 configuration
+8. **Execute** the modified pipeline exactly as the base skill defines it --
+   same phases, same coordination protocols, same failure recovery
+
+All base skill protocols remain in effect unless explicitly overridden above:
+- Iterative Search-Assess-Refine Protocol
+- Cross-Agent Coordination Protocol
+- Failure Recovery Protocol
+- Context Management Guidelines
+- Bibliography and Footnote Standards
+- Search Query Generation Protocol (extended by domain-specific templates above)
+
+---
+
+## Placeholder Reference
+
+This section documents all template variables used in this extension skill file.
+When the engine generator processes this template, each placeholder is replaced
+with values from the engine configuration (engine-config.json).
+
+### Engine Metadata
+- `{{engineName}}` -- kebab-case plugin name for directory and file naming
+- `{{engineDisplayName}}` -- human-readable engine name for display
+- `{{engineVersion}}` -- semantic version of the engine configuration
+- `{{domain}}` -- short description of the research domain
+- `{{audience}}` -- target users for this research engine
+
+### Source Strategy
+- `{{tier1Name}}` / `{{tier1Sources}}` -- Tier 1 credibility definition
+- `{{tier2Name}}` / `{{tier2Sources}}` -- Tier 2 credibility definition
+- `{{tier3Name}}` / `{{tier3Sources}}` -- Tier 3 credibility definition
+- `{{tier4Name}}` / `{{tier4Sources}}` -- Tier 4 credibility definition
+- `{{tier5Name}}` / `{{tier5Sources}}` -- Tier 5 credibility definition
+- `{{preferredSites}}` -- prioritized domains for web searches
+- `{{excludedSources}}` -- domains or source types to never use
+- `{{additionalSearchTemplates}}` -- domain-specific search query templates
+
+### Agent Pipeline
+- `{{tierConfigTable}}` -- markdown table rows for tier configurations
+- `{{agentDeploymentBlocks}}` -- per-agent deployment instructions
+
+### Quality Framework
+- `{{confidenceHigh}}` -- criteria for HIGH confidence scoring
+- `{{confidenceMedium}}` -- criteria for MEDIUM confidence scoring
+- `{{confidenceLow}}` -- criteria for LOW confidence scoring
+- `{{confidenceSpeculative}}` -- criteria for SPECULATIVE confidence scoring
+- `{{minimumEvidence}}` -- minimum evidence threshold for claim inclusion
+- `{{validationRules}}` -- validation rules applied during synthesis
+- `{{citationStandard}}` -- citation format and referencing style
+
+### Output Structure
+- `{{reportSections}}` -- ordered list of report section headings
+- `{{fileNaming}}` -- file naming convention template
+- `{{specialDeliverables}}` -- additional output artifacts beyond the main report
+
+### Prompts
+- `{{globalPreamble}}` -- domain-wide context prepended to all agent prompts
+- `{{agentOverrides}}` -- per-agent prompt overrides keyed by agent ID
+- `{{synthesisInstructions}}` -- additional instructions for the synthesis agent
+- `{{reportingTone}}` -- desired tone and style for the final report
