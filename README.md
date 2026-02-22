@@ -108,28 +108,71 @@ Every generated engine includes:
 
 | Mode | Description | When to Use |
 |------|-------------|-------------|
-| **Self-contained** | Full 4-phase research pipeline embedded. No dependencies. | Sharing, portability, standalone use |
+| **Self-contained** | Full 5-phase research pipeline embedded. No dependencies. | Sharing, portability, standalone use |
 | **Extension** | Overlays customizations on the base `/deep-research` skill. Lighter weight. | When you already have `/deep-research` installed |
 
 Self-contained engines include the complete research orchestration logic (planning, research, synthesis, reporting) in their SKILL.md. Extension engines inherit the base pipeline and only override domain-specific configuration (sources, agents, quality rules, output structure).
 
 ## The Wizard Interview
 
-The wizard uses progressive disclosure across 9 sections. When a domain preset is loaded, sections 4-9 are pre-filled with smart defaults that you can accept or customize.
+The wizard walks you through a structured interview to build your engine configuration. **Everything is customizable** -- presets are starting points, not constraints. You can accept defaults, modify individual fields, or build entirely from scratch.
 
-| Section | What It Covers |
-|---------|----------------|
-| 1. Domain Identity | Engine name, field, target audience, preset selection, output mode |
-| 2. Research Scope | Question types, geographic scope, temporal focus, primary deliverable |
-| 3. Sample Questions | 3-5 example queries -- used to auto-suggest source types, agent roles, and output structure |
-| 4. Source Strategy | 5-tier credibility hierarchy, preferred/excluded sites, search templates |
-| 5. Agent Pipeline | Basic (recommended defaults) or advanced (per-agent configuration of roles, models, tools) |
-| 6. Quality Framework | Confidence scoring levels, minimum evidence thresholds, validation rules, citation standard |
-| 7. Output Structure | Report sections, file naming templates, special deliverables (matrices, maps, etc.) |
-| 8. Advanced Configuration | Optional: iteration limits, token budgets, custom hooks, MCP integrations |
-| 9. Custom Prompts | Global preamble, per-agent prompt overrides, synthesis instructions, reporting tone |
+### How presets work
 
-After all sections are complete, the wizard shows a full preview of the engine configuration and asks for confirmation before generating any files.
+Presets pre-fill sections 4-9 with domain-expert configurations. At every step, the wizard asks: *"Accept, Add, Remove, Modify, or Customize?"* -- you always have full control. Choosing a preset saves time; it doesn't limit what you can build.
+
+You can also skip presets entirely and choose **Custom** to configure every field from a blank slate.
+
+### The 9 sections
+
+**Section 1: Domain Identity** -- Name your engine, describe the research domain, identify the target audience, choose self-contained or extension mode, and optionally select a preset.
+
+**Section 2: Research Scope** -- Define the types of questions your engine handles (e.g., "landscape analysis", "competitive assessment"), geographic scope, temporal focus, and primary deliverable format.
+
+**Section 3: Sample Questions** -- Provide 3-5 example research queries. The wizard uses these to auto-suggest source types, agent specializations, and report sections in later steps.
+
+**Section 4: Source Strategy** -- Configure the 5-tier credibility hierarchy that governs how your engine evaluates sources:
+- Review and customize each tier's name and source list (add, remove, reorder)
+- Define preferred sites to prioritize in searches
+- Define excluded sites to always skip
+- Configure search templates with domain-specific query patterns (e.g., `"{patent_number}" patent claims site:{preferred_site}`)
+- Set language and geographic filters
+
+**Section 5: Agent Pipeline** -- Design the multi-agent research team. Two modes:
+- **Basic:** Review the recommended 3-agent structure (researcher, analyst, synthesizer). Accept as-is, **add more agents**, remove agents, or modify any agent's configuration.
+- **Advanced:** Configure each agent individually -- ID, display name, role description, sub-agent type (`general-purpose`, `expert-instructor`, or `intelligence-analyst`), model (`sonnet`, `opus`, or `haiku`), detailed specialization instructions, and tool access.
+- Assign agents to research tiers (quick/standard/deep/comprehensive) and configure follow-up rounds.
+
+There is **no limit on the number of agents** -- add as many specialized roles as your domain requires.
+
+**Section 6: Quality Framework** -- Define evidence standards:
+- Customize confidence level definitions (HIGH/MEDIUM/LOW/SPECULATIVE) for your domain
+- Set minimum evidence thresholds (e.g., "all valuations require 3+ comparable transactions")
+- Add, remove, or modify validation rules (e.g., "cross-check against official records")
+- Choose citation standard (APA 7th, Bluebook, Chicago, or custom)
+- Configure source verification mode (spot-check, comprehensive, or none)
+- Set dead link handling, freshness thresholds, and verification reporting
+
+**Section 7: Output Structure** -- Design report format:
+- Define, reorder, add, or remove report sections
+- Set file naming templates with variables (`{date}`, `{topic_slug}`)
+- Specify special deliverables (competitive matrices, risk heatmaps, timelines, etc.)
+
+**Section 8: Advanced Configuration** -- Optional power-user settings:
+- Max research iterations per question (1-5)
+- Exploration depth for recursive web traversal (1-10)
+- Token budgets per phase (planning, research, synthesis, reporting)
+- Custom hooks and MCP server integrations
+
+**Section 9: Custom Prompts** -- Write the instructions your agents follow:
+- **Global preamble** -- sets the overall research standard and audience expectations
+- **Per-agent overrides** -- specific instructions for each agent (e.g., "always apply Porter's Five Forces")
+- **Synthesis instructions** -- how findings should be combined across agents
+- **Reporting tone** -- voice and style for the final report
+
+### Preview before generation
+
+After all 9 sections, the wizard shows a complete preview of the engine configuration. Nothing is generated until you explicitly confirm. You can go back and modify any section before proceeding.
 
 ## Example: Patent Intelligence Engine
 
@@ -196,12 +239,27 @@ deep-research-engine-creator/
 │   └── list-engines.md                                 # /list-engines directory scanner
 ├── skills/engine-creator/
 │   ├── SKILL.md                                        # Core wizard + generation logic
-│   ├── domain-presets/
-│   │   ├── legal-research.json                         # Legal research preset
-│   │   ├── market-intelligence.json                    # Market intelligence preset
-│   │   ├── academic-research.json                      # Academic research preset
-│   │   ├── osint-investigation.json                    # OSINT investigation preset
-│   │   └── technical-due-diligence.json                # Technical due diligence preset
+│   ├── domain-presets/                                    # 20 domain presets
+│   │   ├── academic-research.json
+│   │   ├── aerospace-defense.json
+│   │   ├── aml-compliance.json
+│   │   ├── biotechnology.json
+│   │   ├── cybersecurity-threat-intel.json
+│   │   ├── energy-utilities.json
+│   │   ├── esg-climate.json
+│   │   ├── financial-due-diligence.json
+│   │   ├── geopolitical-risk.json
+│   │   ├── government-policy.json
+│   │   ├── healthcare-medical.json
+│   │   ├── infrastructure-development.json
+│   │   ├── insurance-actuarial.json
+│   │   ├── investigative-journalism.json
+│   │   ├── legal-research.json
+│   │   ├── market-intelligence.json
+│   │   ├── osint-investigation.json
+│   │   ├── real-estate-cre.json
+│   │   ├── supply-chain-logistics.json
+│   │   └── technical-due-diligence.json
 │   └── templates/
 │       ├── base-research-skill.md.tmpl                 # Self-contained SKILL.md template
 │       ├── extension-skill.md.tmpl                     # Extension SKILL.md template
