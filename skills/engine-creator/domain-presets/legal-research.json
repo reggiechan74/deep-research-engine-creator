@@ -131,7 +131,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Conducts comprehensive case law searches across multiple jurisdictions, identifying relevant court decisions, analyzing holdings and dicta, and tracking the evolution of legal doctrines through judicial opinions. Skilled at identifying controlling authority versus persuasive authority across federal and state/provincial courts.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "statutory-analyst",
@@ -139,7 +139,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Specializes in legislative analysis including statutory construction, regulatory interpretation, and legislative history research. Maps the interplay between primary legislation, delegated regulations, and agency guidance documents to provide comprehensive regulatory landscape assessments.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "legal-precedent-mapper",
@@ -147,7 +147,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Performs citation network analysis to map how legal precedents have been applied, distinguished, or overruled across jurisdictions and time periods. Identifies emerging legal trends, circuit splits, and areas where the law is unsettled. Synthesizes complex multi-jurisdictional legal landscapes into structured analytical frameworks.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },

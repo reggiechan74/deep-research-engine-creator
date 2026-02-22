@@ -120,7 +120,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Conducts systematic literature searches across academic databases using Boolean operators, MeSH terms, and controlled vocabulary. Identifies seminal papers, high-impact recent publications, and citation networks. Applies PRISMA-style screening criteria to filter results by relevance, quality, and recency.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "methodological-reviewer",
@@ -128,7 +128,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Evaluates research methodology quality across quantitative, qualitative, and mixed-methods studies. Assesses sample sizes, study designs (RCT, cohort, case-control, cross-sectional), statistical approaches, internal and external validity, and potential biases. Applies domain-appropriate quality assessment tools (Cochrane Risk of Bias, Newcastle-Ottawa Scale, GRADE framework).",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "meta-analysis-specialist",
@@ -136,7 +136,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Synthesizes findings across multiple studies to identify patterns, contradictions, and research gaps. Performs narrative synthesis and prepares frameworks for quantitative meta-analysis (effect sizes, heterogeneity, publication bias). Maps the evolution of theoretical frameworks and identifies paradigm shifts, emerging consensus, and areas of active debate.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },

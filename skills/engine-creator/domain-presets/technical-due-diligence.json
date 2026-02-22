@@ -122,7 +122,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "technology-assessor",
@@ -130,7 +130,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Evaluates technology maturity, architecture quality, and standards compliance. Assesses technology readiness levels (TRL), identifies technical debt indicators, and evaluates scalability, security, and performance characteristics against industry benchmarks. Compares implementation approaches against best practices and identifies potential technical risks including vendor lock-in, obsolescence, and architectural limitations.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "ip-landscape-mapper",
@@ -138,7 +138,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Synthesizes patent data, technical standards, and competitive technology intelligence into comprehensive IP landscape assessments. Maps patent filing trends, identifies key assignees and inventors, and assesses freedom-to-operate risks. Builds technology comparison matrices and patent family trees that visualize the competitive IP environment. Identifies potential licensing opportunities, infringement risks, and white space for innovation.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },

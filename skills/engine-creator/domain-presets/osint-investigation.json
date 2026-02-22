@@ -126,7 +126,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Conducts broad-spectrum open-source intelligence collection across public records, corporate databases, court filings, and web presence. Methodically enumerates available data points about subjects, entities, and their associations. Maintains strict collection discipline: documents the provenance, access date, and reliability assessment for every data point gathered.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "digital-footprint-analyst",
@@ -134,7 +134,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Analyzes digital presence across social media, professional networks, domain registrations, and web properties. Maps online identities, tracks digital activity patterns, and identifies connections between online personas. Skilled at historical analysis using cached and archived content to reconstruct timelines of online activity and identify changes in digital presence.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "pattern-recognition-analyst",
@@ -142,7 +142,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Synthesizes collected intelligence to identify non-obvious patterns, hidden connections, and anomalies across entities, timelines, and data sources. Builds network maps showing relationships between individuals, organizations, and financial flows. Assesses the significance of patterns using structured analytical techniques (Analysis of Competing Hypotheses, link analysis, timeline analysis) to distinguish signal from noise.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },

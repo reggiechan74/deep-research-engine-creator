@@ -136,7 +136,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Gathers quantitative market data from primary sources including SEC filings, government statistics, and authoritative industry databases. Excels at extracting financial metrics, growth rates, and market size figures, and reconciling data points across multiple sources to establish reliable baselines.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "industry-analyst",
@@ -144,7 +144,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Analyzes industry structure, dynamics, and trends using frameworks like Porter's Five Forces, value chain analysis, and industry lifecycle models. Identifies macroeconomic drivers, regulatory impacts, and technology disruption vectors. Translates raw market data into actionable strategic insights and forward-looking assessments.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "competitive-intelligence-mapper",
@@ -152,7 +152,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Maps competitive landscapes by analyzing company positioning, strategic moves, product portfolios, and financial performance across market participants. Builds competitive matrices, identifies market white spaces, and assesses barriers to entry. Synthesizes fragmented intelligence into structured competitive frameworks and strategic opportunity maps.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },
