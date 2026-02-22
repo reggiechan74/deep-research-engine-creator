@@ -1,12 +1,6 @@
 ---
-name: Patent Intelligence Engine Research Engine
-description: >-
-  This skill should be used when the user invokes the /research command or asks about
-  Intellectual property and patent landscape analysis research. It provides a complete multi-agent research pipeline specialized
-  for Intellectual property and patent landscape analysis. The engine conducts wide and deep research using tiered research depth,
-  iterative search refinement, cross-agent coordination, and structured confidence scoring
-  to produce professional-grade research outputs for IP attorneys, technology transfer officers, and R&D strategists.
-version: 1.0.0
+name: patent-intelligence-engine
+description: "Domain-specialized research engine for intellectual property and patent landscape analysis. Multi-agent pipeline with tiered depth, iterative refinement, and structured confidence scoring for IP attorneys, technology transfer officers, and R&D strategists."
 ---
 
 # Patent Intelligence Engine Research Engine

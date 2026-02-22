@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/reggiechan74/deep-research-engine-creator/preset-schema.json",
+  "title": "Domain Preset Configuration",
+  "description": "Schema for domain preset files used by the engine-creator wizard. Presets provide partial engine configurations with smart defaults for specific research domains. They are NOT full engine configs — they omit engineMeta, schemaVersion, sampleQuestions, and scope, which are collected during the wizard interview.",
+  "type": "object",
+  "required": [
+    "presetName",
+    "presetDescription",
+    "keywords",
+    "sourceStrategy",
+    "agentPipeline",
+    "qualityFramework",
+    "outputStructure"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "presetName": {
+      "type": "string",
+      "description": "Human-readable name for this domain preset.",
+      "examples": ["Academic Research", "Legal Research"]
+    },
+    "presetDescription": {
+      "type": "string",
+      "description": "Detailed description of what this preset is optimized for and when to use it.",
+      "examples": ["Pre-configured for systematic literature review and meta-analysis preparation."]
+    },
+    "keywords": {
+      "type": "array",
+      "description": "Keywords identifying this preset's domain. Used for preset selection and plugin manifest population.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "sourceStrategy": {
+      "type": "object",
+      "description": "Source hierarchy and search configuration. Same structure as engine-config-schema.json sourceStrategy.",
+      "required": ["credibilityTiers", "preferredSites", "searchTemplates"],
+      "properties": {
+        "credibilityTiers": {
+          "type": "object",
+          "required": ["tier1", "tier2", "tier3", "tier4", "tier5"],
+          "properties": {
+            "tier1": { "$ref": "#/$defs/credibilityTier" },
+            "tier2": { "$ref": "#/$defs/credibilityTier" },
+            "tier3": { "$ref": "#/$defs/credibilityTier" },
+            "tier4": { "$ref": "#/$defs/credibilityTier" },
+            "tier5": { "$ref": "#/$defs/credibilityTier" }
+          },
+          "additionalProperties": false
+        },
+        "preferredSites": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "excludedSources": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "searchTemplates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "pattern"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "pattern": { "type": "string" }
+            }
+          },
+          "minItems": 1
+        },
+        "languageFilters": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z]{2}$" }
+        },
+        "geographicFilters": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentPipeline": {
+      "type": "object",
+      "description": "Agent definitions and tier configuration.",
+      "required": ["tiers", "agents"],
+      "properties": {
+        "tiers": {
+          "type": "object",
+          "required": ["quick", "standard", "deep", "comprehensive"],
+          "properties": {
+            "quick": { "$ref": "#/$defs/tierConfig" },
+            "standard": { "$ref": "#/$defs/tierConfig" },
+            "deep": { "$ref": "#/$defs/tierConfig" },
+            "comprehensive": { "$ref": "#/$defs/tierConfig" }
+          },
+          "additionalProperties": false
+        },
+        "agents": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/agentDefinition" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "qualityFramework": {
+      "type": "object",
+      "description": "Quality controls, confidence scoring, and citation configuration.",
+      "required": ["confidenceScoring", "minimumEvidence", "validationRules", "citationStandard"],
+      "properties": {
+        "confidenceScoring": {
+          "type": "object",
+          "required": ["HIGH", "MEDIUM", "LOW", "SPECULATIVE"],
+          "properties": {
+            "HIGH": { "type": "string" },
+            "MEDIUM": { "type": "string" },
+            "LOW": { "type": "string" },
+            "SPECULATIVE": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "minimumEvidence": { "type": "string" },
+        "validationRules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "citationStandard": { "type": "string" },
+        "citationManagement": {
+          "type": "object",
+          "properties": {
+            "verificationMode": { "type": "string", "enum": ["none", "spot-check", "comprehensive"] },
+            "urlLivenessCheck": { "type": "boolean" },
+            "contentClaimMatching": { "type": "boolean" },
+            "sourceFreshnessThreshold": { "type": "string", "enum": ["none", "1-year", "2-year", "5-year", "custom"] },
+            "sourceFreshnessCustomYears": { "type": "integer", "minimum": 1 },
+            "deadLinkHandling": { "type": "string", "enum": ["flag-only", "archive-fallback", "exclude-from-high"] },
+            "probeOnDiscovery": { "type": "boolean" },
+            "verificationReport": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "scope": { "type": "string", "enum": ["high-confidence-only", "all-sources"] }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "outputStructure": {
+      "type": "object",
+      "description": "Report structure and file naming.",
+      "required": ["reportSections", "fileNaming"],
+      "properties": {
+        "reportSections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "fileNaming": { "type": "string" },
+        "specialDeliverables": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "prompts": {
+      "type": "object",
+      "description": "Optional prompt customizations.",
+      "properties": {
+        "globalPreamble": { "type": "string" },
+        "agentOverrides": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "synthesisInstructions": { "type": "string" },
+        "reportingTone": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "advanced": {
+      "type": "object",
+      "description": "Advanced configuration defaults.",
+      "properties": {
+        "maxIterationsPerQuestion": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "tokenBudgets": {
+          "type": "object",
+          "properties": {
+            "planning": { "type": "integer", "minimum": 0 },
+            "research": { "type": "integer", "minimum": 0 },
+            "synthesis": { "type": "integer", "minimum": 0 },
+            "reporting": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "explorationDepth": { "type": "integer", "minimum": 1, "maximum": 10 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "credibilityTier": {
+      "type": "object",
+      "required": ["name", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "tierConfig": {
+      "type": "object",
+      "required": ["agents"],
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "followUpRound": { "type": "boolean" }
+      }
+    },
+    "agentDefinition": {
+      "type": "object",
+      "required": ["id", "role", "subagentType", "specialization"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "role": { "type": "string" },
+        "subagentType": { "type": "string", "enum": ["general-purpose", "expert-instructor", "intelligence-analyst"] },
+        "model": { "type": "string", "enum": ["sonnet", "opus", "haiku", "inherit"] },
+        "specialization": { "type": "string" },
+        "tools": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

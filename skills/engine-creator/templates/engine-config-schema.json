@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/reggiechan74/cc-plugins/deep-research-engine-creator/engine-config-schema.json",
+  "$id": "https://github.com/reggiechan74/deep-research-engine-creator/engine-config-schema.json",
   "title": "Deep Research Engine Configuration",
   "description": "Schema for engine-config.json files produced by the engine-creator wizard and consumed by the plugin generator. Defines a complete domain-specialized deep-research engine configuration.",
   "type": "object",
@@ -543,7 +543,7 @@
         },
         "tokenBudgets": {
           "type": "object",
-          "description": "Approximate token limits for each pipeline phase. Helps control costs. Values are guidelines, not hard caps.",
+          "description": "Approximate token limits for each pipeline phase. Helps control costs. Values are guidelines, not hard caps. NOTE: Defaults for these fields (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000) are applied by the engine-creator wizard during generation, not by JSON Schema validation. If omitted from config, the generator fills them in.",
           "additionalProperties": false,
           "properties": {
             "planning": {
