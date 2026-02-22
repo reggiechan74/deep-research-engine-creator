@@ -7,9 +7,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/stargazers)
 [![Domain Presets](https://img.shields.io/badge/Domain_Presets-21-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/skills/engine-creator/domain-presets)
 
-Create domain-specialized deep-research engines as standalone Claude Code plugins.
+**Deep research tools answer questions. This builds the tools.**
 
-This meta-plugin interviews you about your research domain, then generates a complete Claude Code plugin with a custom multi-agent research pipeline, domain-specific source hierarchies, quality frameworks, and output templates. You describe what you research; it builds the tooling.
+Create domain-specialized deep-research engines as standalone Claude Code plugins. This meta-plugin interviews you about your research domain, then generates a complete Claude Code plugin with a custom multi-agent research pipeline, domain-specific source hierarchies, quality frameworks, and output templates. You describe what you research; it builds the tooling.
 
 ## Why I Built This
 
