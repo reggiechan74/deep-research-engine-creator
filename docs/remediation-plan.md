@@ -6,7 +6,7 @@ Cross-model review by GPT-5.3-codex identified 13 findings. Second-pass review o
 
 ---
 
-## Finding 1 [CRITICAL]: plugin-json.tmpl requires fields not in schema/wizard
+## Finding 1 [CRITICAL]: plugin-json.tmpl requires fields not in schema/wizard — DONE
 
 **Problem:** `plugin-json.tmpl` uses `{{engineDescription}}`, `{{authorName}}`, `{{authorEmail}}`, `{{keywords}}` — none exist in `engineMeta` schema or wizard.
 
@@ -25,7 +25,7 @@ Cross-model review by GPT-5.3-codex identified 13 findings. Second-pass review o
 
 ---
 
-## Finding 2 [HIGH]: Template placeholders exceed config model
+## Finding 2 [HIGH]: Template placeholders exceed config model — DONE
 
 **Problem:** Placeholders like `{{standardTierDescription}}`, `{{verificationModeInstructions}}`, `{{deadLinkInstructions}}` have no direct schema field — they're derived/expanded values.
 
@@ -48,7 +48,7 @@ Cross-model review by GPT-5.3-codex identified 13 findings. Second-pass review o
 
 ---
 
-## Finding 3 [HIGH]: Wizard section numbering inconsistent
+## Finding 3 [HIGH]: Wizard section numbering inconsistent — DONE
 
 **Problem:** README says 8 sections, but SKILL.md uses "Section 2.5" for Sample Questions, making 9 blocks. Commands reference both conventions.
 
@@ -73,7 +73,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 4 [HIGH]: /update-engine regeneration matrix misses key files
+## Finding 4 [HIGH]: /update-engine regeneration matrix misses key files — DONE
 
 **Problem:** Source strategy changes should also regenerate `commands/sources.md`; agent/tier changes should regenerate `commands/research.md`; metadata changes need path updates.
 
@@ -94,7 +94,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 5 [HIGH]: Example skill dir doesn't match generator convention
+## Finding 5 [HIGH]: Example skill dir doesn't match generator convention — DONE
 
 **Problem:** Generator says `skillDirName = engineMeta.name`, so patent engine should use `skills/patent-intelligence-engine/`. Example uses `skills/patent-research/`.
 
@@ -106,7 +106,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 6 [HIGH]: Extension-mode dependency is brittle
+## Finding 6 [HIGH]: Extension-mode dependency is brittle — DONE
 
 **Problem:** Extension template hard-codes `.claude/commands/deep-research.md` path. Plugin-to-plugin dependency semantics aren't well-defined in Claude Code.
 
@@ -121,7 +121,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 7 [MEDIUM]: allowed-tools YAML format may be invalid
+## Finding 7 [MEDIUM]: allowed-tools YAML format may be invalid — DONE
 
 **Problem:** `command-template.md.tmpl` uses `allowed-tools: Task, WebFetch, ...` (comma-separated scalar) while other commands use array syntax `["Read", "Write"]`.
 
@@ -132,7 +132,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 8 [MEDIUM]: Schema lacks relational/structural constraints
+## Finding 8 [MEDIUM]: Schema lacks relational/structural constraints — DONE
 
 **Problem:** Tier agent IDs aren't validated against declared agents. `citationManagement` and `verificationReport` lack `additionalProperties: false` and `required`.
 
@@ -145,7 +145,7 @@ Update all references: "Guide the user through **9 sections**", "Pre-fill sectio
 
 ---
 
-## Finding 9 [MEDIUM]: /test-engine doesn't validate against schema
+## Finding 9 [MEDIUM]: /test-engine doesn't validate against schema — DONE
 
 **Problem:** Config validity check only verifies top-level keys exist, not full JSON Schema compliance.
 
@@ -165,7 +165,7 @@ This provides deep structural validation without requiring a JSON Schema library
 
 ---
 
-## Finding 10 [MEDIUM]: Presets reference paywalled sources
+## Finding 10 [MEDIUM]: Presets reference paywalled sources — DONE
 
 **Problem:** Legal and market presets list Westlaw, LexisNexis, Gartner, etc. as Tier 1/2 sources — inaccessible to most users.
 
@@ -179,7 +179,7 @@ This provides deep structural validation without requiring a JSON Schema library
 
 ---
 
-## Finding 11 [LOW]: Timestamp instruction uses `TZ` with `date -u`
+## Finding 11 [LOW]: Timestamp instruction uses `TZ` with `date -u` — DONE
 
 **Problem:** `TZ='America/New_York' date -u` outputs UTC regardless of TZ.
 
@@ -190,7 +190,7 @@ This provides deep structural validation without requiring a JSON Schema library
 
 ---
 
-## Finding 12 [LOW]: Example metadata format drift
+## Finding 12 [LOW]: Example metadata format drift — DONE
 
 **Problem:** SKILL.md says `deep-research-engine-creator/1.0.0`, example uses `deep-research-engine-creator v1.0.0`.
 
@@ -201,7 +201,7 @@ This provides deep structural validation without requiring a JSON Schema library
 
 ---
 
-## Finding 13 [LOW]: publish-engine.sh makes optimistic git assumptions
+## Finding 13 [LOW]: publish-engine.sh makes optimistic git assumptions — DONE
 
 **Problem:** Assumes `main` branch. No idempotent update handling.
 
@@ -251,3 +251,12 @@ Finding 5 (example)  ──→ Finding 12 (metadata fix in same example file)
 - F9: Expanded from 4 to 7 sub-checks; acknowledged JSON Schema runtime limitation
 - F11: Changed `%z` to `%:z` for RFC 3339 compliance
 - F13: Added no-op commit handling and rsync-based update semantics
+
+---
+
+## Round 2 Findings (Claude Opus 4.6 Review)
+
+See `docs/plans/2026-02-21-round2-remediation-design.md` for full design.
+See `docs/plans/2026-02-21-round2-remediation-plan.md` for implementation plan.
+
+14 additional issues identified and remediated. Status: DONE.
