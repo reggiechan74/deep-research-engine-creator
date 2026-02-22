@@ -4,23 +4,35 @@ Create domain-specialized deep-research engines as standalone Claude Code plugin
 
 This meta-plugin interviews you about your research domain, then generates a complete Claude Code plugin with a custom multi-agent research pipeline, domain-specific source hierarchies, quality frameworks, and output templates. You describe what you research; it builds the tooling.
 
+## Installation
+
+Install directly from GitHub:
+
+```bash
+claude plugin add reggiechan74/deep-research-engine-creator
+```
+
+Or clone and install manually:
+
+```bash
+git clone https://github.com/reggiechan74/deep-research-engine-creator.git
+claude --plugin-dir ./deep-research-engine-creator
+```
+
 ## Quick Start
 
 ```bash
-# 1. Install the plugin
-claude --plugin-dir ./deep-research-engine-creator
-
-# 2. Run the wizard (with an optional preset)
+# 1. Run the wizard (with an optional preset)
 /create-engine --preset market
 
-# 3. Answer the wizard questions — domain, sources, agents, quality, output
+# 2. Answer the wizard questions — domain, sources, agents, quality, output
 #    The wizard walks you through 9 sections with smart defaults.
 
-# 4. Validate the generated engine
+# 3. Validate the generated engine
 /test-engine ./generated-engines/your-engine/
 
-# 5. Use the generated engine
-claude --plugin-dir ./generated-engines/your-engine/
+# 4. Install and use the generated engine
+claude plugin add ./generated-engines/your-engine/
 /research "your topic"
 ```
 
@@ -183,7 +195,9 @@ deep-research-engine-creator/
 │       ├── agent-template.md.tmpl                      # Per-agent definition template
 │       ├── plugin-json.tmpl                            # plugin.json template
 │       ├── readme-template.md.tmpl                     # Generated README template
-│       └── engine-config-schema.json                   # Config validation schema
+│       ├── engine-config-schema.json                   # Config validation schema
+│       ├── preset-schema.json                          # Domain preset validation schema
+│       └── plugin-manifest-schema.json                 # Plugin manifest validation schema
 ├── scripts/
 │   └── publish-engine.sh                               # Marketplace publishing script
 ├── examples/
