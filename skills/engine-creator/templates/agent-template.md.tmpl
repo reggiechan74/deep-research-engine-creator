@@ -59,7 +59,7 @@ When conducting research:
    - Pass 1 (SEARCH): Execute diversified query set
    - Pass 2 (ASSESS): Evaluate evidence sufficiency -- 2+ independent sources for key claims? Contradictions? Gaps?
    - Pass 3 (REFINE): If gaps found, generate targeted follow-up queries
-   - Max 3 iterations per research question
+   - Max {{maxIterations}} iterations per research question
    - Abort when no new credible sources after 2 alternate query branches
 
 ## Confidence Scoring
@@ -72,7 +72,7 @@ Tag every claim with a confidence level:
 
 - Use claims/evidence/confidence tables for all findings
 - Log all search queries, engines, filters, and assessments to Methodology_Log.md
-- Save citations in APA 7th edition format with clickable URLs
+- Save citations using the configured citation standard: {{citationStandard}}
 - Keep chat responses concise (450 tokens or fewer)
 - Format: `## Focus | ## Top Findings (with IDs + confidence) | ## Gaps/Next | ## Files Written`
 
