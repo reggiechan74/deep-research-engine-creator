@@ -155,6 +155,25 @@ These prompts are injected into the base skill's agent instructions during execu
 
 ---
 
+## Advanced Configuration Override
+
+Override the base skill's advanced settings with engine-specific values. If any of
+these values are omitted from the engine configuration, the base skill's defaults
+are inherited unchanged.
+
+- **Max iterations per question:** {{maxIterations}}
+- **Exploration depth:** {{explorationDepth}}
+- **Token budgets:**
+  - Planning: {{planningBudget}}
+  - Research: {{researchBudget}}
+  - Synthesis: {{synthesisBudget}}
+  - Reporting: {{reportingBudget}}
+
+When executing the base pipeline, substitute these values wherever the base skill
+references iteration limits, exploration depth, or token budgets.
+
+---
+
 ## Execution Instructions
 
 To execute this extension engine, Claude must merge these overrides with the base
@@ -232,3 +251,11 @@ with values from the engine configuration (engine-config.json).
 - `{{agentOverrides}}` -- per-agent prompt overrides keyed by agent ID
 - `{{synthesisInstructions}}` -- additional instructions for the synthesis agent
 - `{{reportingTone}}` -- desired tone and style for the final report
+
+### Advanced Configuration
+- `{{maxIterations}}` -- maximum research-refine cycles per question
+- `{{explorationDepth}}` -- maximum depth for recursive web exploration from seed URLs
+- `{{planningBudget}}` -- token budget for planning phase
+- `{{researchBudget}}` -- token budget for research phase (per agent)
+- `{{synthesisBudget}}` -- token budget for synthesis phase
+- `{{reportingBudget}}` -- token budget for reporting phase

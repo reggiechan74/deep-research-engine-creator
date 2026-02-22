@@ -111,7 +111,7 @@ Use AskUserQuestion: "Generate a standalone Citation Verification Report?"
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
