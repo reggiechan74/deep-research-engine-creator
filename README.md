@@ -230,16 +230,140 @@ This engine demonstrates the full capabilities of a generated plugin:
 
 ## Architecture
 
-The Engine Creator uses an **A+C hybrid architecture** (Ask + Configure):
+The system has two halves: the **Engine Creator** (a factory that builds engines) and the **Generated Engine** (a standalone plugin that runs research). The config file is the pivot point between them.
 
-```
-Wizard Interview  -->  engine-config.json  -->  Plugin Generation
-    (ask)                  (config)                (generate)
+### Engine Creator Factory
+
+```mermaid
+flowchart LR
+    subgraph WIZARD["Wizard Interview (9 Sections)"]
+        direction TB
+        S1["1. Domain Identity"]
+        S2["2. Research Scope"]
+        S3["3. Sample Questions"]
+        S4["4. Source Strategy"]
+        S5["5. Agent Pipeline"]
+        S6["6. Quality Framework<br/>+ VVC Config"]
+        S7["7. Output Structure"]
+        S8["8. Advanced Config"]
+        S9["9. Custom Prompts"]
+        S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
+    end
+
+    PRESET["Domain Preset<br/>(20 available)"]
+    CONFIG["engine-config.json<br/>(source of truth)"]
+
+    subgraph GEN["Plugin Generation"]
+        direction TB
+        G1["plugin.json"]
+        G2["SKILL.md"]
+        G3["commands/"]
+        G4["agents/"]
+        G5["README.md"]
+    end
+
+    TEMPLATES["Templates<br/>(10 .tmpl files)"]
+    ENGINE["Standalone<br/>Claude Code Plugin"]
+
+    PRESET -.->|"pre-fills<br/>sections 4-9"| WIZARD
+    WIZARD --> CONFIG
+    CONFIG --> GEN
+    TEMPLATES -.->|"+ placeholders"| GEN
+    GEN --> ENGINE
+
+    classDef wizard fill:#e9d8fd,stroke:#805ad5,color:#553c9a
+    classDef config fill:#fef3c7,stroke:#d69e2e,color:#744210
+    classDef gen fill:#c6f6d5,stroke:#38a169,color:#276749
+    classDef output fill:#dbeafe,stroke:#2b6cb0,color:#1a365d
+    classDef preset fill:#feebc8,stroke:#dd6b20,color:#7b341e
+
+    class S1,S2,S3,S4,S5,S6,S7,S8,S9 wizard
+    class CONFIG config
+    class G1,G2,G3,G4,G5 gen
+    class ENGINE output
+    class PRESET,TEMPLATES preset
+
+    style WIZARD fill:#f5f0ff,stroke:#805ad5,color:#553c9a
+    style GEN fill:#f0fff4,stroke:#38a169,color:#276749
 ```
 
-1. **Wizard interview** collects domain requirements through structured questions
-2. **engine-config.json** serves as the pivot point -- a complete, editable, versionable specification of the engine
-3. **Templates + config** are combined to generate all plugin files (commands, agents, skills, README)
+### Generated Engine Research Pipeline
+
+When a user runs `/research [topic]` on a generated engine, this pipeline executes:
+
+```mermaid
+flowchart TD
+    TOPIC["User runs<br/>/research topic --deep"]
+
+    subgraph P0["Phase 0: Tier Detection"]
+        PARSE["Parse flags and<br/>configure depth"]
+    end
+
+    subgraph P1["Phase 1: Research Planning"]
+        PLAN["Strategic framework<br/>and agent task design"]
+    end
+
+    subgraph P2["Phase 2: Parallel Research"]
+        direction LR
+        A1["Agent 1<br/>Domain Specialist"]
+        A2["Agent 2<br/>Analyst"]
+        A3["Agent 3<br/>Mapper"]
+    end
+
+    subgraph P3["Phase 3: Synthesis"]
+        SYN["Multi-source integration<br/>Contradiction resolution<br/>Gap analysis"]
+    end
+
+    subgraph P4["Phase 4: Draft Reporting"]
+        DRAFT["Draft report with<br/>claim tagging<br/>[VC] [PO] [IE]"]
+    end
+
+    subgraph P5["Phase 5: VVC-Verify"]
+        VER["Extract claims<br/>Re-fetch sources<br/>Classify alignment"]
+    end
+
+    subgraph P6["Phase 6: VVC-Correct"]
+        COR["Auto-correct errors<br/>Produce final report<br/>+ correction log"]
+    end
+
+    SOURCES["5-Tier Source<br/>Hierarchy"]
+    QUALITY["Quality Framework<br/>Confidence Scoring"]
+    REPORT["Comprehensive Report<br/>+ Verification Report<br/>+ Correction Log"]
+
+    TOPIC --> P0
+    P0 --> P1
+    P1 --> P2
+    SOURCES -.->|"governs<br/>credibility"| P2
+    P2 --> P3
+    P3 --> P4
+    QUALITY -.->|"evidence<br/>thresholds"| P4
+    P4 --> P5
+    P5 --> P6
+    P6 --> REPORT
+
+    classDef phase fill:#dbeafe,stroke:#2b6cb0,color:#1a365d
+    classDef agent fill:#e9d8fd,stroke:#805ad5,color:#553c9a
+    classDef vvc fill:#fed7d7,stroke:#e53e3e,color:#9b2c2c
+    classDef input fill:#c6f6d5,stroke:#38a169,color:#276749
+    classDef support fill:#feebc8,stroke:#dd6b20,color:#7b341e
+    classDef output fill:#fef3c7,stroke:#d69e2e,color:#744210
+
+    class PARSE,PLAN,SYN phase
+    class A1,A2,A3 agent
+    class DRAFT phase
+    class VER,COR vvc
+    class TOPIC input
+    class SOURCES,QUALITY support
+    class REPORT output
+
+    style P0 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P1 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P2 fill:#f5f0ff,stroke:#805ad5,color:#553c9a
+    style P3 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P4 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P5 fill:#fff5f5,stroke:#e53e3e,color:#9b2c2c
+    style P6 fill:#fff5f5,stroke:#e53e3e,color:#9b2c2c
+```
 
 The config file is the source of truth. You can:
 - Edit it directly and re-run generation
