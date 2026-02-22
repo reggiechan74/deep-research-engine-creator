@@ -1,0 +1,236 @@
+{
+  "presetName": "Cybersecurity & Threat Intelligence",
+  "presetDescription": "Pre-configured for cybersecurity research including vulnerability analysis, threat actor profiling, attack surface mapping, malware analysis, incident response intelligence, and security posture assessments. Optimized for OSINT-enriched threat intelligence with structured indicator tracking.",
+  "keywords": ["cybersecurity", "threat-intelligence", "vulnerability", "cve", "malware", "incident-response", "attack-surface"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Authoritative Vulnerability & Advisory Sources",
+        "sources": [
+          "NIST National Vulnerability Database (nvd.nist.gov)",
+          "MITRE CVE database (cve.mitre.org)",
+          "MITRE ATT&CK framework (attack.mitre.org)",
+          "CISA Known Exploited Vulnerabilities Catalog (cisa.gov/known-exploited-vulnerabilities-catalog)",
+          "US-CERT alerts and advisories",
+          "Microsoft Security Response Center advisories (msrc.microsoft.com)",
+          "Google Project Zero vulnerability disclosures (googleprojectzero.blogspot.com)",
+          "Apple Security Updates (support.apple.com/en-us/HT201222)",
+          "CWE Common Weakness Enumeration database (cwe.mitre.org)",
+          "Vendor security advisories (Cisco, Red Hat, Oracle, Adobe, Palo Alto Networks)"
+        ]
+      },
+      "tier2": {
+        "name": "Threat Intelligence & Research",
+        "sources": [
+          "SANS Internet Storm Center diaries (isc.sans.edu)",
+          "Mandiant / Google Threat Intelligence reports",
+          "CrowdStrike threat research and adversary profiles",
+          "Recorded Future public intelligence reports",
+          "VirusTotal file and URL analysis (virustotal.com)",
+          "Shodan internet-connected device search (shodan.io)",
+          "Censys internet-wide scanning data (censys.io)",
+          "AlienVault Open Threat Exchange (otx.alienvault.com)",
+          "CIRCL Computer Incident Response Center Luxembourg (circl.lu)",
+          "abuse.ch platforms (URLhaus, MalwareBazaar, ThreatFox)"
+        ]
+      },
+      "tier3": {
+        "name": "Security Research & Analysis",
+        "sources": [
+          "Krebs on Security (krebsonsecurity.com)",
+          "Schneier on Security (schneier.com)",
+          "Troy Hunt security blog (troyhunt.com)",
+          "Academic security papers (USENIX Security, IEEE S&P, ACM CCS, NDSS)",
+          "BugTraq archives",
+          "Full Disclosure mailing list",
+          "Security conference presentations (Black Hat, DEF CON, RSA Conference)"
+        ]
+      },
+      "tier4": {
+        "name": "Community & Open Source",
+        "sources": [
+          "GitHub Security Advisories (github.com/advisories)",
+          "Security-focused subreddits (r/netsec, r/cybersecurity)",
+          "Hacker News security discussions",
+          "Security tool documentation (Metasploit, Nmap, Wireshark)",
+          "Stack Exchange Information Security (security.stackexchange.com)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Anonymous paste sites without corroboration",
+          "Unverified dark web claims",
+          "Social media threat hype without IOCs",
+          "Marketing materials from security vendors without technical backing",
+          "AI-generated vulnerability descriptions without CVE verification"
+        ]
+      }
+    },
+    "preferredSites": [
+      "nvd.nist.gov",
+      "cve.mitre.org",
+      "attack.mitre.org",
+      "cisa.gov",
+      "virustotal.com",
+      "shodan.io",
+      "isc.sans.edu",
+      "krebsonsecurity.com",
+      "abuse.ch",
+      "censys.io",
+      "github.com/advisories"
+    ],
+    "excludedSources": [
+      "wikipedia.org",
+      "quora.com",
+      "yahoo-answers.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "cve-lookup",
+        "pattern": "CVE-{cve_id} vulnerability details CVSS score site:{preferred_site}"
+      },
+      {
+        "name": "threat-actor-profile",
+        "pattern": "\"{threat_actor}\" APT threat actor TTPs MITRE ATT&CK {year}"
+      },
+      {
+        "name": "malware-analysis",
+        "pattern": "\"{malware_name}\" malware analysis IOC indicators {year}"
+      },
+      {
+        "name": "attack-surface-scan",
+        "pattern": "\"{technology}\" vulnerability exploit attack surface exposure {year}"
+      },
+      {
+        "name": "vulnerability-search",
+        "pattern": "\"{product}\" vulnerability CVE advisory patch {year} site:{preferred_site}"
+      },
+      {
+        "name": "incident-indicators",
+        "pattern": "\"{incident}\" indicators compromise IOC hash IP domain {year}"
+      },
+      {
+        "name": "exploit-availability",
+        "pattern": "CVE-{cve_id} exploit proof-of-concept PoC in-the-wild exploitation"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["vulnerability-researcher"]
+      },
+      "standard": {
+        "agents": ["vulnerability-researcher", "threat-analyst"]
+      },
+      "deep": {
+        "agents": ["vulnerability-researcher", "threat-analyst", "attack-surface-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["vulnerability-researcher", "threat-analyst", "attack-surface-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "vulnerability-researcher",
+        "role": "Vulnerability Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches vulnerability databases (NVD, CVE, vendor advisories), assesses CVSS scores, identifies exploit availability, tracks patch status, and maps affected software/hardware. Correlates CVEs with MITRE ATT&CK techniques and known exploitation in the wild.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "threat-analyst",
+        "role": "Threat Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Profiles threat actors using MITRE ATT&CK framework, analyzes TTPs (tactics, techniques, procedures), tracks campaign timelines, assesses threat actor capability and intent. Maps kill chains and identifies defensive gaps.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "attack-surface-mapper",
+        "role": "Attack Surface Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes vulnerability and threat data into attack surface assessments. Maps exposure vectors, prioritizes risks by exploitability and impact, identifies defensive controls gaps, and produces actionable remediation roadmaps with risk-ranked findings.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official vulnerability databases (NVD, CVE) or vendor security advisories. IOCs confirmed by 2+ independent threat intelligence sources. CVSS scores from official NVD entries.",
+      "MEDIUM": "Supported by recognized threat intelligence providers (Mandiant, CrowdStrike, Recorded Future) corroborated by at least 1 official advisory or database entry. Technical analysis from established security researchers.",
+      "LOW": "Based on single security blog post or community report without official database corroboration. IOCs from unverified community feeds. Vulnerability claims without CVE assignment.",
+      "SPECULATIVE": "Based on proof-of-concept code without confirmed in-the-wild exploitation, threat actor attribution based on circumstantial evidence, or projected attack vectors based on theoretical analysis."
+    },
+    "minimumEvidence": "All vulnerability claims require CVE ID or vendor advisory reference. Threat actor attributions require 2+ independent intelligence sources. IOCs must include type, value, confidence level, and first-seen date.",
+    "validationRules": [
+      "Verify CVE IDs against NVD and confirm CVSS scores from official entries.",
+      "Validate IOCs against at least 2 threat intelligence platforms.",
+      "Cross-reference threat actor TTPs with MITRE ATT&CK framework.",
+      "Confirm patch and mitigation availability from vendor advisories.",
+      "Flag vulnerabilities without CVE assignment as unconfirmed.",
+      "Distinguish between proof-of-concept and confirmed in-the-wild exploitation.",
+      "Verify exploit availability claims against known exploit databases and vendor advisories."
+    ],
+    "citationStandard": "APA 7th Edition with cybersecurity extensions. Vulnerabilities cited with CVE ID, CVSS score, and NVD URL. Threat actors referenced by known aliases with ATT&CK group ID. IOCs formatted with type:value notation. Include advisory URLs and disclosure dates.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "1-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-confidence-levels"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Threat Landscape Overview",
+      "Vulnerability Assessment",
+      "Threat Actor Profiles",
+      "Attack Surface Analysis",
+      "IOC Summary",
+      "Risk Prioritization Matrix",
+      "Mitigation Recommendations",
+      "Detection Signatures",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_threat_intel.md",
+    "specialDeliverables": [
+      "attack-surface-map",
+      "threat-actor-profile-cards",
+      "ioc-feed",
+      "risk-priority-matrix",
+      "mitre-attack-mapping"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting cybersecurity threat intelligence research to the standard expected by a CISO, SOC manager, or incident response team lead. Accuracy of technical details is paramount: every CVE, IOC, and attribution must be verified against authoritative sources. Distinguish between confirmed exploitation and theoretical vulnerability. Apply the MITRE ATT&CK framework consistently for TTP classification. Assess both likelihood and impact when prioritizing risks. Consider the defender's perspective: what can be detected, what can be mitigated, and what requires immediate action.",
+    "agentOverrides": {
+      "vulnerability-researcher": "Prioritize NVD and CVE database verification for all vulnerability claims. Always include CVSS base score, attack vector, and exploitability metrics. Track patch status from vendor advisories and note time-to-patch windows. Flag any vulnerability with known in-the-wild exploitation for immediate escalation. Correlate CVEs with MITRE ATT&CK techniques where applicable.",
+      "threat-analyst": "Map all threat actor activity to the MITRE ATT&CK framework with specific technique IDs (e.g., T1566.001). Build campaign timelines with first-seen and last-seen dates. Assess threat actor capability (sophistication, resources) and intent (targets, motivations). Document known aliases, attributed campaigns, and infrastructure patterns. Identify defensive gaps in the kill chain.",
+      "attack-surface-mapper": "Produce risk-ranked remediation roadmaps that prioritize by exploitability (CVSS exploitability metrics, known exploitation status) and business impact. Map exposure vectors across network, application, and human attack surfaces. Identify defensive control gaps and recommend specific mitigations with effort/impact assessment. Include detection opportunities for each identified risk."
+    },
+    "synthesisInstructions": "Lead with highest-priority risks requiring immediate action. Quantify risk using CVSS scores and exploitability metrics. Map threats to MITRE ATT&CK for consistent TTP classification. Include both strategic (threat landscape) and tactical (IOCs, detection rules) intelligence. Provide clear remediation priorities with effort/impact assessment.",
+    "reportingTone": "Technical but accessible to security leadership. Clear severity classifications. Actionable recommendations with specific remediation steps. Avoid FUD (fear, uncertainty, doubt) — present evidence-based assessments with calibrated confidence levels."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 18000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

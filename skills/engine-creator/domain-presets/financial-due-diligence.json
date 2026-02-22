@@ -1,0 +1,247 @@
+{
+  "presetName": "Financial Due Diligence",
+  "presetDescription": "Pre-configured for financial due diligence research including company financial analysis, M&A target assessment, credit risk evaluation, beneficial ownership investigation, regulatory compliance review, and forensic accounting red flags. Optimized for institutional-quality due diligence with multi-source verification and fraud risk indicators.",
+  "keywords": ["financial-due-diligence", "m-and-a", "credit-risk", "beneficial-ownership", "compliance", "forensic-accounting", "company-analysis"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Regulatory Filings & Official Records",
+        "sources": [
+          "SEC EDGAR filings (sec.gov — 10-K, 10-Q, 8-K, DEF 14A, S-1, 13F)",
+          "SEDAR+ corporate filings (sedarplus.ca — Canada)",
+          "Companies House filings (companieshouse.gov.uk — UK)",
+          "Corporate registry databases (state and provincial)",
+          "UCC filing databases",
+          "Court records (PACER — pacer.gov, CanLII — canlii.ca)",
+          "Bankruptcy filings (PACER bankruptcy courts)",
+          "OFAC Sanctions Lists (treasury.gov/ofac — SDN and consolidated lists)",
+          "FinCEN beneficial ownership database (fincen.gov)"
+        ]
+      },
+      "tier2": {
+        "name": "Financial Data & Analytics",
+        "sources": [
+          "Bloomberg Terminal data (bloomberg.com)",
+          "S&P Capital IQ (spglobal.com)",
+          "Moody's credit ratings and research (moodys.com)",
+          "Fitch Ratings (fitchratings.com)",
+          "DBRS Morningstar ratings (dbrsmorningstar.com)",
+          "Dun & Bradstreet business reports (dnb.com)",
+          "Bureau van Dijk Orbis database (bvdinfo.com)",
+          "PitchBook data and analytics (pitchbook.com)",
+          "Refinitiv financial data (refinitiv.com)",
+          "Audited financial statements from regulatory filings",
+          "Bond prospectuses and indentures"
+        ]
+      },
+      "tier3": {
+        "name": "Professional Analysis & Research",
+        "sources": [
+          "Big Four accounting firm industry reports (Deloitte, PwC, EY, KPMG)",
+          "Investment bank research (Goldman Sachs, Morgan Stanley, JP Morgan)",
+          "Law firm client alerts — securities, M&A, and regulatory",
+          "PCAOB inspection reports (pcaobus.org)",
+          "Proxy advisory firms (ISS, Glass Lewis)"
+        ]
+      },
+      "tier4": {
+        "name": "Business Intelligence & News",
+        "sources": [
+          "Wall Street Journal (wsj.com)",
+          "Financial Times (ft.com)",
+          "Bloomberg News (bloomberg.com/news)",
+          "Reuters (reuters.com)",
+          "The Information (theinformation.com)",
+          "Activist investor letters and presentations",
+          "Short-seller reports (use with professional skepticism)",
+          "Industry trade publications"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Anonymous stock message boards",
+          "Unverified social media claims about companies",
+          "Penny stock promotions and paid stock coverage",
+          "AI-generated financial analysis without source verification",
+          "Self-reported company metrics without audit confirmation"
+        ]
+      }
+    },
+    "preferredSites": [
+      "sec.gov",
+      "sedarplus.ca",
+      "pacer.gov",
+      "bloomberg.com",
+      "spglobal.com",
+      "moodys.com",
+      "fitchratings.com",
+      "dnb.com",
+      "pitchbook.com",
+      "treasury.gov",
+      "fincen.gov",
+      "pcaobus.org"
+    ],
+    "excludedSources": [
+      "seekingalpha.com",
+      "stocktwits.com",
+      "reddit.com",
+      "yahoo-answers.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "sec-filing-deep-dive",
+        "pattern": "\"{company}\" {filing_type} site:sec.gov/cgi-bin/browse-edgar OR site:sec.gov/Archives {year}"
+      },
+      {
+        "name": "beneficial-ownership-search",
+        "pattern": "\"{company}\" OR \"{principal_name}\" beneficial owner corporate registry UCC filing {jurisdiction}"
+      },
+      {
+        "name": "litigation-history",
+        "pattern": "\"{company}\" OR \"{principal_name}\" lawsuit litigation complaint judgment {jurisdiction} site:pacer.gov OR site:canlii.ca"
+      },
+      {
+        "name": "credit-analysis",
+        "pattern": "\"{company}\" credit rating outlook downgrade upgrade site:moodys.com OR site:fitchratings.com OR site:spglobal.com"
+      },
+      {
+        "name": "m-and-a-precedents",
+        "pattern": "\"{industry}\" acquisition merger deal value multiple EBITDA {year_range}"
+      },
+      {
+        "name": "regulatory-enforcement",
+        "pattern": "\"{company}\" OR \"{principal_name}\" enforcement action fine penalty SEC DOJ OFAC {year_range}"
+      },
+      {
+        "name": "related-party-transactions",
+        "pattern": "\"{company}\" related party transaction DEF 14A proxy statement 10-K site:sec.gov"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["financial-statement-analyst"]
+      },
+      "standard": {
+        "agents": ["financial-statement-analyst", "risk-investigator"]
+      },
+      "deep": {
+        "agents": ["financial-statement-analyst", "risk-investigator", "deal-intelligence-synthesizer"]
+      },
+      "comprehensive": {
+        "agents": ["financial-statement-analyst", "risk-investigator", "deal-intelligence-synthesizer"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "financial-statement-analyst",
+        "role": "Financial Statement Analyst",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Analyzes SEC/SEDAR filings including 10-K, 10-Q, proxy statements, and registration statements. Extracts key financial metrics (revenue, EBITDA, FCF, leverage ratios, working capital). Identifies accounting policy changes, unusual adjustments, related-party transactions, and material weaknesses in internal controls. Compares financial performance across reporting periods and against peers.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "risk-investigator",
+        "role": "Risk Investigator",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Investigates litigation history, regulatory enforcement actions, beneficial ownership structures, sanctions exposure, and management background. Searches PACER, state court records, OFAC/sanctions lists, UCC filings, and bankruptcy records. Identifies red flags including related-party transactions, off-balance-sheet arrangements, auditor changes, and restatements.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "deal-intelligence-synthesizer",
+        "role": "Deal Intelligence Synthesizer",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes financial analysis and risk investigation into deal-ready intelligence. Builds comparable transaction analyses, assesses valuation ranges, identifies deal risks and mitigants, evaluates management quality and corporate governance. Produces institutional-quality investment memoranda with clear go/no-go frameworks.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against audited financial statements filed with SEC/SEDAR, confirmed by 2+ independent professional data providers (Bloomberg, S&P, Moody's). Legal findings confirmed via court records (PACER). Beneficial ownership verified through FinCEN/corporate registry.",
+      "MEDIUM": "Based on unaudited quarterly filings corroborated by professional data provider. Litigation data from single court database without exhaustive multi-jurisdiction search. Credit assessments from single rating agency supported by financial analysis.",
+      "LOW": "Based on company press releases, earnings call transcripts, or management presentations without verification against regulatory filings. Single-source financial data without independent corroboration.",
+      "SPECULATIVE": "Based on rumored deal terms, projected synergies without detailed basis, management guidance without track record assessment, or comparable transaction multiples applied without adjustment for company-specific factors."
+    },
+    "minimumEvidence": "All financial claims require audited financial statement or regulatory filing citation. Revenue, EBITDA, and net income figures must reference specific filing period and source. Litigation claims require case number and jurisdiction. Beneficial ownership claims require corporate registry or regulatory filing reference.",
+    "validationRules": [
+      "Cross-check financial data against SEC/SEDAR filings (not just third-party databases).",
+      "Verify auditor identity and opinion type (clean/qualified/adverse/disclaimer).",
+      "Confirm outstanding litigation via multi-jurisdiction court search.",
+      "Validate beneficial ownership through corporate registry records.",
+      "Check OFAC/sanctions list for all key principals.",
+      "Verify credit ratings from issuing agency directly.",
+      "Flag any auditor changes within past 3 years.",
+      "Identify material weakness disclosures in SOX 302/404 certifications.",
+      "Compare management discussion with actual financial performance."
+    ],
+    "citationStandard": "APA 7th Edition with financial/legal extensions. SEC filings cited with company name, filing type, CIK number, accession number, and filing date. Court cases cited with case name, case number, court, and filing date. Credit ratings cited with agency, rating, outlook, and date. Include EDGAR/PACER URLs.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "1-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-confidence-levels"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Company Overview",
+      "Financial Analysis",
+      "Revenue & Profitability Assessment",
+      "Balance Sheet & Liquidity",
+      "Cash Flow Analysis",
+      "Management & Governance",
+      "Litigation & Regulatory Risk",
+      "Beneficial Ownership Structure",
+      "Comparable Transaction Analysis",
+      "Valuation Assessment",
+      "Key Risks & Mitigants",
+      "Red Flags & Concerns",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_financial_dd.md",
+    "specialDeliverables": [
+      "financial-summary-table",
+      "litigation-tracker",
+      "beneficial-ownership-chart",
+      "comparable-transactions-matrix",
+      "risk-scoring-matrix",
+      "red-flag-register"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting financial due diligence to the standard expected by a private equity investment committee, M&A advisory team, or credit committee at a major financial institution. Accuracy and completeness are paramount — missed risks can result in material losses. Verify every financial figure against primary regulatory filings. Apply professional skepticism to management representations. Identify patterns that may indicate earnings manipulation, aggressive accounting, or undisclosed risks. Consider both the quantitative financials and qualitative factors (management quality, corporate governance, industry dynamics). Always distinguish between verified facts and analytical judgments.",
+    "agentOverrides": {
+      "financial-statement-analyst": "Focus on trend analysis, accounting quality, and peer benchmarking with specific attention to revenue recognition policies and non-recurring items. Extract normalized EBITDA and free cash flow metrics. Identify changes in accounting estimates or policies across reporting periods. Flag significant related-party transactions, off-balance-sheet arrangements, and contingent liabilities.",
+      "risk-investigator": "Conduct thorough background checks with multi-jurisdiction litigation search and sanctions screening. Search PACER, state courts, and Canadian courts (CanLII) for litigation involving the company and key principals. Screen all directors, officers, and beneficial owners against OFAC/SDN lists. Investigate prior business failures, regulatory sanctions, and professional discipline actions.",
+      "deal-intelligence-synthesizer": "Produce institutional-quality investment memoranda with clear risk/reward assessment. Build comparable transaction analysis with adjustment rationale for company-specific factors. Present normalized financial metrics alongside reported figures. Structure findings around a go/no-go framework with identified conditions precedent, key risks, mitigants, and areas requiring additional investigation."
+    },
+    "synthesisInstructions": "Lead with the investment thesis (or anti-thesis). Present financial performance with normalized metrics alongside reported figures. Highlight key risks with probability and impact assessment. Include both bull and bear cases with supporting evidence. Build comparable transaction analysis with adjustment rationale. Provide clear go/no-go recommendation with identified conditions and mitigants. Flag any areas requiring additional investigation.",
+    "reportingTone": "Institutional investment quality suitable for investment committees, board presentations, and credit approval packages. Precise, evidence-based, professionally skeptical. Avoid promotional language — present balanced assessment with clear identification of risks and uncertainties. Use standard financial terminology and ratios with definitions where needed for non-specialist readers."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 20000,
+      "synthesis": 12000,
+      "reporting": 14000
+    }
+  }
+}

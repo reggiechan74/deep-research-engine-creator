@@ -1,0 +1,245 @@
+{
+  "presetName": "Real Estate & CRE",
+  "presetDescription": "Pre-configured for commercial real estate research — property valuations, market comps, zoning/land use analysis, municipal records, cap rate analysis, lease abstracts, investment analysis, and development feasibility. Optimized for institutional-quality analysis with official record verification and professional data provider corroboration.",
+  "keywords": ["real-estate", "commercial-real-estate", "cre", "property-valuation", "cap-rate", "zoning", "investment-analysis"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Records & Registries",
+        "sources": [
+          "Municipal property assessment databases (MPAC — mpac.ca, county assessors)",
+          "Land registry and title search systems (provincial/state land registries)",
+          "Zoning bylaw databases and official plan documents",
+          "CMHC housing data and research (cmhc-schl.gc.ca)",
+          "HUD housing and urban development data (hud.gov)",
+          "Statistics Canada housing and construction data (statcan.gc.ca)",
+          "U.S. Census Bureau housing data (census.gov)",
+          "SEC REIT filings — 10-K, 10-Q, 8-K, proxy statements (sec.gov)",
+          "SEDAR+ REIT and real estate corporate filings (sedarplus.ca)"
+        ]
+      },
+      "tier2": {
+        "name": "Professional Data & Analytics",
+        "sources": [
+          "CoStar commercial real estate analytics (costar.com)",
+          "CBRE Research reports and market outlooks (cbre.com)",
+          "JLL Research and market intelligence (jll.com)",
+          "Cushman & Wakefield research and market reports (cushmanwakefield.com)",
+          "Colliers International research (colliers.com)",
+          "RealCapital Analytics transaction data (realcapitalanalytics.com)",
+          "MSCI Real Estate benchmarks and indices",
+          "Altus Group data and analytics (altusgroup.com)",
+          "REALPAC industry benchmarks and reporting standards",
+          "Yardi Matrix market data and analytics (yardimatrix.com)"
+        ]
+      },
+      "tier3": {
+        "name": "Industry & Association Sources",
+        "sources": [
+          "BOMA (Building Owners and Managers Association) reports and benchmarks",
+          "ULI (Urban Land Institute) publications and research (uli.org)",
+          "NAIOP (Commercial Real Estate Development Association) research",
+          "CCIM Institute market analysis and research",
+          "Appraisal Institute publications and standards",
+          "RICS (Royal Institution of Chartered Surveyors) publications",
+          "Real Property Association of Canada (REALPAC) research",
+          "NAREIT (National Association of Real Estate Investment Trusts) data",
+          "Local real estate boards — TRREB, CREA, and regional equivalents"
+        ]
+      },
+      "tier4": {
+        "name": "News & Commentary",
+        "sources": [
+          "Commercial Observer (commercialobserver.com)",
+          "GlobeSt (globest.com)",
+          "Bisnow (bisnow.com)",
+          "The Real Deal (therealdeal.com)",
+          "CoStar News (costar.com/news)",
+          "Globe & Mail real estate section",
+          "Financial Post real estate coverage",
+          "RENX — Real Estate News Exchange (renx.ca)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Zillow/Zolo automated value estimates without professional verification",
+          "Social media market predictions and influencer commentary",
+          "Anonymous real estate forum posts",
+          "Outdated MLS listings used as current market evidence",
+          "Promotional developer marketing materials without disclosed assumptions"
+        ]
+      }
+    },
+    "preferredSites": [
+      "mpac.ca",
+      "costar.com",
+      "cbre.com",
+      "jll.com",
+      "cushmanwakefield.com",
+      "realcapitalanalytics.com",
+      "cmhc-schl.gc.ca",
+      "statcan.gc.ca",
+      "census.gov",
+      "sec.gov",
+      "bfrb.ca",
+      "uli.org"
+    ],
+    "excludedSources": [
+      "zillow.com",
+      "zolo.ca",
+      "trulia.com",
+      "realtor.ca"
+    ],
+    "searchTemplates": [
+      {
+        "name": "property-valuation",
+        "pattern": "\"{property_address}\" OR \"{pin_apn}\" assessment value {municipality} site:{preferred_site}"
+      },
+      {
+        "name": "market-comp",
+        "pattern": "\"{property_type}\" comparable sales \"{submarket}\" {year} cap rate price per sqft"
+      },
+      {
+        "name": "zoning-analysis",
+        "pattern": "\"{municipality}\" zoning bylaw \"{zone_code}\" permitted uses density height"
+      },
+      {
+        "name": "cap-rate-research",
+        "pattern": "\"{property_type}\" cap rate \"{geography}\" {year} survey site:{preferred_site}"
+      },
+      {
+        "name": "lease-analysis",
+        "pattern": "\"{property_type}\" lease rate \"{submarket}\" vacancy absorption {year}"
+      },
+      {
+        "name": "development-feasibility",
+        "pattern": "\"{municipality}\" development charges fees \"{property_type}\" construction costs {year}"
+      },
+      {
+        "name": "reit-analysis",
+        "pattern": "\"{reit_name}\" 10-K annual report NOI FFO AFFO site:sec.gov OR site:sedarplus.ca"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["property-data-researcher"]
+      },
+      "standard": {
+        "agents": ["property-data-researcher", "market-analyst"]
+      },
+      "deep": {
+        "agents": ["property-data-researcher", "market-analyst", "investment-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["property-data-researcher", "market-analyst", "investment-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "property-data-researcher",
+        "role": "Property Data Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches property databases, municipal records, assessment rolls, land registry, and title systems. Extracts property details, assessed values, zoning classifications, legal descriptions, encumbrances, and transaction history. Excels at navigating government record systems and reconciling data across official sources.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "market-analyst",
+        "role": "CRE Market Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes CRE market fundamentals: cap rates, net operating income, vacancy rates, absorption, rent growth, and comparable sales. Applies valuation methodologies including income approach, sales comparison approach, and cost approach to the standard expected by AACI/MAI-designated appraisers. Assesses submarket dynamics, supply pipeline, and investment metrics.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "investment-strategist",
+        "role": "CRE Investment Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes property-level and market-level data into institutional-quality investment analysis: risk-adjusted returns, development pro formas, highest-and-best-use analysis, and portfolio positioning. Builds competitive property matrices, conducts sensitivity analysis on key assumptions, and identifies market opportunities and mispriced assets.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official property records (assessment rolls, land registry, title search) and confirmed by professional data providers (CoStar, RCA). Property-specific data within 12 months.",
+      "MEDIUM": "Supported by at least 1 professional analytics platform corroborated by at least 1 official record. Market-level statistics from recognized CRE research firms (CBRE, JLL, C&W).",
+      "LOW": "Based on a single commercial data source without official record verification. Market data older than 18 months or from adjacent submarkets requiring extrapolation.",
+      "SPECULATIVE": "Projections based on trend extrapolation, proposed development plans not yet approved, or pre-construction pricing without firm commitments."
+    },
+    "minimumEvidence": "All property valuations require assessment roll or recent comparable sale verification. Cap rate claims require 3+ comparable transactions. Market statistics require data from recognized CRE research firms.",
+    "validationRules": [
+      "Verify property data against municipal assessment records.",
+      "Confirm zoning classifications and permitted uses against current bylaws.",
+      "Validate transaction prices against land registry records.",
+      "Cross-check cap rates across multiple data providers and note material discrepancies.",
+      "Flag any market data older than 12 months as potentially outdated and note the vintage.",
+      "Verify REIT financial data against SEC/SEDAR filings.",
+      "Distinguish between asking price and transacted price in all comparable analyses.",
+      "Ensure comparable sales are adjusted for differences in property condition, size, location, and transaction date.",
+      "Validate development cost estimates against current municipal development charge schedules."
+    ],
+    "citationStandard": "APA 7th Edition format with real estate-specific extensions. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Include property identifiers (PIN/APN), assessment roll references, land registry instrument numbers, and MLS numbers where applicable.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Property Overview",
+      "Market Context",
+      "Comparable Analysis",
+      "Valuation Assessment",
+      "Zoning & Land Use",
+      "Investment Analysis",
+      "Risk Assessment",
+      "Development Potential",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_cre_analysis.md",
+    "specialDeliverables": [
+      "comparable-sales-matrix",
+      "cap-rate-analysis",
+      "zoning-summary",
+      "investment-pro-forma",
+      "submarket-heatmap"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting professional CRE analysis to the standard expected by institutional investors, pension fund real estate allocators, and senior asset managers. Accuracy of property data is paramount. All valuations must reference comparable evidence. Distinguish between assessed value, appraised value, and market value. Consider both income-producing potential and capital appreciation. Apply appropriate discount rates and cap rates for the specific property type and submarket.",
+    "agentOverrides": {
+      "property-data-researcher": "Prioritize official records and assessment data. Navigate municipal assessment portals, land registry systems, and title search databases. Extract legal descriptions, encumbrances, easements, and covenant restrictions. Reconcile assessed values with recent transaction evidence. Flag any discrepancies between assessment records and other data sources.",
+      "market-analyst": "Apply proper valuation methodology to the standard expected of AACI/MAI-designated professionals. Use income approach (direct capitalization and DCF) for income-producing properties, sales comparison for owner-occupied and land, and cost approach where appropriate. Analyze submarket fundamentals including vacancy, absorption, new supply, and rent growth trends. Quantify market metrics with specific data rather than qualitative descriptions.",
+      "investment-strategist": "Build institutional-quality investment memos. Lead with investment thesis and risk-adjusted return analysis. Construct development pro formas with clearly stated assumptions. Conduct highest-and-best-use analysis considering legal permissibility, physical possibility, financial feasibility, and maximum productivity. Present sensitivity tables on key variables (cap rate, vacancy, rent growth, construction costs)."
+    },
+    "synthesisInstructions": "Lead with investment thesis. Quantify risk-adjusted returns. Present comparable evidence in structured tables. Include sensitivity analysis on key assumptions (cap rate, vacancy, rent growth). Balance property-specific analysis with market-level context. Distinguish between current income performance and value-add or repositioning potential. Address both upside opportunity and downside risk scenarios.",
+    "reportingTone": "Professional institutional investment quality suitable for investment committees, lending decisions, and board presentations. Precise, data-driven, and legally aware. Avoid promotional language. Present balanced analysis with clearly identified assumptions and limitations. Write for decision-makers who need to allocate capital, not browse listings."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

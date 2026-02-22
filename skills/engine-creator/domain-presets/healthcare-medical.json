@@ -1,0 +1,240 @@
+{
+  "presetName": "Healthcare & Medical Research",
+  "presetDescription": "Pre-configured for healthcare and medical research including clinical evidence review, drug/device safety assessment, regulatory pathway analysis, epidemiological research, and health technology assessment. Optimized for evidence-based medicine with systematic review methodology and regulatory compliance awareness.",
+  "keywords": ["healthcare", "medical", "clinical-trials", "fda", "pubmed", "drug-safety", "evidence-based-medicine"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Clinical & Regulatory Sources",
+        "sources": [
+          "PubMed/MEDLINE (pubmed.ncbi.nlm.nih.gov)",
+          "Cochrane Library systematic reviews (cochranelibrary.com)",
+          "ClinicalTrials.gov",
+          "FDA drug/device databases (fda.gov — Drugs@FDA, MAUDE, 510(k), PMA)",
+          "EMA (European Medicines Agency) product information",
+          "WHO publications and guidelines",
+          "Health Canada Drug Product Database",
+          "NIH clinical guidelines"
+        ]
+      },
+      "tier2": {
+        "name": "Peer-Reviewed & Evidence Synthesis",
+        "sources": [
+          "NICE guidelines and technology appraisals",
+          "UpToDate clinical decision support",
+          "BMJ Best Practice",
+          "Lancet",
+          "NEJM",
+          "JAMA",
+          "Nature Medicine",
+          "CDC MMWR reports",
+          "CADTH health technology assessments",
+          "Systematic reviews and meta-analyses in indexed journals"
+        ]
+      },
+      "tier3": {
+        "name": "Professional & Institutional Sources",
+        "sources": [
+          "Medical society guidelines (AMA, AHA, ASCO, etc.)",
+          "Hospital system clinical protocols",
+          "CMS coverage determinations",
+          "Health economics publications (pharmacoeconomics, QALY analyses)",
+          "Medical conference proceedings (ASCO, AHA, RSNA, ASH)"
+        ]
+      },
+      "tier4": {
+        "name": "Industry & News",
+        "sources": [
+          "Pharmaceutical company pipeline reports and press releases",
+          "STAT News",
+          "FiercePharma",
+          "Endpoints News",
+          "MedPage Today",
+          "Medical device company SEC filings",
+          "Healthcare consulting reports (McKinsey Health, Deloitte Life Sciences)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Patient forums and anecdotal reports without clinical backing",
+          "Alternative medicine websites without peer-reviewed evidence",
+          "Social media health claims",
+          "Retracted publications",
+          "Predatory journal publications",
+          "Supplement manufacturer health claims"
+        ]
+      }
+    },
+    "preferredSites": [
+      "pubmed.ncbi.nlm.nih.gov",
+      "clinicaltrials.gov",
+      "fda.gov",
+      "cochranelibrary.com",
+      "who.int",
+      "nice.org.uk",
+      "ema.europa.eu",
+      "cdc.gov",
+      "canada.ca/health",
+      "cadth.ca",
+      "uptodate.com"
+    ],
+    "excludedSources": [
+      "webmd.com",
+      "healthline.com",
+      "mayoclinic.org",
+      "wikipedia.org"
+    ],
+    "searchTemplates": [
+      {
+        "name": "clinical-evidence",
+        "pattern": "\"{intervention}\" clinical evidence {condition} systematic review OR meta-analysis site:pubmed.ncbi.nlm.nih.gov OR site:cochranelibrary.com"
+      },
+      {
+        "name": "drug-safety-search",
+        "pattern": "\"{drug_name}\" adverse events OR safety OR black box warning OR REMS site:fda.gov OR site:pubmed.ncbi.nlm.nih.gov"
+      },
+      {
+        "name": "clinical-trial-lookup",
+        "pattern": "\"{intervention}\" \"{condition}\" {phase} recruiting OR completed site:clinicaltrials.gov"
+      },
+      {
+        "name": "regulatory-pathway",
+        "pattern": "\"{product_name}\" approval OR 510(k) OR PMA OR BLA OR NDA site:fda.gov OR site:ema.europa.eu"
+      },
+      {
+        "name": "disease-epidemiology",
+        "pattern": "\"{condition}\" prevalence OR incidence OR epidemiology {population} {geography} {year_range}"
+      },
+      {
+        "name": "health-technology-assessment",
+        "pattern": "\"{intervention}\" health technology assessment OR cost-effectiveness OR QALY site:nice.org.uk OR site:cadth.ca"
+      },
+      {
+        "name": "drug-interaction-check",
+        "pattern": "\"{drug_a}\" \"{drug_b}\" interaction OR contraindication OR pharmacokinetics site:pubmed.ncbi.nlm.nih.gov"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["clinical-evidence-researcher"]
+      },
+      "standard": {
+        "agents": ["clinical-evidence-researcher", "regulatory-analyst"]
+      },
+      "deep": {
+        "agents": ["clinical-evidence-researcher", "regulatory-analyst", "health-outcomes-synthesizer"]
+      },
+      "comprehensive": {
+        "agents": ["clinical-evidence-researcher", "regulatory-analyst", "health-outcomes-synthesizer"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "clinical-evidence-researcher",
+        "role": "Clinical Evidence Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches PubMed, Cochrane Library, ClinicalTrials.gov, and regulatory databases for clinical evidence. Extracts study design, sample sizes, endpoints, outcomes, confidence intervals, and p-values. Assesses level of evidence using Oxford/GRADE frameworks. Identifies systematic reviews and meta-analyses for evidence synthesis.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "regulatory-analyst",
+        "role": "Regulatory Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes FDA/EMA/Health Canada regulatory pathways, approval histories, label changes, safety communications, and post-market surveillance data. Reviews clinical study reports, FDA review documents, advisory committee meeting transcripts. Assesses regulatory risk and timeline implications.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "health-outcomes-synthesizer",
+        "role": "Health Outcomes Synthesizer",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes clinical evidence and regulatory data into health outcomes assessments. Conducts indirect treatment comparisons, evaluates number-needed-to-treat (NNT), builds benefit-risk frameworks. Produces evidence summaries suitable for formulary committees, HTA bodies, and clinical decision-making.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Based on systematic reviews, meta-analyses, or large randomized controlled trials (RCTs) published in peer-reviewed journals indexed in PubMed. Regulatory data from FDA/EMA/HC official databases. Confirmed by Cochrane review or equivalent.",
+      "MEDIUM": "Based on smaller RCTs, well-designed observational studies, or non-systematic reviews in peer-reviewed journals. Supported by clinical guidelines from recognized medical societies. Regulatory data from advisory committee documents.",
+      "LOW": "Based on case series, case reports, or expert opinion published in indexed journals. Data from a single study without replication. Conference abstracts or preprints not yet peer-reviewed.",
+      "SPECULATIVE": "Based on preclinical/animal studies, in-vitro data, computational models, or extrapolation from adjacent therapeutic areas. Phase I/II data used to project Phase III outcomes. Mechanism-of-action-based predictions without clinical validation."
+    },
+    "minimumEvidence": "All clinical efficacy claims require citation of at least one peer-reviewed clinical study with sample size, endpoints, and statistical significance reported. Drug safety claims require FDA/EMA label reference or post-market surveillance data. Epidemiological statistics require citation of population-based studies or government health data.",
+    "validationRules": [
+      "Verify all PubMed citations exist and are not retracted (check Retraction Watch).",
+      "Confirm ClinicalTrials.gov registration numbers.",
+      "Validate FDA approval dates against Drugs@FDA.",
+      "Cross-check drug interaction claims against multiple databases.",
+      "Distinguish between surrogate and clinical endpoints.",
+      "Flag studies with high risk of bias per Cochrane criteria.",
+      "Verify sample size adequacy for claimed effect sizes.",
+      "Confirm p-values and confidence intervals as reported."
+    ],
+    "citationStandard": "AMA (American Medical Association) citation style. Journal articles: Author(s). Title. Journal. Year;Volume(Issue):Pages. doi:XX. Clinical trials: NCT number, Phase, Status. FDA references: Application Number, Approval Date. Include PubMed IDs (PMID) and DOIs where available.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "3-year",
+      "foundationalStudyThreshold": "5-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-confidence-levels"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Clinical Question & PICO Framework",
+      "Evidence Summary",
+      "Systematic Review of Literature",
+      "Clinical Trial Landscape",
+      "Regulatory Status",
+      "Safety Profile",
+      "Health Economics & Outcomes",
+      "Comparative Effectiveness",
+      "Recommendations",
+      "Evidence Quality Assessment",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_medical_research.md",
+    "specialDeliverables": [
+      "evidence-grade-table",
+      "forest-plot-data",
+      "pico-summary",
+      "regulatory-timeline",
+      "benefit-risk-framework"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting healthcare research to the standard expected by a clinical pharmacologist, medical affairs director, or health technology assessment body. Evidence quality is paramount: apply GRADE methodology for rating certainty of evidence. Distinguish between efficacy (controlled settings) and effectiveness (real-world). Report absolute risk reductions alongside relative measures. Consider both clinical and statistical significance. Apply the PICO framework (Population, Intervention, Comparison, Outcome) to structure clinical questions. Note important limitations including generalizability, follow-up duration, and potential biases. This analysis does not constitute medical advice.",
+    "agentOverrides": {
+      "clinical-evidence-researcher": "Apply Oxford Centre for Evidence-Based Medicine levels to all evidence cited. Prioritize systematic reviews and meta-analyses. Validate all clinical trial registration numbers on ClinicalTrials.gov and cross-reference registered endpoints against published outcomes to detect outcome switching. Document the full PICO for each clinical question.",
+      "regulatory-analyst": "Track complete regulatory chronology with label evolution for all products discussed. Document approval pathway (NDA, BLA, 510(k), PMA, De Novo), review timeline, advisory committee votes, post-market requirements (REMS, PMCs, PMRs), and all safety communications (Dear Healthcare Provider letters, MedWatch alerts). Note any Breakthrough Therapy, Fast Track, Priority Review, or Accelerated Approval designations.",
+      "health-outcomes-synthesizer": "Produce GRADE evidence profiles for key outcomes. Quantify NNT/NNH where data permits. Build benefit-risk frameworks that weigh efficacy against safety signals. Conduct indirect treatment comparisons when head-to-head data is unavailable. Present cost-effectiveness data (QALY, ICER) where available. Identify ongoing trials that may change the evidence landscape."
+    },
+    "synthesisInstructions": "Structure around the PICO framework. Present evidence hierarchically from strongest (systematic reviews) to weakest (case reports). Include forest plot data where meta-analyses are available. Quantify treatment effects with NNT/NNH. Present benefit-risk balance clearly. Identify evidence gaps and ongoing trials that may change the evidence landscape. Disclaimer that analysis is for informational purposes and does not constitute medical advice.",
+    "reportingTone": "Scientific and precise, suitable for medical affairs, clinical development teams, and HTA submission support. Use correct medical terminology with lay explanations where appropriate. Calibrate confidence carefully — avoid overstating conclusions beyond what the evidence supports. Include appropriate caveats about evidence limitations and generalizability."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 20000,
+      "synthesis": 12000,
+      "reporting": 14000
+    }
+  }
+}

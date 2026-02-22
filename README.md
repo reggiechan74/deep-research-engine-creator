@@ -57,6 +57,10 @@ Presets pre-fill the wizard with domain-specific defaults for source hierarchies
 | `--preset academic` | Academic Research | Peer-reviewed sources, systematic review methodology |
 | `--preset osint` | OSINT Investigation | Multi-source correlation, digital footprint analysis |
 | `--preset techdd` | Technical Due Diligence | Patent databases, standards compliance, IP landscape |
+| `--preset cre` | Real Estate & CRE | Property valuations, cap rates, zoning, municipal records |
+| `--preset cyber` | Cybersecurity & Threat Intel | CVE/NVD, MITRE ATT&CK, IOC tracking, attack surface mapping |
+| `--preset medical` | Healthcare & Medical | PubMed, clinical trials, FDA/EMA, GRADE evidence grading |
+| `--preset findd` | Financial Due Diligence | SEC filings, beneficial ownership, litigation, M&A analysis |
 
 Or choose **Custom** during the wizard to build a configuration from scratch.
 
