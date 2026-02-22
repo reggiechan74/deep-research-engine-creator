@@ -1,5 +1,8 @@
 # Deep Research Engine Creator
 
+[![GitHub Release](https://img.shields.io/github/v/release/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/reggiechan74/deep-research-engine-creator/blob/main/LICENSE)
+
 Create domain-specialized deep-research engines as standalone Claude Code plugins.
 
 This meta-plugin interviews you about your research domain, then generates a complete Claude Code plugin with a custom multi-agent research pipeline, domain-specific source hierarchies, quality frameworks, and output templates. You describe what you research; it builds the tooling.
