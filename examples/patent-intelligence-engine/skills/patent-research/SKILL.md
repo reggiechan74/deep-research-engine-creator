@@ -20,6 +20,7 @@ agent definitions, quality standards, and output specifications are defined in t
 ## Usage
 
 - `/research [topic]` -- Standard tier (default): multi-agent pipeline with patent search + prior art analysis
+- `/research [URL]` -- Research starting from a specific webpage (Standard tier)
 - `/research [topic] --quick` -- Quick tier: fast patent lookup with single specialist agent
 - `/research [topic] --deep` -- Deep tier: full 3-agent pipeline including IP landscape mapping
 - `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds for gap closure
@@ -61,6 +62,11 @@ Parse tier from `$ARGUMENTS`:
 - If `--approve` is present, pause after Phase 1 for user approval
 - Otherwise, default to **Standard** tier
 - Strip flag tokens from `$ARGUMENTS` to derive the research topic
+- If topic starts with `http://` or `https://`, treat it as a URL seed
+  - Fetch the page content using WebFetch
+  - Extract topic/title from the page
+  - Use URL as primary seed for recursive web exploration
+  - Derive TOPIC_SLUG from extracted title
 
 ### Derive Configuration
 
@@ -426,6 +432,10 @@ Every Phase 2 research agent MUST:
 11. Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
 12. Apply Global Standards and outline quality standards
 13. Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+14. Recursive web exploration up to 5 levels deep from authoritative seed URLs and alternate seeds — follow citation chains, linked references, and related pages
+15. Document "unanswered questions" — patent-related questions that remain open after search (e.g., "Could not determine current prosecution status for family X")
+16. Document "important absences" — expected patent data not found (e.g., "No patents found from Company Y in this space despite their public R&D announcements")
+17. Run contrarian sweep: actively search for patent invalidation challenges, IPR proceedings, claim construction disputes, and prior art that could narrow or invalidate key patents found during research
 
 ---
 
@@ -623,3 +633,12 @@ should apply intellectual property and patent landscape analysis-specific knowle
 terminology, and analytical frameworks appropriate to this field. All research outputs
 should be relevant and actionable for IP attorneys, technology transfer officers, and
 R&D strategists.
+
+---
+
+## Operational Lessons
+
+Accumulated findings from past research runs using this engine. Update this section after
+each research run review or post-mortem analysis.
+
+No entries yet — update after first research run with `/post-mortem`.

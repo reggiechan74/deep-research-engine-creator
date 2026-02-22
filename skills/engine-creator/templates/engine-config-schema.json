@@ -482,6 +482,13 @@
           "description": "Freeform hook configuration for injecting custom behavior at pipeline stages. Keys are hook point names, values are implementation-specific.",
           "additionalProperties": true
         },
+        "explorationDepth": {
+          "type": "integer",
+          "description": "Maximum depth for recursive web exploration from seed URLs (following citation chains and references)",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 10
+        },
         "mcpServers": {
           "type": "object",
           "description": "MCP (Model Context Protocol) server configurations for external tool integration. Keys are server names, values are server-specific connection configs.",
