@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [1.2.0] - 2026-02-22
 
 ### Added
-- **Verification, Validation & Correction (VVC) system** -- two-pass post-reporting pipeline that verifies draft report claims against cited sources and auto-corrects errors
+- **Verification, Validation & Correction (VVC) system** -- goes beyond simple citations (which can still hallucinate). Two-pass post-reporting pipeline that extracts every factual claim, re-fetches the cited source, and verifies both source credibility and accurate representation. Failed claims are auto-corrected or flagged
   - Phase 4 renamed to "Draft Reporting" with mandatory `[VC]`/`[PO]`/`[IE]` claim tagging
   - Phase 5 (VVC-Verify): extracts verifiable claims, fetches sources, classifies alignment (CONFIRMED/PARAPHRASED/OVERSTATED/UNDERSTATED/DISPUTED/UNSUPPORTED/SOURCE_UNAVAILABLE), produces verification report
   - Phase 6 (VVC-Correct): implements corrections, produces final Comprehensive Report + correction log

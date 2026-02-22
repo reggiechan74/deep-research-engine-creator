@@ -671,12 +671,12 @@ engine configuration (engine-config.json).
 - `{{phase4ReportType}}` -- "draft" with VVC, "final" without
 - `{{phase4OutputFile}}` -- output filename ("Draft_Report.md" with VVC, "Comprehensive_Report.md" without)
 - `{{vvcPhaseLines}}` -- Phase 5-6 lines in the architecture list (empty when VVC disabled)
-- `{{vvcClaimTaxonomyBlock}}` -- Claim Type Taxonomy section with [VC]/[PO]/[IE] definitions and verification scope table (empty when VVC disabled)
+- `{{vvcClaimTaxonomyBlock}}` -- Claim Type Taxonomy section with [VC]/[PO]/[IE] definitions and verification scope table. Lead with the key distinction: citations are just URLs -- they don't prove the AI read the source correctly. VVC verifies both source credibility and accurate representation. (Empty when VVC disabled)
 - `{{vvcClaimTaggingInstructions}}` -- Instructions for the reporting agent to tag claims with [VC]/[PO]/[IE] (empty when VVC disabled)
 - `{{vvcVerifyPhaseBlock}}` -- Complete Phase 5 VVC-Verify section (empty when VVC disabled or tier is quick)
 - `{{vvcCorrectPhaseBlock}}` -- Complete Phase 6 VVC-Correct section (empty when VVC disabled or tier behavior is not "full")
 - `{{vvcFileStructure}}` -- File output entries for VVC artifacts (Draft_Report.md, VVC_Verification_Report.md, VVC_Correction_Log.md)
-- `{{vvcFeatureBullets}}` -- Key Workflow Features bullets for VVC (empty when VVC disabled)
+- `{{vvcFeatureBullets}}` -- Key Workflow Features bullets for VVC. Lead bullet must distinguish claim verification from simple citations: citations can still hallucinate, verified claims can't. (Empty when VVC disabled)
 - `{{vvcBudgetLine}}` -- Token budget line for VVC phase (empty when VVC disabled)
 - `{{vvcSubAgentNote}}` -- Note about VVC specialist in sub-agent list (empty when VVC disabled)
 

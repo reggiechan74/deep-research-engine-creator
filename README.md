@@ -27,7 +27,7 @@ The general-purpose deep research tools opened the door. This walks through it.
 |--|:--:|:--:|:--:|:--:|:--:|
 | **Domain-specific source hierarchy** | 3 domain filters max | Site-restricted search | Google Search + Drive/Gmail | Web + Google Workspace | **5-tier credibility hierarchy, unlimited domains per tier, fully customizable** |
 | **Multi-agent architecture** | Single pipeline | Single pipeline | Single pipeline | Single pipeline | **Configurable multi-agent teams with per-agent specialization, model, and tools** |
-| **Post-report verification (VVC)** | -- | -- | -- | -- | **Automated claim extraction, source re-fetch, alignment classification, and auto-correction** |
+| **Post-report verification (VVC)** | Citations only | Citations only | Citations only | Citations only | **Claim verification: extracts every factual claim, re-fetches the cited source, checks credibility AND accurate representation, auto-corrects errors. Citations can still hallucinate. Verified claims can't.** |
 | **Quality framework** | Generic | Generic | Generic | Generic | **Configurable confidence scoring, evidence thresholds, validation rules, citation standards** |
 | **Report structure** | Fixed format | Fixed (with export to MD/PDF/Word) | Fixed (with Canvas/Audio) | Fixed | **Fully customizable sections, deliverables, and naming per domain** |
 | **Reproducibility** | Ephemeral | Ephemeral | Ephemeral | Ephemeral | **Versionable `engine-config.json` -- same config = same pipeline** |
@@ -38,7 +38,9 @@ The general-purpose deep research tools opened the door. This walks through it.
 | **Built-in search index** | Proprietary crawler | Bing | Google | Web search | Relies on Claude Code tools |
 | **Free tier** | 3/day | Limited | Limited | Limited | Requires Claude Code subscription |
 
-**The tradeoff is intentional.** The SaaS tools optimize for zero-setup convenience. This plugin optimizes for domain depth, verification rigor, and professional control. If you need a quick answer to a general question, use Perplexity. If you need a patent landscape analysis that distinguishes USPTO primary filings from EPO translations, verifies every claim against its cited source, and outputs a report structure your IP counsel expects -- build an engine.
+**The tradeoff is intentional.** The SaaS tools optimize for zero-setup convenience. This plugin optimizes for domain depth, verification rigor, and professional control. If you need a quick answer to a general question, use Perplexity. If you need research where every factual claim is checked for source credibility and accurate representation -- not just decorated with a URL -- build an engine.
+
+> **Why verification matters more than citations:** Every deep research tool cites sources. But a citation is just a URL -- it doesn't mean the AI read it correctly. The model may hallucinate a claim and attach a plausible-looking source after the fact. VVC goes further: it extracts every factual claim from the draft report, re-fetches the cited source, and answers two questions: (1) Is this source credible for this claim? (2) Was the source accurately represented? Claims that fail are auto-corrected or flagged. Citations create confidence. Verification earns it.
 
 ## Installation
 
@@ -139,6 +141,7 @@ Every generated engine includes:
 - A sources command (`/sources`) for inspecting the configured credibility hierarchy
 - Domain-specialized agents with their own search strategies and citation prefixes
 - A quality framework with confidence scoring, evidence thresholds, and validation rules
+- **Claim verification (VVC)** -- not just citations. Every factual claim is extracted, the cited source is re-fetched, and both source credibility and accurate representation are verified. Citations can still hallucinate. Verified claims can't.
 - Structured report output with configurable sections
 
 ## Two Output Modes

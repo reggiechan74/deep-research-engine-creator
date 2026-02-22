@@ -70,7 +70,7 @@ This engine uses a four-tier confidence scoring system (HIGH/MEDIUM/LOW/SPECULAT
 
 ## Verification, Validation & Correction (VVC)
 
-This engine includes a two-pass VVC system that verifies draft report claims against cited sources and auto-corrects errors:
+Every research tool cites sources -- but a citation is just a URL. It doesn't mean the AI read the source correctly. VVC goes beyond citations: it extracts every factual claim, re-fetches the cited source, and checks two things: (1) Is the source credible for this claim? (2) Was the source accurately represented? Claims that fail are auto-corrected or flagged.
 
 - **Claim Tagging:** Phase 4 tags every assertion as `[VC]` (Verifiable Claim), `[PO]` (Professional Opinion), or `[IE]` (Inferred/Extrapolated)
 - **Phase 5 (VVC-Verify):** Extracts `[VC]` claims, fetches cited sources, classifies alignment (CONFIRMED/PARAPHRASED/OVERSTATED/DISPUTED/UNSUPPORTED), recommends corrections
