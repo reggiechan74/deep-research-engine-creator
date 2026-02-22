@@ -27,7 +27,7 @@ The general-purpose deep research tools opened the door. This walks through it.
 |--|:--:|:--:|:--:|:--:|:--:|
 | **Domain-specific source hierarchy** | 3 domain filters max | Site-restricted search | Google Search + Drive/Gmail | Web + Google Workspace | **5-tier credibility hierarchy, unlimited domains per tier, fully customizable** |
 | **Multi-agent architecture** | Single pipeline | Single pipeline | Single pipeline | Single pipeline | **Configurable multi-agent teams with per-agent specialization, model, and tools** |
-| **Post-report verification (VVC)** | Citations only | Citations only | Citations only | Citations only | **Claim verification: extracts every factual claim, re-fetches the cited source, checks credibility AND accurate representation, auto-corrects errors. Citations can still hallucinate. Verified claims can't.** |
+| **Post-report verification (VVC)** | Citations only (37% failure rate -- [Tow Center](https://www.niemanlab.org/2025/03/ai-search-engines-fail-to-produce-accurate-citations-in-over-60-of-tests-according-to-new-tow-center-study/)) | Citations only (89% of incorrect citations stated with confidence) | Citations only (~22% misattribution rate -- [PIES](https://arxiv.org/html/2601.22984)) | Citations only (no post-draft re-verification) | **Claim verification: extracts every factual claim, re-fetches the cited source, checks credibility AND accurate representation, auto-corrects errors. Citations can hallucinate. Verified claims can't.** |
 | **Quality framework** | Generic | Generic | Generic | Generic | **Configurable confidence scoring, evidence thresholds, validation rules, citation standards** |
 | **Report structure** | Fixed format | Fixed (with export to MD/PDF/Word) | Fixed (with Canvas/Audio) | Fixed | **Fully customizable sections, deliverables, and naming per domain** |
 | **Reproducibility** | Ephemeral | Ephemeral | Ephemeral | Ephemeral | **Versionable `engine-config.json` -- same config = same pipeline** |
@@ -40,7 +40,30 @@ The general-purpose deep research tools opened the door. This walks through it.
 
 **The tradeoff is intentional.** The SaaS tools optimize for zero-setup convenience. This plugin optimizes for domain depth, verification rigor, and professional control. If you need a quick answer to a general question, use Perplexity. If you need research where every factual claim is checked for source credibility and accurate representation -- not just decorated with a URL -- build an engine.
 
-> **Why verification matters more than citations:** Every deep research tool cites sources. But a citation is just a URL -- it doesn't mean the AI read it correctly. The model may hallucinate a claim and attach a plausible-looking source after the fact. VVC goes further: it extracts every factual claim from the draft report, re-fetches the cited source, and answers two questions: (1) Is this source credible for this claim? (2) Was the source accurately represented? Claims that fail are auto-corrected or flagged. Citations create confidence. Verification earns it.
+> **Why verification matters more than citations:** A [Columbia University study](https://www.niemanlab.org/2025/03/ai-search-engines-fail-to-produce-accurate-citations-in-over-60-of-tests-according-to-new-tow-center-study/) found AI search engines fail to produce accurate citations **more than 60% of the time**. The citation looks real -- a clickable URL to a real page -- but the claim attached to it may not appear in that source at all. Researchers call this "[hallucination laundering](https://gptzero.me/news/gptzero-perplexity-investigation/)." Specific findings: Perplexity failed 37% of citation tasks (best in class). ChatGPT presented incorrect citations with confidence 89% of the time. Gemini misattributed ~22% of explicit claims. Claude hallucinated metadata (author, title) even when the cited URL was real. **None of these platforms re-fetch sources after drafting to verify accuracy.** VVC does: it extracts every factual claim, re-fetches the cited source, and answers two questions: (1) Is this source credible for this claim? (2) Was the source accurately represented? Claims that fail are auto-corrected or flagged. Citations create confidence. Verification earns it.
+>
+> Sources: [Tow Center / Columbia Journalism Review (2025)](https://www.cjr.org/tow_center/we-compared-eight-ai-search-engines-theyre-all-bad-at-citing-news.php) · [GPTZero: Second-Hand Hallucinations](https://gptzero.me/news/gptzero-perplexity-investigation/) · [PIES Hallucination Taxonomy (arXiv)](https://arxiv.org/html/2601.22984) · [Deakin University Citation Study](https://studyfinds.org/chatgpts-hallucination-problem-fabricated-references/) · [TechCrunch: Claude Legal Citation Incident](https://techcrunch.com/2025/05/15/anthropics-lawyer-was-forced-to-apologize-after-claude-hallucinated-a-legal-citation/)
+
+### Deep Research Benchmarks: Where the Field Stands
+
+A growing number of benchmarks now evaluate deep research agents. The results paint a consistent picture -- even the best systems have significant room to improve:
+
+| Benchmark | Creator | Key Finding |
+|-----------|---------|-------------|
+| [DRACO](https://huggingface.co/datasets/perplexity-ai/draco) | Perplexity | Best system scores 70.5%. Strongest in Law (90.2%), weakest in general knowledge |
+| [DeepResearch Bench II](https://github.com/imlrz/DeepResearch-Bench-II) | Independent (academic) | Even the strongest models satisfy **fewer than 50%** of expert rubrics across 9,430 criteria |
+| [DeepScholar-Bench](https://github.com/guestrin-lab/deepscholar-bench) | Stanford-adjacent | No system exceeds **31% geometric mean** across synthesis, retrieval, and verifiability |
+| [ReportBench](https://github.com/ByteDance-BandAI/ReportBench) | ByteDance | Citation hallucination (fabricated references) identified as a distinct and persistent failure type |
+| [DeepSearchQA](https://huggingface.co/datasets/google/deepsearchqa) | Google DeepMind | 900-prompt benchmark; best system achieves 66.1% on multi-source collation tasks |
+| [DeepHalluBench](https://arxiv.org/html/2601.22984) | Academic | First trajectory-level hallucination evaluation; finds errors cascade from early research stages |
+
+**What these benchmarks don't measure** -- and what generated engines address by default:
+
+- **Post-draft self-verification.** Every benchmark evaluates the final report as-is. No benchmark tests whether the system checks its own work. VVC (enabled by default) adds this layer.
+- **Source credibility ranking.** No benchmark evaluates whether the system distinguishes tier-1 regulatory filings from tier-5 blog posts. The 5-tier credibility hierarchy (configured per engine) addresses this.
+- **Self-correction capability.** No benchmark measures whether a system can fix its own citation errors when detected. VVC Phase 6 auto-corrects or flags failed claims.
+
+**An honest caveat:** This is an engine *factory*, not a single engine. A generated engine's quality depends on how it's configured -- source hierarchies, verification scope, agent specialization. The default configuration is designed to address the gaps these benchmarks expose: VVC enabled, 100% HIGH-confidence verification, 75% MEDIUM, 5-tier source hierarchies, and multi-agent parallel research. But a user who disables VVC and configures a minimal pipeline will get minimal results. The tool provides the structural advantage. The configuration determines whether you use it.
 
 ## Installation
 
@@ -384,6 +407,89 @@ Push a generated engine to a marketplace repository:
 ```
 
 The script validates the engine structure, reads the name and version from `engine-config.json`, clones the marketplace repo, copies the engine, commits, and pushes.
+
+## Benchmarking a Generated Engine
+
+Several open-source benchmarks exist for evaluating deep research agents. You can use them to validate a newly generated engine against published baselines.
+
+### Available Benchmarks
+
+| Benchmark | Best For | Dataset |
+|-----------|----------|---------|
+| [DRACO](https://huggingface.co/datasets/perplexity-ai/draco) | General quality (100 tasks, 10 domains, ~40 rubrics per task) | `huggingface-cli download perplexity-ai/draco` |
+| [ReportBench](https://github.com/ByteDance-BandAI/ReportBench) | Citation accuracy (precision, recall, hallucination rate) | Clone repo |
+| [DeepResearch Bench](https://github.com/Ayanami0730/deep_research_bench) | PhD-level research quality (RACE + FACT metrics) | Clone repo |
+| [DeepScholar-Bench](https://github.com/guestrin-lab/deepscholar-bench) | Academic synthesis (retrieval + verifiability) | Clone repo |
+| [DeepSearchQA](https://huggingface.co/datasets/google/deepsearchqa) | Multi-source collation (900 prompts, 17 fields) | `huggingface-cli download google/deepsearchqa` |
+
+### How to Run a Benchmark
+
+**1. Generate an engine and load it:**
+
+```bash
+# Generate a legal research engine
+claude --plugin-dir ./deep-research-engine-creator
+# Run /create-engine --preset legal, complete the wizard
+
+# Load the generated engine
+claude --plugin-dir ./generated-engines/legal-research-engine
+```
+
+**2. Download a benchmark dataset:**
+
+```bash
+# DRACO (recommended starting point)
+pip install huggingface-hub
+huggingface-cli download perplexity-ai/draco --repo-type dataset --local-dir ./benchmarks/draco
+```
+
+**3. Run benchmark queries through the engine:**
+
+```bash
+# For each benchmark task, invoke the engine's research command
+claude -p "/research [benchmark query] --deep" --plugin-dir ./generated-engines/legal-research-engine
+```
+
+Collect the output reports from the engine's output directory. Each run produces a Comprehensive Report, Bibliography, and (if VVC enabled) a VVC Verification Report and Correction Log.
+
+**4. Score the outputs:**
+
+Each benchmark provides its own evaluation protocol:
+- **DRACO:** LLM-as-judge scoring against per-task rubrics (~40 criteria each)
+- **ReportBench:** Citation precision/recall against arXiv survey gold standards, plus statement and citation hallucination rates
+- **DeepResearch Bench:** RACE (report quality) + FACT (citation accuracy) composite scoring
+
+### Measuring the VVC Delta
+
+The most valuable test you can run is comparing the same engine with and without verification:
+
+| Run | How | What It Shows |
+|-----|-----|---------------|
+| **A: VVC enabled** | Default config (VVC on, 100% HIGH, 75% MEDIUM) | Baseline with verification |
+| **B: VVC disabled** | Edit `engine-config.json`, set `vvc.enabled: false` | Baseline without verification |
+| **A - B** | Compare scores | The measurable value VVC adds to citation accuracy and factual correctness |
+
+This delta is data no other platform can produce -- none of them have a toggle for post-draft verification.
+
+### Domain Specialization Test
+
+The strongest validation of the factory model: test whether domain-specialized engines outperform general-purpose tools on domain-specific tasks.
+
+1. Generate a domain engine (e.g., `--preset legal`)
+2. Run it on that domain's benchmark subset (e.g., DRACO's Law category, where Perplexity scores 90.2%)
+3. Compare to published general-purpose baselines
+
+If a specialized engine outperforms general-purpose tools on its home domain -- even if it underperforms elsewhere -- that validates the core thesis: **specialization beats generalization for professional research**.
+
+### Published Baselines for Comparison
+
+| System | DRACO Score | Notes |
+|--------|-------------|-------|
+| Perplexity Deep Research | 70.5% | Best overall; 90.2% on Law |
+| Gemini Deep Research | 59.0% | -- |
+| OpenAI o3 Deep Research | 52.1% | Slowest (avg 1,808s per task) |
+
+Source: [DRACO benchmark paper (arXiv 2602.11685)](https://arxiv.org/html/2602.11685v1)
 
 ## Requirements
 
