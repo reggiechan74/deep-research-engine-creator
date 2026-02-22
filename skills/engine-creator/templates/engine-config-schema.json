@@ -1,0 +1,589 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/reggiechan74/cc-plugins/deep-research-engine-creator/engine-config-schema.json",
+  "title": "Deep Research Engine Configuration",
+  "description": "Schema for engine-config.json files produced by the engine-creator wizard and consumed by the plugin generator. Defines a complete domain-specialized deep-research engine configuration.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "engineMeta",
+    "sampleQuestions",
+    "scope",
+    "sourceStrategy",
+    "agentPipeline",
+    "qualityFramework",
+    "outputStructure"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Version of this schema format. Used for forward-compatibility checks when the generator reads a config.",
+      "examples": ["1.0"]
+    },
+    "engineMeta": {
+      "type": "object",
+      "description": "Metadata about the generated research engine plugin.",
+      "required": [
+        "name",
+        "displayName",
+        "domain",
+        "audience",
+        "version",
+        "mode",
+        "createdAt",
+        "createdBy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Kebab-case plugin name used for directory naming and internal references.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "examples": ["real-estate-research", "biotech-analyst"]
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Human-readable name shown in UI and documentation.",
+          "examples": ["Real Estate Research Engine", "Biotech Analyst"]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Short description of the research domain this engine covers.",
+          "examples": ["Commercial real estate valuation and market analysis"]
+        },
+        "audience": {
+          "type": "string",
+          "description": "Target users for this research engine.",
+          "examples": ["Real estate investors and analysts", "Biotech venture capitalists"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of this engine configuration.",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "examples": ["1.0.0"]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Deployment mode. 'self-contained' produces a standalone plugin with all files. 'extension' produces an add-on that depends on a base deep-research plugin.",
+          "enum": ["self-contained", "extension"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO 8601 datetime when this configuration was generated.",
+          "format": "date-time",
+          "examples": ["2026-02-21T18:30:00Z"]
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Identifier of the tool and version that generated this configuration.",
+          "examples": ["deep-research-engine-creator/1.0.0"]
+        }
+      }
+    },
+    "sampleQuestions": {
+      "type": "array",
+      "description": "Example research questions that demonstrate the engine's capabilities. Shown to users as starting points and used in generated documentation.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "maxItems": 5,
+      "examples": [
+        [
+          "What is the cap rate trend for Class A office buildings in downtown Toronto?",
+          "Compare industrial vacancy rates across the GTA for the past 3 years.",
+          "What zoning changes are proposed for the King-Spadina area?"
+        ]
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "description": "Defines the boundaries of what this research engine investigates: question types, geography, time horizon, and output format.",
+      "required": [
+        "questionTypes",
+        "geographic",
+        "temporal",
+        "deliverable"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "questionTypes": {
+          "type": "array",
+          "description": "Categories of questions this engine can answer.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["market-analysis", "valuation", "regulatory", "demographic-trends"]
+          ]
+        },
+        "geographic": {
+          "type": "array",
+          "description": "Geographic regions this engine focuses on. Use ISO country codes, region names, or 'global'.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["Canada", "Ontario", "Greater Toronto Area"]
+          ]
+        },
+        "temporal": {
+          "type": "string",
+          "description": "Default time horizon for research queries.",
+          "examples": ["last-5-years", "current", "forward-looking-10-years"]
+        },
+        "deliverable": {
+          "type": "string",
+          "description": "Primary output format the engine produces.",
+          "examples": ["research-report", "briefing-memo", "data-dashboard"]
+        }
+      }
+    },
+    "sourceStrategy": {
+      "type": "object",
+      "description": "Governs where the engine looks for information and how it ranks source credibility.",
+      "required": [
+        "credibilityTiers",
+        "preferredSites",
+        "searchTemplates"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "credibilityTiers": {
+          "type": "object",
+          "description": "Five-tier source credibility hierarchy from most authoritative (tier1) to least (tier5). Agents weight findings by tier during synthesis.",
+          "required": ["tier1", "tier2", "tier3", "tier4", "tier5"],
+          "additionalProperties": false,
+          "properties": {
+            "tier1": {
+              "$ref": "#/$defs/credibilityTier",
+              "description": "Highest credibility: primary/official sources (government databases, regulatory filings, peer-reviewed research)."
+            },
+            "tier2": {
+              "$ref": "#/$defs/credibilityTier",
+              "description": "High credibility: established institutional sources (industry associations, major consultancies)."
+            },
+            "tier3": {
+              "$ref": "#/$defs/credibilityTier",
+              "description": "Moderate credibility: reputable secondary sources (quality journalism, professional publications)."
+            },
+            "tier4": {
+              "$ref": "#/$defs/credibilityTier",
+              "description": "Lower credibility: informal but potentially useful sources (blogs, forums, social media from known experts)."
+            },
+            "tier5": {
+              "$ref": "#/$defs/credibilityTier",
+              "description": "Lowest credibility: unverified or anonymous sources. Require corroboration from higher tiers."
+            }
+          }
+        },
+        "preferredSites": {
+          "type": "array",
+          "description": "Domain names the engine should prioritize in web searches.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["cmhc-schl.gc.ca", "realtor.ca", "statcan.gc.ca"]
+          ]
+        },
+        "excludedSources": {
+          "type": "array",
+          "description": "Domain names or source types the engine should never use.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["wikipedia.org", "reddit.com"]
+          ]
+        },
+        "searchTemplates": {
+          "type": "array",
+          "description": "Reusable search query templates with placeholder patterns. Agents substitute placeholders at runtime.",
+          "items": {
+            "type": "object",
+            "required": ["name", "pattern"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Identifier for this search template.",
+                "examples": ["market-data", "regulatory-filing"]
+              },
+              "pattern": {
+                "type": "string",
+                "description": "Search query template with {placeholders} for runtime substitution.",
+                "examples": ["{property_type} {metric} {geography} site:{preferred_site}"]
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "languageFilters": {
+          "type": "array",
+          "description": "ISO 639-1 language codes to restrict search results. Empty or omitted means no language filtering.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2}$"
+          },
+          "examples": [
+            ["en", "fr"]
+          ]
+        },
+        "geographicFilters": {
+          "type": "array",
+          "description": "Geographic restrictions for search results, complementing the scope.geographic field with search-engine-specific locality hints.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["CA", "US"]
+          ]
+        }
+      }
+    },
+    "agentPipeline": {
+      "type": "object",
+      "description": "Defines the multi-agent research pipeline: which agents exist, what they do, and how they are grouped into research tiers of increasing depth.",
+      "required": [
+        "tiers",
+        "agents"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tiers": {
+          "type": "object",
+          "description": "Research depth tiers. Each tier activates a subset of agents. Higher tiers produce more thorough (and more expensive) research.",
+          "additionalProperties": false,
+          "properties": {
+            "quick": {
+              "$ref": "#/$defs/tierConfig",
+              "description": "Fast, low-cost tier for simple factual lookups. Typically 1-2 agents, no follow-up."
+            },
+            "standard": {
+              "$ref": "#/$defs/tierConfig",
+              "description": "Default tier balancing depth and speed. Multiple agents, optional follow-up round."
+            },
+            "deep": {
+              "$ref": "#/$defs/tierConfig",
+              "description": "Thorough tier for complex questions. Most agents active, follow-up rounds enabled."
+            },
+            "comprehensive": {
+              "$ref": "#/$defs/tierConfig",
+              "description": "Maximum depth tier. All agents active, multiple follow-up rounds, highest token budget."
+            }
+          },
+          "required": ["quick", "standard", "deep", "comprehensive"]
+        },
+        "agents": {
+          "type": "array",
+          "description": "Definitions of all research agents available in this engine. Each agent has a specialized role in the pipeline.",
+          "items": {
+            "$ref": "#/$defs/agentDefinition"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "qualityFramework": {
+      "type": "object",
+      "description": "Rules and standards for ensuring research output quality, including confidence scoring, evidence thresholds, and citation requirements.",
+      "required": [
+        "confidenceScoring",
+        "minimumEvidence",
+        "validationRules",
+        "citationStandard"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "confidenceScoring": {
+          "type": "object",
+          "description": "Definitions for each confidence level. Agents tag every claim with a confidence label based on these criteria.",
+          "required": ["HIGH", "MEDIUM", "LOW", "SPECULATIVE"],
+          "additionalProperties": false,
+          "properties": {
+            "HIGH": {
+              "type": "string",
+              "description": "Criteria for HIGH confidence: what evidence standard must be met.",
+              "examples": ["Multiple tier-1/tier-2 sources agree, with direct data or official records."]
+            },
+            "MEDIUM": {
+              "type": "string",
+              "description": "Criteria for MEDIUM confidence.",
+              "examples": ["At least one tier-1/tier-2 source, corroborated by tier-3 sources."]
+            },
+            "LOW": {
+              "type": "string",
+              "description": "Criteria for LOW confidence.",
+              "examples": ["Only tier-3/tier-4 sources available, or sources conflict."]
+            },
+            "SPECULATIVE": {
+              "type": "string",
+              "description": "Criteria for SPECULATIVE confidence.",
+              "examples": ["Inference or extrapolation from indirect evidence. No direct sources found."]
+            }
+          }
+        },
+        "minimumEvidence": {
+          "type": "string",
+          "description": "Minimum evidence threshold required before including a claim in the report.",
+          "examples": ["At least 2 independent sources, with at least 1 from tier-1 through tier-3."]
+        },
+        "validationRules": {
+          "type": "array",
+          "description": "Rules the synthesis agent applies to validate findings before including them in the report.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            [
+              "Cross-check statistics against official government sources when available.",
+              "Flag any data point older than 2 years as potentially outdated.",
+              "Reject claims sourced exclusively from tier-5 sources."
+            ]
+          ]
+        },
+        "citationStandard": {
+          "type": "string",
+          "description": "Citation format and inline referencing style used in generated reports.",
+          "examples": ["Inline numbered references [1] with full URL bibliography at end of report."]
+        }
+      }
+    },
+    "outputStructure": {
+      "type": "object",
+      "description": "Defines the structure and naming conventions of generated research reports.",
+      "required": [
+        "reportSections",
+        "fileNaming"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "reportSections": {
+          "type": "array",
+          "description": "Ordered list of section headings that appear in every generated report. Agents populate these sections during synthesis.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            [
+              "Executive Summary",
+              "Methodology",
+              "Key Findings",
+              "Analysis",
+              "Confidence Assessment",
+              "Sources & Bibliography"
+            ]
+          ]
+        },
+        "fileNaming": {
+          "type": "string",
+          "description": "Template for naming generated report files. Supports {placeholders} for date, topic, tier, etc.",
+          "examples": ["{date}_{topic_slug}_research_report.md"]
+        },
+        "specialDeliverables": {
+          "type": "array",
+          "description": "Additional output artifacts beyond the main report (e.g., data tables, comparison matrices, executive briefs).",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["comparison-matrix", "executive-brief", "data-appendix"]
+          ]
+        }
+      }
+    },
+    "prompts": {
+      "type": "object",
+      "description": "Optional prompt customizations injected into agent instructions at runtime. Allows fine-tuning agent behavior without modifying the generated skill files.",
+      "additionalProperties": false,
+      "properties": {
+        "globalPreamble": {
+          "type": "string",
+          "description": "Text prepended to every agent's system prompt. Use for domain-wide context or persona instructions.",
+          "examples": ["You are a domain expert in Canadian commercial real estate. Always consider both federal and provincial regulatory contexts."]
+        },
+        "agentOverrides": {
+          "type": "object",
+          "description": "Per-agent prompt overrides keyed by agent ID. Merged into the specific agent's instructions.",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "examples": [
+            {
+              "market-analyst": "Focus on quantitative metrics: cap rates, vacancy rates, absorption rates.",
+              "regulatory-scanner": "Prioritize municipal zoning by-laws and provincial planning legislation."
+            }
+          ]
+        },
+        "synthesisInstructions": {
+          "type": "string",
+          "description": "Additional instructions for the synthesis/reporting agent on how to combine findings.",
+          "examples": ["Weight quantitative findings more heavily than qualitative assessments. Always include a contrarian viewpoint section."]
+        },
+        "reportingTone": {
+          "type": "string",
+          "description": "Desired tone and style for the final report.",
+          "examples": ["Professional and analytical. Avoid jargon where possible. Write for an investor audience."]
+        }
+      }
+    },
+    "advanced": {
+      "type": "object",
+      "description": "Advanced configuration options for power users. Controls iteration limits, token budgets, and extensibility hooks.",
+      "additionalProperties": false,
+      "properties": {
+        "maxIterationsPerQuestion": {
+          "type": "integer",
+          "description": "Maximum number of research-refine cycles per question before forcing synthesis. Higher values produce more thorough results at greater cost.",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 5
+        },
+        "tokenBudgets": {
+          "type": "object",
+          "description": "Approximate token limits for each pipeline phase. Helps control costs. Values are guidelines, not hard caps.",
+          "additionalProperties": false,
+          "properties": {
+            "planning": {
+              "type": "integer",
+              "description": "Token budget for the planning/decomposition phase.",
+              "minimum": 0,
+              "examples": [2000]
+            },
+            "research": {
+              "type": "integer",
+              "description": "Token budget for the research/data-gathering phase.",
+              "minimum": 0,
+              "examples": [15000]
+            },
+            "synthesis": {
+              "type": "integer",
+              "description": "Token budget for the synthesis/analysis phase.",
+              "minimum": 0,
+              "examples": [8000]
+            },
+            "reporting": {
+              "type": "integer",
+              "description": "Token budget for the final report generation phase.",
+              "minimum": 0,
+              "examples": [10000]
+            }
+          }
+        },
+        "hooks": {
+          "type": "object",
+          "description": "Freeform hook configuration for injecting custom behavior at pipeline stages. Keys are hook point names, values are implementation-specific.",
+          "additionalProperties": true
+        },
+        "mcpServers": {
+          "type": "object",
+          "description": "MCP (Model Context Protocol) server configurations for external tool integration. Keys are server names, values are server-specific connection configs.",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "credibilityTier": {
+      "type": "object",
+      "description": "A single credibility tier defining a category of sources and their trust level.",
+      "required": ["name", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name for this credibility tier.",
+          "examples": ["Official/Primary Sources", "Institutional Sources"]
+        },
+        "sources": {
+          "type": "array",
+          "description": "List of source types or specific domains that belong to this tier.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            ["Government databases", "Regulatory filings", "Peer-reviewed journals"]
+          ]
+        }
+      }
+    },
+    "tierConfig": {
+      "type": "object",
+      "description": "Configuration for a research depth tier, specifying which agents participate and whether follow-up rounds are enabled.",
+      "required": ["agents"],
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "type": "array",
+          "description": "Agent IDs activated for this tier. Must reference IDs defined in agentPipeline.agents.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "followUpRound": {
+          "type": "boolean",
+          "description": "Whether agents perform an additional research round to fill gaps found during initial synthesis.",
+          "default": false
+        }
+      }
+    },
+    "agentDefinition": {
+      "type": "object",
+      "description": "Definition of a single research agent in the pipeline.",
+      "required": [
+        "id",
+        "role",
+        "subagentType",
+        "specialization"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this agent, referenced by tier configurations.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "examples": ["market-analyst", "regulatory-scanner", "data-aggregator"]
+        },
+        "role": {
+          "type": "string",
+          "description": "Short role title describing what this agent does.",
+          "examples": ["Market Research Analyst", "Regulatory Scanner", "Data Synthesizer"]
+        },
+        "subagentType": {
+          "type": "string",
+          "description": "Claude Code sub-agent type that determines the agent's base capabilities and tool access.",
+          "enum": ["general-purpose", "expert-instructor", "intelligence-analyst"]
+        },
+        "model": {
+          "type": "string",
+          "description": "Model to use for this agent. 'inherit' uses the calling session's model. Omit to use the engine's default.",
+          "enum": ["sonnet", "opus", "haiku", "inherit"]
+        },
+        "specialization": {
+          "type": "string",
+          "description": "Detailed description of this agent's domain specialization and research approach.",
+          "examples": ["Analyzes market trends, pricing data, and transaction volumes using quantitative methods."]
+        },
+        "tools": {
+          "type": "array",
+          "description": "Additional tool identifiers this agent should have access to beyond the default set.",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["WebSearch", "WebFetch", "Bash"]
+          ]
+        }
+      }
+    }
+  }
+}
