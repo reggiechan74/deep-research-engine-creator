@@ -1,29 +1,30 @@
 ---
-name: Patent Intelligence Research Engine
+name: Patent Intelligence Engine Research Engine
 description: >-
   This skill should be used when the user invokes the /research command or asks about
-  intellectual property and patent landscape analysis. It provides a complete multi-agent
-  research pipeline specialized for patent research.
+  Intellectual property and patent landscape analysis research. It provides a complete multi-agent research pipeline specialized
+  for Intellectual property and patent landscape analysis. The engine conducts wide and deep research using tiered research depth,
+  iterative search refinement, cross-agent coordination, and structured confidence scoring
+  to produce professional-grade research outputs for IP attorneys, technology transfer officers, and R&D strategists.
 version: 1.0.0
 ---
 
-# Patent Intelligence Research Engine
+# Patent Intelligence Engine Research Engine
 
-Launch a comprehensive multi-agent research system specialized for **intellectual property
-and patent landscape analysis** research, serving **IP attorneys, technology transfer
-officers, and R&D strategists**.
+Launch a comprehensive multi-agent research system specialized for **Intellectual property and patent landscape analysis** research,
+serving **IP attorneys, technology transfer officers, and R&D strategists**.
 
-This engine implements a four-phase research pipeline with tier-based depth routing. It is
+This engine implements a five-phase research pipeline with tier-based depth routing. It is
 fully self-contained -- no external research plugin dependencies are required. All protocols,
 agent definitions, quality standards, and output specifications are defined in this file.
 
 ## Usage
 
-- `/research [topic]` -- Standard tier (default): multi-agent pipeline with patent search + prior art analysis
+- `/research [topic]` -- Standard tier (default): 2 agents: Patent Search Specialist, Prior Art Analyst
 - `/research [URL]` -- Research starting from a specific webpage (Standard tier)
-- `/research [topic] --quick` -- Quick tier: fast patent lookup with single specialist agent
-- `/research [topic] --deep` -- Deep tier: full 3-agent pipeline including IP landscape mapping
-- `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds for gap closure
+- `/research [topic] --quick` -- Quick tier: Single-agent lookup using Patent Search Specialist
+- `/research [topic] --deep` -- Deep tier: Full pipeline with 3 agents: Patent Search Specialist, Prior Art Analyst, IP Landscape Mapper
+- `/research [topic] --comprehensive` -- Comprehensive tier: All 3 agents + follow-up round
 - `/research [topic] --outline-only` -- Planning phase only (produces outline, then stops)
 - `/research [topic] --approve` -- Pause for user approval after Phase 1 before proceeding
 
@@ -31,7 +32,7 @@ agent definitions, quality standards, and output specifications are defined in t
 
 ## Research Architecture
 
-This engine implements a **four-phase research system** with tier-based depth routing:
+This engine implements a **five-phase research system** with tier-based depth routing:
 
 1. **Phase 0: Tier Detection** -- Parse flags, configure paths and depth
 2. **Phase 1: Research Planning** -- Strategic framework development and agent task design
@@ -43,10 +44,10 @@ This engine implements a **four-phase research system** with tier-based depth ro
 
 | Tier | Planning | Research Agents | Synthesis | Report | User Gate |
 |------|----------|----------------|-----------|--------|-----------|
-| Quick | No | patent-search-specialist only | No | Inline | No |
+| Quick | No | patent-search-specialist | No | Inline | No |
 | Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Full | --approve only |
 | Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Full | --approve only |
-| Comprehensive | Yes | All 3 agents + follow-up round | Yes | Full | Always |
+| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Full | Always |
 
 ---
 
@@ -91,10 +92,10 @@ followed by every agent in the pipeline.
 ### Confidence Scoring Framework
 
 ```
-HIGH        (3/3): Verified against official patent office databases (USPTO, EPO, WIPO). Patent numbers confirmed as valid with current status checked. Claim analysis based on actual claim text from granted patents. Multiple authoritative sources agree on assignee, dates, and classification.
-MEDIUM      (2/3): Supported by patent analytics platforms or secondary patent databases, corroborated by at least 1 official patent office source. Patent family connections inferred from priority claims and verified where possible. Claim scope assessments are consistent with prosecution history.
-LOW         (1/3): Based on a single commercial patent database, industry report, or news source without verification against official patent office records. Patent status may not be current. Claim analysis based on abstracts rather than full claim text.
-SPECULATIVE (0/3): Based on published patent applications (not yet granted), roadmap announcements of IP strategy, or extrapolation from filing trends. Represents projected IP positions rather than confirmed rights. Includes freedom-to-operate assessments based on pending claims that may change during prosecution.
+HIGH        (●●●): Verified against official patent office databases (USPTO, EPO, WIPO). Patent numbers confirmed as valid with current status checked. Claim analysis based on actual claim text from granted patents. Multiple authoritative sources agree on assignee, dates, and classification.
+MEDIUM      (●●○): Supported by patent analytics platforms or secondary patent databases, corroborated by at least 1 official patent office source. Patent family connections inferred from priority claims and verified where possible. Claim scope assessments are consistent with prosecution history.
+LOW         (●○○): Based on a single commercial patent database, industry report, or news source without verification against official patent office records. Patent status may not be current. Claim analysis based on abstracts rather than full claim text.
+SPECULATIVE (○○○): Based on published patent applications (not yet granted), roadmap announcements of IP strategy, or extrapolation from filing trends. Represents projected IP positions rather than confirmed rights. Includes freedom-to-operate assessments based on pending claims that may change during prosecution.
 ```
 
 **Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
@@ -103,11 +104,11 @@ claims MUST be HIGH confidence or explicitly flagged as exceptions. All patent c
 ### Source Credibility Hierarchy
 
 ```
-Tier 1 (Official Patent Databases):     USPTO PATFT/AppFT (patents.google.com, patft.uspto.gov), EPO Espacenet and Global Patent Index, WIPO PATENTSCOPE and PCT publications, Google Patents with full-text search and classification browsing, National patent office databases (JPO J-PlatPat, KIPO KIPRIS, CNIPA, CIPO)
-Tier 2 (Patent Analytics & Legal):      Patent prosecution histories (USPTO PAIR, EPO Register), Patent litigation databases (PACER, Docket Navigator, Lex Machina), Published patent examiner search reports and office actions, PTAB decisions and inter partes review proceedings, Patent classification systems (CPC, IPC) official documentation
-Tier 3 (Technical & Scientific):        Peer-reviewed technical journals related to the patent domain, Conference proceedings from major technical conferences, Standards body publications (IEEE, ISO, ASTM) relevant to patent claims, Published doctoral dissertations and technical reports, ArXiv preprints and academic working papers with disclosed methodology
-Tier 4 (Industry & Commercial):         Patent analytics platform reports (PatSnap, Orbit Intelligence, Innography), Industry news and trade publications covering patent activity, Company press releases and investor presentations mentioning IP, Technology blog posts from recognized patent attorneys and IP professionals, Patent valuation and licensing market reports
-Tier 5 (Unreliable / Unverified):       Anonymous forum posts and unattributed patent commentary, Marketing materials claiming patent-pending status without application numbers, AI-generated patent summaries without verification against original filings, Unverified patent ownership claims on company websites, Social media discussions about patent disputes without case citations
+Tier 1 (Official Patent Databases):  USPTO PATFT and AppFT (patents.google.com, patft.uspto.gov), European Patent Office (EPO) Espacenet and Global Patent Index, WIPO PATENTSCOPE and PCT publications, Google Patents with full-text search and classification browsing, National patent office databases (JPO J-PlatPat, KIPO KIPRIS, CNIPA, CIPO)
+Tier 2 (Patent Analytics & Legal Sources):  Patent prosecution histories (USPTO PAIR, EPO Register), Patent litigation databases (PACER, Docket Navigator, Lex Machina), Published patent examiner search reports and office actions, PTAB decisions and inter partes review proceedings, Patent classification systems (CPC, IPC) official documentation
+Tier 3 (Technical & Scientific Literature):  Peer-reviewed technical journals related to the patent domain, Conference proceedings from major technical conferences, Standards body publications (IEEE, ISO, ASTM) relevant to patent claims, Published doctoral dissertations and technical reports, ArXiv preprints and academic working papers with disclosed methodology
+Tier 4 (Industry & Commercial Sources):  Patent analytics platform reports (PatSnap, Orbit Intelligence, Innography), Industry news and trade publications covering patent activity, Company press releases and investor presentations mentioning IP, Technology blog posts from recognized patent attorneys and IP professionals, Patent valuation and licensing market reports
+Tier 5 (Unreliable / Unverified):  Anonymous forum posts and unattributed patent commentary, Marketing materials claiming patent-pending status without application numbers, AI-generated patent summaries without verification against original filings, Unverified patent ownership claims on company websites, Social media discussions about patent disputes without case citations
 ```
 
 **Rule:** No HIGH confidence claim can rest solely on Tier 4-5 sources. At minimum,
@@ -117,24 +118,24 @@ one Tier 1-3 source is required for any HIGH confidence assertion.
 
 - **Citation format:** APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available.
 - Use numbered footnotes `[^1]`, `[^2]`, etc. for inline source references
-- Use citation IDs by agent type: `[PS-01]` (patent search), `[PA-01]` (prior art), `[IL-01]` (IP landscape)
+- Use citation IDs by agent type: `[W-01]` (web), `[E-01]` (expert), `[I-01]` (intel)
 - Master bibliography maps IDs to full citations with clickable URLs
 - Do not repeat full citations in chat; use IDs and defer to bibliography files
 - **Evidence rules:** No high-impact claim without 2+ independent sources, or mark as LOW confidence
-- **Adversarial sweep:** Always look for patent invalidation arguments, prosecution history estoppel, expired coverage, and contradictory data
+- **Adversarial sweep:** Always look for refutations, critiques, failure cases, and contradictory data
 - Log contradictions in methodology file
 
 ### Validation Rules
 
-- Verify all patent numbers against official patent office databases (USPTO PATFT/AppFT, EPO Espacenet, WIPO PATENTSCOPE) and confirm current legal status.
-- Confirm patent assignee information is current by checking assignment records -- patents may have been transferred, licensed, or sold.
-- Distinguish between granted patents and pending applications when assessing IP strength and enforceability.
-- Validate CPC and IPC classification codes against official classification schemes to ensure accuracy of landscape mapping.
-- Cross-check patent family connections using priority claim data from multiple patent offices.
-- Verify that cited prior art references are actually relevant to the claims under analysis, not just topically related.
-- Flag any patent status data older than 6 months as potentially outdated -- maintenance fees, assignments, and litigation may have changed status.
-- Assess patent term calculations considering any patent term adjustments (PTA) or terminal disclaimers.
-- Confirm that freedom-to-operate assessments reference specific claim elements, not just patent titles or abstracts.
+1. Verify all patent numbers against official patent office databases (USPTO PATFT/AppFT, EPO Espacenet, WIPO PATENTSCOPE) and confirm current legal status.
+2. Confirm patent assignee information is current by checking assignment records -- patents may have been transferred, licensed, or sold.
+3. Distinguish between granted patents and pending applications when assessing IP strength and enforceability.
+4. Validate CPC and IPC classification codes against official classification schemes to ensure accuracy of landscape mapping.
+5. Cross-check patent family connections using priority claim data from multiple patent offices.
+6. Verify that cited prior art references are actually relevant to the claims under analysis, not just topically related.
+7. Flag any patent status data older than 6 months as potentially outdated -- maintenance fees, assignments, and litigation may have changed status.
+8. Assess patent term calculations considering any patent term adjustments (PTA) or terminal disclaimers.
+9. Confirm that freedom-to-operate assessments reference specific claim elements, not just patent titles or abstracts.
 
 ### Structured Output Standards
 
@@ -158,23 +159,23 @@ one Tier 1-3 source is required for any HIGH confidence assertion.
 
 For each research question, generate a minimum of 4 queries before searching:
 
-1. **Direct query** -- Core patent terminology, technology keywords, and patent numbers
-2. **Synonym variant** -- Alternative technical terms, CPC/IPC classification codes, regional naming conventions
-3. **Adversarial** -- "patent invalidation [X]", "prior art [X]", "[X] patent challenge", "[X] patent expired"
+1. **Direct query** -- Core terminology and primary keywords for the question
+2. **Synonym variant** -- Alternative terms, Intellectual property and patent landscape analysis-specific jargon, regional naming conventions
+3. **Adversarial** -- "problems with [X]", "criticism of [X]", "failure of [X]", "[X] controversy"
 4. **Expert-source targeted** -- `site:` filters for preferred authoritative domains
 
 ### Preferred Sites for Targeted Queries
 
-- `patents.google.com` -- Google Patents (full-text search, classification browsing, family links)
-- `patft.uspto.gov` -- USPTO granted patents full-text database
-- `appft.uspto.gov` -- USPTO published applications full-text database
-- `worldwide.espacenet.com` -- EPO Espacenet worldwide patent search
-- `patentscope.wipo.int` -- WIPO PATENTSCOPE international patent search
-- `epo.org` -- European Patent Office official site and register
-- `scholar.google.com` -- Google Scholar for non-patent literature and prior art
-- `lens.org` -- The Lens open patent and scholarly search
-- `ipo.gov.uk` -- UK Intellectual Property Office
-- `cipo.ic.gc.ca` -- Canadian Intellectual Property Office
+1. patents.google.com
+2. patft.uspto.gov
+3. appft.uspto.gov
+4. worldwide.espacenet.com
+5. patentscope.wipo.int
+6. epo.org
+7. scholar.google.com
+8. lens.org
+9. ipo.gov.uk
+10. cipo.ic.gc.ca
 
 ### Domain-Specific Search Templates
 
@@ -189,7 +190,7 @@ For each research question, generate a minimum of 4 queries before searching:
 - **patent-citation-network**: `"{patent_number}" cited-by references forward-citation backward-citation`
 
 Additional queries may be generated for geographic variants, temporal slices, or
-office-specific databases as the topic demands. All queries must be logged to
+domain-specific databases as the topic demands. All queries must be logged to
 `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md` with timestamps and result counts.
 
 ---
@@ -203,18 +204,17 @@ For each assigned research question:
 
   Pass 1 -- SEARCH: Execute diversified query set (4+ queries per question)
     - Apply Search Query Generation Protocol
-    - Cast wide net across patent databases and source types
+    - Cast wide net across source types and credibility tiers
     - Record all queries and results in Methodology_Log.md
 
   Pass 2 -- ASSESS: Evaluate sufficiency
-    - Are there 2+ independent sources for key patent claims?
-    - Are there unanswered sub-questions (missing jurisdictions, unchecked assignees)?
-    - Are there contradictions needing resolution (conflicting assignee data, status discrepancies)?
+    - Are there 2+ independent sources for key claims?
+    - Are there unanswered sub-questions?
+    - Are there contradictions needing resolution?
     - Score current evidence against Confidence Scoring Framework
 
   Pass 3 -- REFINE (if gaps found):
     - Generate targeted follow-up queries addressing specific gaps
-    - Try alternative classification codes, different patent offices, or date-range adjustments
     - Execute search with refined queries
     - Assess again against sufficiency criteria
     - Max 4 iterations per research question
@@ -253,8 +253,7 @@ To prevent duplicate work and maximize coverage across parallel research agents:
 - Agent produces no useful findings   --> Record gap; synthesis agent prioritizes gap-closing
 - All agents fail on research question --> Flag as UNRESEARCHABLE with explanation
 - Cross-agent contradictions          --> Synthesis runs dedicated reconciliation sub-task
-- Patent number verification fails    --> Flag patent as UNVERIFIED; do not assign HIGH confidence
-- User reports factual error          --> Trigger targeted verification mini-search against official patent office
+- User reports factual error          --> Trigger targeted verification mini-search
 ```
 
 ---
@@ -263,12 +262,12 @@ To prevent duplicate work and maximize coverage across parallel research agents:
 
 The Patent Intelligence Engine research system uses these available sub-agents:
 
-- **research-planning-specialist** (general-purpose) -- Creates systematic research frameworks, decomposes complex patent research questions into agent-specific tasks, and designs the research outline that all downstream agents follow.
-- **patent-search-specialist** (general-purpose, sonnet) -- Conducts comprehensive patent searches across major patent offices using classification codes, keyword strategies, and assignee tracking. Extracts patent data, maps patent families, and tracks prosecution histories.
-- **prior-art-analyst** (expert-instructor, sonnet) -- Analyzes patent claims for novelty and non-obviousness against the prior art landscape using TSM and KSR frameworks. Maps prior art references to specific claim elements.
-- **ip-landscape-mapper** (intelligence-analyst, sonnet) -- Maps patent portfolios by assignee, analyzes filing trends, builds competitive matrices, identifies whitespace opportunities, and assesses freedom-to-operate risks.
-- **synthesis-specialist** (general-purpose) -- Integrates findings from all research agents, resolves contradictions, scores confidence levels, and builds a unified patent intelligence picture.
-- **research-reporting-specialist** (general-purpose) -- Transforms synthesized findings into professional patent intelligence reports with proper structure, citations, and actionable recommendations.
+- research-planning-specialist
+- synthesis-specialist
+- research-reporting-specialist
+- patent-search-specialist (Patent Search Specialist)
+- prior-art-analyst (Prior Art Analyst)
+- ip-landscape-mapper (IP Landscape Mapper)
 
 Each sub-agent type provides different capabilities matched to its pipeline role. The
 planning and synthesis specialists are fixed roles; research agents are domain-specialized
@@ -284,15 +283,14 @@ instructions:
 **Domain:** Intellectual property and patent landscape analysis
 
 **Instructions:**
-- Conduct focused patent search on the topic using official patent databases
+- Conduct focused web research on the topic within the Intellectual property and patent landscape analysis domain
 - Apply Search Query Generation Protocol (minimum 4 query types per question)
 - Apply Iterative Search-Assess-Refine Protocol (max 2 iterations)
 - Apply Global Standards for evidence quality and confidence scoring
 - Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
 - Note source credibility tier (1-5) for each source used
-- For each key patent found, extract: patent number, title, assignee, filing date, grant date, status
 - Produce inline summary directly in chat response (no file output structure needed)
-- Format: `## Summary | ## Key Patents Found (with confidence) | ## Sources | ## Limitations`
+- Format: `## Summary | ## Key Findings (with confidence) | ## Sources | ## Limitations`
 
 After deploying the quick agent, skip all remaining phases.
 
@@ -304,16 +302,16 @@ After deploying the quick agent, skip all remaining phases.
 
 Deploy **research-planning-specialist** with instructions to:
 
-- Analyze patent research topic complexity, scope, and jurisdictional requirements
+- Analyze Intellectual property and patent landscape analysis research topic complexity, scope, and domain requirements
 - Create systematic research framework mapping key investigation areas
 - Build scope grid:
-  - Core research questions (landscape, prior art, FTO, competitive)
-  - Sub-questions and hypotheses about patent ownership, validity, and scope
-  - Dissenting angles and potential invalidity arguments
-  - Geographic slices (which jurisdictions to prioritize) and temporal boundaries
-- Identify optimal patent databases, classification codes, and investigation methods
-- Rank sources: primary patent office databases > analytics platforms > industry reports per the Source Credibility Hierarchy
-- Design specific task assignments for downstream agents by research question, jurisdiction, and technology sub-area to reduce overlap
+  - Core research questions
+  - Sub-questions and hypotheses
+  - Dissenting angles and contrarian viewpoints
+  - Geographic and temporal slices relevant to Intellectual property and patent landscape analysis
+- Identify optimal source types, authorities, and investigation methods
+- Rank sources: primary > secondary > tertiary per the Source Credibility Hierarchy
+- Design specific task assignments for downstream agents by question/region/era/counterposition to reduce overlap
 - Establish quality standards, verification protocols, and synthesis strategies
 - Generate research timeline and dependency mapping
 - Create output specifications and integration protocols
@@ -334,86 +332,29 @@ Deploy **research-planning-specialist** with instructions to:
 Deploy research agents simultaneously per tier configuration. Each agent operates
 independently but coordinates through Shared_Sources.md.
 
-#### Agent: patent-search-specialist
+#### Agent: Patent Search Specialist
 
-Deploy **patent-search-specialist** as a Task sub-agent with the following instructions:
+Deploy **patent-search-specialist** (model: sonnet, type: general-purpose) with specialization:
 
-**Role:** Patent Search Specialist
-**Model:** sonnet
-**Sub-agent type:** general-purpose
+Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions. Extracts key data points: patent numbers, filing dates, grant dates, assignees, inventors, claim counts, and citation metrics.
 
-**Instructions:**
-- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md` AND `BASE_DIR/[TOPIC_SLUG]_Shared_Sources.md` (create Shared_Sources.md if it does not exist)
-- Follow assigned research domains and methodologies from the outline
-- Conduct comprehensive patent searches across USPTO, EPO, WIPO, and other relevant patent offices
-- Use CPC/IPC classification codes, keyword strategies, and assignee tracking to identify relevant patents
-- For each key patent, document: patent number, title, abstract summary, filing date, grant date, current assignee, independent claim count, total claim count, CPC/IPC classifications, and forward citation count
-- Identify patent families by tracing priority claims across jurisdictions
-- Track prosecution history for key patents to assess claim scope evolution and examiner rejections
-- Apply Search Query Generation Protocol (minimum 4 query types per research question)
-- Apply Iterative Search-Assess-Refine Protocol (max 4 iterations per question)
-- Append high-value sources to `Shared_Sources.md` as discovered
-- Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
-- Note source credibility tier (1-5) for each source used
-- Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_patent-search-specialist_Bibliography.md`
-- Save claims table: `BASE_DIR/[TOPIC_SLUG]_Claims_patent-search-specialist.md`
-- Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
-- Apply Global Standards and outline quality standards
-- Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+Search across all major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO as relevant). For each key patent, document: patent number, title, abstract summary, filing date, grant date (or publication date for applications), current assignee, independent claim count, total claim count, CPC/IPC classifications, and forward citation count. Identify patent families by tracing priority claims across jurisdictions. Track prosecution history for key patents to assess claim scope evolution, examiner rejections, and any narrowing amendments.
 
-#### Agent: prior-art-analyst
+#### Agent: Prior Art Analyst
 
-Deploy **prior-art-analyst** as a Task sub-agent with the following instructions (Standard tier and above):
+Deploy **prior-art-analyst** (model: sonnet, type: expert-instructor) with specialization:
 
-**Role:** Prior Art Analyst
-**Model:** sonnet
-**Sub-agent type:** expert-instructor
+Analyzes patent claims for novelty and non-obviousness against the prior art landscape. Applies the Teaching-Suggestion-Motivation (TSM) test and KSR obviousness framework to evaluate patentability. Reviews prosecution histories to understand claim scope evolution and examiner objections. Identifies relevant prior art references including patents, published applications, technical papers, conference proceedings, and commercial products. Assesses claim construction and identifies potential invalidity arguments.
 
-**Instructions:**
-- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md` AND `BASE_DIR/[TOPIC_SLUG]_Shared_Sources.md` (create Shared_Sources.md if it does not exist)
-- Follow assigned research domains and methodologies from the outline
-- Build comprehensive prior art maps including patent prior art, non-patent literature, and commercial prior art
-- Apply TSM (Teaching-Suggestion-Motivation) test and KSR v. Teleflex obviousness framework for patentability assessments
-- Review prosecution histories to understand claim scope evolution and examiner objections
-- Document claim-by-claim mapping between subject patents and identified prior art
-- Assess claim construction and identify potential invalidity arguments
-- Apply Search Query Generation Protocol (minimum 4 query types per research question)
-- Apply Iterative Search-Assess-Refine Protocol (max 4 iterations per question)
-- Append high-value sources to `Shared_Sources.md` as discovered
-- Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
-- Note source credibility tier (1-5) for each source used
-- Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_prior-art-analyst_Bibliography.md`
-- Save claims table: `BASE_DIR/[TOPIC_SLUG]_Claims_prior-art-analyst.md`
-- Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
-- Apply Global Standards and outline quality standards
-- Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+For each technology area under investigation, build a comprehensive prior art map including: (1) patent prior art -- earlier patents and published applications with relevant claims, (2) non-patent literature -- technical papers, conference proceedings, standards documents, (3) commercial prior art -- products or services publicly available before the priority date. Apply the TSM (Teaching-Suggestion-Motivation) framework and KSR v. Teleflex obviousness analysis where assessing patentability. Document claim-by-claim mapping between subject patents and identified prior art.
 
-#### Agent: ip-landscape-mapper
+#### Agent: IP Landscape Mapper
 
-Deploy **ip-landscape-mapper** as a Task sub-agent with the following instructions (Deep tier and above):
+Deploy **ip-landscape-mapper** (model: sonnet, type: intelligence-analyst) with specialization:
 
-**Role:** IP Landscape Mapper
-**Model:** sonnet
-**Sub-agent type:** intelligence-analyst
+Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.
 
-**Instructions:**
-- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md` AND `BASE_DIR/[TOPIC_SLUG]_Shared_Sources.md` (create Shared_Sources.md if it does not exist)
-- Follow assigned research domains and methodologies from the outline
-- Map patent portfolios by assignee, filing trends over time, geographic distribution, and technology clusters
-- Build competitive portfolio matrices comparing key players across portfolio size, claim breadth, geographic spread, remaining patent life, and citation impact
-- Identify whitespace opportunities in CPC/IPC classification space where filing density is low
-- Assess freedom-to-operate risks by mapping potentially blocking patent claims against the subject technology
-- Create filing trend timelines and assignee ranking tables
-- Apply Search Query Generation Protocol (minimum 4 query types per research question)
-- Apply Iterative Search-Assess-Refine Protocol (max 4 iterations per question)
-- Append high-value sources to `Shared_Sources.md` as discovered
-- Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
-- Note source credibility tier (1-5) for each source used
-- Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_ip-landscape-mapper_Bibliography.md`
-- Save claims table: `BASE_DIR/[TOPIC_SLUG]_Claims_ip-landscape-mapper.md`
-- Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
-- Apply Global Standards and outline quality standards
-- Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+Build a comprehensive IP landscape showing: filing trends over time by year, top assignees ranked by patent count and claim breadth, geographic filing patterns across major jurisdictions, and technology cluster mapping using CPC classification hierarchies. Create competitive portfolio matrices comparing key players across dimensions: portfolio size, average claim count, geographic spread, average remaining patent life, and citation impact. Identify whitespace regions in the CPC/IPC classification space where filing density is low relative to commercial activity. Assess freedom-to-operate risks by mapping potentially blocking patent claims against the subject technology.
 
 #### Common Agent Requirements
 
@@ -424,7 +365,7 @@ Every Phase 2 research agent MUST:
 3. Apply Search Query Generation Protocol (minimum 4 query types per research question)
 4. Apply Iterative Search-Assess-Refine Protocol (max 4 iterations per question)
 5. Append high-value sources to `Shared_Sources.md` as discovered
-6. Apply domain-specific focus: patent data extraction, prior art mapping, landscape analysis, and FTO risk assessment as assigned
+6. Apply domain-specific focus: Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions. Extracts key data points: patent numbers, filing dates, grant dates, assignees, inventors, claim counts, and citation metrics.; Analyzes patent claims for novelty and non-obviousness against the prior art landscape. Applies the Teaching-Suggestion-Motivation (TSM) test and KSR obviousness framework to evaluate patentability. Reviews prosecution histories to understand claim scope evolution and examiner objections. Identifies relevant prior art references including patents, published applications, technical papers, conference proceedings, and commercial products. Assesses claim construction and identifies potential invalidity arguments.; Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.
 7. Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
 8. Note source credibility tier (1-5) for each source used
 9. Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md`
@@ -433,9 +374,9 @@ Every Phase 2 research agent MUST:
 12. Apply Global Standards and outline quality standards
 13. Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
 14. Recursive web exploration up to 5 levels deep from authoritative seed URLs and alternate seeds — follow citation chains, linked references, and related pages
-15. Document "unanswered questions" — patent-related questions that remain open after search (e.g., "Could not determine current prosecution status for family X")
-16. Document "important absences" — expected patent data not found (e.g., "No patents found from Company Y in this space despite their public R&D announcements")
-17. Run contrarian sweep: actively search for patent invalidation challenges, IPR proceedings, claim construction disputes, and prior art that could narrow or invalidate key patents found during research
+15. Document "unanswered questions" — research questions that remain open or partially answered after exhausting search iterations
+16. Document "important absences" — information you expected to find based on the domain and topic but could not locate (negative evidence is itself evidence)
+17. Run contrarian sweep: actively search for refutations, critiques, failure cases, and contradictory data for key claims found during research — do not only search for confirming evidence
 
 ---
 
@@ -447,11 +388,11 @@ instructions to:
 - **FIRST ACTION**: Read the research outline file `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
 - Compare planned research coverage against actual research execution
 - Read ALL agent output files: results, claims tables, bibliographies, shared sources
-- Integrate findings from all research agents into coherent patent intelligence framework
-- Cross-reference patent data across agents: verify patent numbers, assignees, dates, and status are consistent
+- Integrate findings from all research agents into coherent knowledge framework
+- Cross-reference facts and claims across multiple independent sources
 - Mark claims with confidence scores using the Confidence Scoring Framework
-- Resolve contradictions and inconsistencies in research findings (conflicting assignee data, status discrepancies, different claim counts)
-- Generate meta-insights and higher-level implications for IP strategy
+- Resolve contradictions and inconsistencies in research findings
+- Generate meta-insights and higher-level implications
 - Create unified understanding from fragmented information streams
 - Note gaps between planned and executed research for the reporting agent
 - Structure the analysis to support strategic IP decisions. Lead with the patent landscape overview showing the competitive environment. Present filing trend data with clear temporal patterns. Build competitive matrices that enable side-by-side portfolio comparison. For FTO assessments, clearly map the relationship between identified patent claims and the subject technology, using a risk-rating system (High/Medium/Low) for each potentially blocking patent. Quantify IP risks where possible: number of potentially blocking patents, years of remaining patent life, geographic coverage gaps, and litigation history of key patent holders. Identify actionable whitespace opportunities with supporting evidence from the landscape analysis.
@@ -467,7 +408,7 @@ instructions to:
 After synthesis completion, deploy the **research-reporting-specialist** with instructions to:
 
 - Reference original research objectives and report specifications from the outline
-- Transform synthesized findings into comprehensive professional patent intelligence report
+- Transform synthesized findings into comprehensive professional report
 - Create executive summary with key findings and strategic recommendations
 - Develop structured content with logical flow and narrative coherence
 - Include actionable implementation guidelines and practical applications
@@ -477,24 +418,24 @@ After synthesis completion, deploy the **research-reporting-specialist** with in
 
 The final report MUST include these sections in order:
 
-1. **Executive Summary** -- Key findings, strategic implications, and top-level recommendations in 500 words or fewer
-2. **Patent Landscape Overview** -- Technology domain definition, scope of analysis, filing trend summary, key statistics
-3. **Key Patent Families** -- Detailed analysis of the most significant patent families including claims, assignees, geographic coverage, and citation impact
-4. **Claims Analysis** -- Independent claim mapping, claim breadth assessment, prosecution history highlights, and claim scope evolution
-5. **Prior Art Assessment** -- Prior art landscape summary, key references identified, TSM/KSR analysis results, and patentability opinions
-6. **Competitive Portfolio Matrix** -- Side-by-side comparison of key assignee portfolios across standard dimensions (size, breadth, geography, remaining life, citations)
-7. **Freedom-to-Operate Assessment** -- Identified blocking patents, risk ratings (High/Medium/Low/Clear), claim-to-technology mapping, and recommended mitigation strategies
-8. **Whitespace & Opportunity Analysis** -- Under-patented technology segments, geographic gaps, expiring foundational patents, and strategic filing recommendations
-9. **IP Risk Matrix** -- Consolidated risk assessment table with likelihood, impact, and recommended actions for each identified IP risk
-10. **Recommendations** -- Prioritized strategic recommendations for IP decision-makers, organized by timeframe (immediate, short-term, long-term)
-11. **Methodology** -- Research approach, databases searched, classification codes used, agent pipeline description, and limitations
-12. **Bibliography** -- Consolidated master bibliography with patent-specific citations and clickable URLs
+1. Executive Summary
+2. Patent Landscape Overview
+3. Key Patent Families
+4. Claims Analysis
+5. Prior Art Assessment
+6. Competitive Portfolio Matrix
+7. Freedom-to-Operate Assessment
+8. Whitespace & Opportunity Analysis
+9. IP Risk Matrix
+10. Recommendations
+11. Methodology
+12. Bibliography
 
 #### Citation Requirements
 
 - **USE FOOTNOTES**: Include numbered footnote citations throughout the report: `[^1]`, `[^2]`, etc.
 - Place footnotes at end of each major section with full citations and clickable URLs
-- Use APA 7th Edition with patent-specific extensions format throughout
+- Use APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available. format throughout
 - **BIBLIOGRAPHY CONSOLIDATION**: Create master bibliography file: `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`
 - Read all agent bibliography files and consolidate
 - Deduplicate using Bibliography Deduplication Rules (below)
@@ -508,7 +449,6 @@ The final report MUST include these sections in order:
 - Document any deviations from planned research approach
 - Add limitations/risks section and "so what" analysis tied to decision impact
 - Note any deviations from planned approach identified during synthesis
-- Include disclaimer: "This patent intelligence report is provided for informational purposes only and does not constitute legal advice. Consult with a registered patent attorney for formal legal opinions on patentability, validity, or freedom-to-operate."
 - Save report to `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md`
 - Output format (500 tokens or fewer in chat): `## Executive Brief | ## Key Findings (with IDs + confidence) | ## Recommendations | ## Limitations/Risks | ## Files Written`
 
@@ -552,9 +492,8 @@ File naming follows the convention: {date}_{topic_slug}_patent_intelligence.md
 - **Confidence scoring on every claim** using the four-tier framework (HIGH/MEDIUM/LOW/SPECULATIVE)
 - **Source credibility hierarchy** enforces evidence quality -- no HIGH confidence claim on Tier 4-5 sources alone
 - **Tier-based depth routing** matches research effort to topic complexity
-- **Domain specialization** -- all agents operate within patent intelligence context, applying IP-specific knowledge and source preferences
+- **Domain specialization** -- all agents operate within Intellectual property and patent landscape analysis context, applying field-specific knowledge and source preferences
 - **Structured output standards** ensure consistent, parseable research artifacts across all agents
-- **Patent-specific validation** -- patent numbers verified against official databases, status confirmed, claim text referenced
 
 ---
 
@@ -565,35 +504,26 @@ File naming follows the convention: {date}_{topic_slug}_patent_intelligence.md
 - Use numbered footnotes for immediate source reference: `[^1]`, `[^2]`, etc.
 - Sequential numbering per document (not per section)
 - Place footnote markers immediately after relevant statements
-- Example: `Samsung SDI holds 47 granted patents in solid-state electrolyte compositions[^1].`
-
-### Patent-Specific Citation Format
-
-- **Granted patents**: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name].
-- **Published applications**: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date].
-- **PCT applications**: Inventor(s), Title, WO [number], Filed [date], Published [date], Designated States.
-- Example: `Smith, J., & Lee, K., Solid-State Electrolyte Composition, U.S. Patent No. 11,234,567, Filed Jan. 15, 2020, Granted Mar. 1, 2022, Assignee: Samsung SDI Co., Ltd.`
+- Example: `According to the report[^1], the market grew at 15% CAGR.`
 
 ### Footnote Placement
 
 - Place footnotes at the end of each major section for immediate context
-- Use APA 7th Edition with patent-specific extensions format in footnotes with clickable URLs
+- Use APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available. format in footnotes with clickable URLs
 - Cross-reference master bibliography when applicable
 
 ### Master Bibliography
 
-- All citations follow APA 7th Edition with patent-specific extensions format with clickable URLs
+- All citations follow APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available. format with clickable URLs
 - Include complete source information with access dates
-- Organize by source type: (1) Granted Patents, (2) Published Applications, (3) Patent Analytics, (4) Technical Literature, (5) Other Sources
-- Secondary organization by credibility tier within each source type
+- Organize by source type and credibility tier
 - Cross-reference footnote numbers where sources appear in reports
 - Include source attribution indicating which agent discovered each source
 
 ### Bibliography Deduplication Rules
 
 - Same URL --> merge, keep earliest discovery timestamp
-- Same patent number from different databases --> merge, prefer official patent office source
-- Same content, different URLs --> note both, mark canonical (prefer official patent office)
+- Same content, different URLs --> note both, mark canonical
 - Different editions/versions --> keep most recent unless historical context needed
 - Conflicting information from same source --> note both dates and what changed
 
@@ -607,14 +537,9 @@ mismatches from undermining research quality.
 
 ### Verification Mode: spot-check
 
-**Spot-Check Mode:** After Phase 2 research completes, randomly select 30% of HIGH-confidence
-citations (minimum 5 citations). For each selected citation:
-1. Verify URL resolves (HTTP 200)
-2. Confirm source title/author matches citation
-3. Check publication date is within freshness threshold
-4. Flag any discrepancies in the verification report
+Verify a random sample of HIGH-confidence citations (minimum 3 or 20% of HIGH citations, whichever is greater). Record verification results in Methodology_Log.md.
 
-### Probe on Discovery: enabled
+### Probe on Discovery: true
 
 When probe-on-discovery is enabled, each Phase 2 research agent must:
 - Verify source URL resolves (HTTP 200) immediately when found
@@ -622,7 +547,7 @@ When probe-on-discovery is enabled, each Phase 2 research agent must:
 - Attempt archive.org fallback if configured: `https://web.archive.org/web/*/[URL]`
 - This prevents wasted analysis on sources that cannot be independently verified
 
-### URL Liveness Checking: enabled
+### URL Liveness Checking: true
 
 When enabled, the reporting agent (Phase 4) or a dedicated verification pass must:
 - Check every cited URL in the master bibliography resolves
@@ -638,20 +563,19 @@ Sources older than the freshness threshold are flagged (not automatically exclud
 
 ### Dead Link Handling: archive-fallback
 
-When a cited URL returns non-200 status:
-1. Attempt Wayback Machine retrieval: `https://web.archive.org/web/*/[URL]`
-2. If archived version found, update citation with archive URL and note: "[Accessed via Wayback Machine, archived YYYY-MM-DD]"
-3. If no archive found, flag citation as UNVERIFIABLE
-4. UNVERIFIABLE sources cannot be sole basis for HIGH confidence claims — downgrade or find alternative source
+Attempt Wayback Machine retrieval at https://web.archive.org/web/*/[URL]. If archived version found, use it and note [ARCHIVED: date] in bibliography. If not found, mark as [DEAD LINK].
 
-### Content-Claim Matching: disabled
+### Content-Claim Matching: false
 
-Content-claim matching is not enabled for this engine. Claims are verified through
-the standard multi-source corroboration process defined in the Confidence Scoring Framework.
+When enabled (token-expensive):
+- For each HIGH confidence claim, fetch the cited source
+- Verify the claim accurately reflects the source content
+- Flag mismatches as: CONFIRMED (exact match), PARAPHRASED (reasonable interpretation), DISPUTED (source says something different), UNSUPPORTED (claim not found in source)
+- Record results in the verification report
 
 ### Citation Verification Report
 
-Verification reporting is enabled with scope: HIGH-confidence sources only.
+Generate a standalone Citation Verification Report. Scope: high-confidence-only. Include summary statistics, per-citation verification table, issues found, and remediation recommendations.
 
 When verification reporting is enabled, generate:
 `BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md`
@@ -671,7 +595,7 @@ Report structure:
 ### Verification Details
 | Citation ID | URL | Status | Freshness | Content Match | Notes |
 |-------------|-----|--------|-----------|---------------|-------|
-| [PS-01] | url | ALIVE/DEAD/REDIRECT | Current/Stale(YYYY) | N/A | ... |
+| [W-01] | url | ALIVE/DEAD/REDIRECT | Current/Stale(YYYY) | N/A or CONFIRMED/DISPUTED | ... |
 
 ### Issues Found
 [List any dead links, stale sources, content mismatches, or unverifiable claims]
@@ -700,9 +624,9 @@ Reporting:      12000 tokens output max
 - Always read the outline first; then load only the question-specific files/notes needed
 - Use structured outputs (tables, bullet summaries, query logs) instead of long prose to minimize token footprint
 - Chunk long-source notes: summarize per source immediately after reading; store extended quotes in per-source appendices if needed
-- Use citation IDs (`[PS-01]`, `[PA-01]`, `[IL-01]`) and refer to them instead of repeating full citations
+- Use citation IDs (`[W-01]`, `[E-01]`, `[I-01]`) and refer to them instead of repeating full citations
 - For long runs, operate in passes: (1) initial sweep + notes, (2) synthesis of top claims/gaps, (3) targeted follow-up on gaps, resetting context to only outline + top notes each pass
-- When a patent document is large, capture a condensed abstract, key claims, and classification codes; keep raw text out of the main context
+- When a document is large, capture a condensed abstract, key data points, and contradictions; keep raw text out of the main context
 - Encourage tool-side chunked reading (page/section-level) and avoid reloading full documents once summarized
 
 ---
@@ -713,10 +637,9 @@ You are conducting patent intelligence analysis to the standard expected by a se
 
 This preamble applies to all agents in the pipeline. Every research action, source
 evaluation, and analytical judgment should be informed by this domain context. Agents
-should apply intellectual property and patent landscape analysis-specific knowledge,
-terminology, and analytical frameworks appropriate to this field. All research outputs
-should be relevant and actionable for IP attorneys, technology transfer officers, and
-R&D strategists.
+should apply Intellectual property and patent landscape analysis-specific knowledge, terminology, and analytical frameworks
+appropriate to this field. All research outputs should be relevant and actionable for
+IP attorneys, technology transfer officers, and R&D strategists.
 
 ---
 
@@ -726,3 +649,84 @@ Accumulated findings from past research runs using this engine. Update this sect
 each research run review or post-mortem analysis.
 
 No entries yet — update after first research run with `/post-mortem`.
+
+When no lessons have been recorded yet, include this placeholder text:
+"No entries yet — update after first research run with `/post-mortem`."
+
+---
+
+## Placeholder Reference
+
+This section documents all template variables used in this skill file. When the engine
+generator processes this template, each placeholder is replaced with values from the
+engine configuration (engine-config.json).
+
+### Engine Metadata
+- `{{engineName}}` -- kebab-case plugin name for directory and file naming
+- `{{engineDisplayName}}` -- human-readable engine name for display
+- `{{engineVersion}}` -- semantic version of the engine configuration
+- `{{domain}}` -- short description of the research domain
+- `{{audience}}` -- target users for this research engine
+
+### Scope Configuration
+- `{{standardTierDescription}}` -- description of standard tier capabilities
+- `{{quickTierDescription}}` -- description of quick tier capabilities
+- `{{deepTierDescription}}` -- description of deep tier capabilities
+- `{{comprehensiveTierDescription}}` -- description of comprehensive tier capabilities
+
+### Source Strategy
+- `{{tier1Name}}` / `{{tier1Sources}}` -- Tier 1 credibility definition
+- `{{tier2Name}}` / `{{tier2Sources}}` -- Tier 2 credibility definition
+- `{{tier3Name}}` / `{{tier3Sources}}` -- Tier 3 credibility definition
+- `{{tier4Name}}` / `{{tier4Sources}}` -- Tier 4 credibility definition
+- `{{tier5Name}}` / `{{tier5Sources}}` -- Tier 5 credibility definition
+- `{{additionalSearchTemplates}}` -- domain-specific search query templates
+- `{{preferredSites}}` -- prioritized domains for web searches
+
+### Agent Pipeline
+- `{{tierConfigTable}}` -- markdown table of tier configurations
+- `{{quickAgentId}}` -- agent ID used for the quick tier
+- `{{agentDeploymentBlocks}}` -- per-agent deployment instructions
+- `{{subAgentList}}` -- list of available sub-agent types
+- `{{agentSpecialization}}` -- domain-specific agent focus areas
+
+### Quality Framework
+- `{{confidenceHigh}}` -- criteria for HIGH confidence scoring
+- `{{confidenceMedium}}` -- criteria for MEDIUM confidence scoring
+- `{{confidenceLow}}` -- criteria for LOW confidence scoring
+- `{{confidenceSpeculative}}` -- criteria for SPECULATIVE confidence scoring
+- `{{minimumEvidence}}` -- minimum evidence threshold for claim inclusion
+- `{{validationRules}}` -- validation rules applied during synthesis
+- `{{citationStandard}}` -- citation format and referencing style
+
+### Output Structure
+- `{{reportSections}}` -- ordered list of report section headings
+- `{{fileStructure}}` -- per-agent file output entries
+- `{{fileNaming}}` -- file naming convention template
+
+### Prompts
+- `{{globalPreamble}}` -- domain-wide context prepended to all agent prompts
+- `{{synthesisInstructions}}` -- additional instructions for the synthesis agent
+- `{{reportingTone}}` -- desired tone and style for the final report
+
+### Advanced Configuration
+- `{{maxIterations}}` -- maximum research-refine cycles per question
+- `{{explorationDepth}}` -- maximum depth for recursive web exploration from seed URLs
+- `{{planningBudget}}` -- token budget for planning phase
+- `{{researchBudget}}` -- token budget for research phase (per agent)
+- `{{synthesisBudget}}` -- token budget for synthesis phase
+- `{{reportingBudget}}` -- token budget for reporting phase
+
+### Citation Management
+- `{{verificationMode}}` -- source verification depth (none, spot-check, comprehensive)
+- `{{verificationModeInstructions}}` -- expanded instructions for the selected verification mode
+- `{{urlLivenessCheck}}` -- whether to verify URL resolution
+- `{{contentClaimMatching}}` -- whether to verify claims match source content
+- `{{sourceFreshnessThreshold}}` -- age threshold for flagging stale sources
+- `{{deadLinkHandling}}` -- how to handle dead/unreachable URLs
+- `{{deadLinkInstructions}}` -- expanded instructions for the selected dead link strategy
+- `{{probeOnDiscovery}}` -- whether to verify sources immediately when found
+- `{{verificationReportConfig}}` -- verification report generation instructions
+
+### Operational
+- `{{operationalLessons}}` -- accumulated post-mortem findings from past research runs

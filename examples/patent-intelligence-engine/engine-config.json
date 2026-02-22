@@ -7,12 +7,11 @@
     "audience": "IP attorneys, technology transfer officers, and R&D strategists",
     "version": "1.0.0",
     "mode": "self-contained",
-    "createdAt": "2026-02-21T19:00:00-05:00",
+    "createdAt": "2026-02-21T21:54:02-05:00",
     "createdBy": "deep-research-engine-creator/1.0.0",
     "description": "A domain-specialized research engine for intellectual property and patent landscape analysis",
     "author": {
-      "name": "Deep Research Engine Creator",
-      "email": ""
+      "name": "Deep Research Engine Creator"
     },
     "keywords": ["patent", "intellectual-property", "landscape-analysis", "prior-art", "freedom-to-operate"]
   },
@@ -169,7 +168,7 @@
         "subagentType": "general-purpose",
         "model": "sonnet",
         "specialization": "Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions. Extracts key data points: patent numbers, filing dates, grant dates, assignees, inventors, claim counts, and citation metrics.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "prior-art-analyst",
@@ -177,7 +176,7 @@
         "subagentType": "expert-instructor",
         "model": "sonnet",
         "specialization": "Analyzes patent claims for novelty and non-obviousness against the prior art landscape. Applies the Teaching-Suggestion-Motivation (TSM) test and KSR obviousness framework to evaluate patentability. Reviews prosecution histories to understand claim scope evolution and examiner objections. Identifies relevant prior art references including patents, published applications, technical papers, conference proceedings, and commercial products. Assesses claim construction and identifies potential invalidity arguments.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       },
       {
         "id": "ip-landscape-mapper",
@@ -185,7 +184,7 @@
         "subagentType": "intelligence-analyst",
         "model": "sonnet",
         "specialization": "Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.",
-        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },
