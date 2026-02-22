@@ -21,6 +21,25 @@ So I built this. Not a single domain engine, but a **factory that generates them
 
 The general-purpose deep research tools opened the door. This walks through it.
 
+## How It Compares
+
+|  | Perplexity Deep Research | ChatGPT Deep Research | Gemini Deep Research | Claude Research | **Engine Creator** |
+|--|:--:|:--:|:--:|:--:|:--:|
+| **Domain-specific source hierarchy** | 3 domain filters max | Site-restricted search | Google Search + Drive/Gmail | Web + Google Workspace | **5-tier credibility hierarchy, unlimited domains per tier, fully customizable** |
+| **Multi-agent architecture** | Single pipeline | Single pipeline | Single pipeline | Single pipeline | **Configurable multi-agent teams with per-agent specialization, model, and tools** |
+| **Post-report verification (VVC)** | -- | -- | -- | -- | **Automated claim extraction, source re-fetch, alignment classification, and auto-correction** |
+| **Quality framework** | Generic | Generic | Generic | Generic | **Configurable confidence scoring, evidence thresholds, validation rules, citation standards** |
+| **Report structure** | Fixed format | Fixed (with export to MD/PDF/Word) | Fixed (with Canvas/Audio) | Fixed | **Fully customizable sections, deliverables, and naming per domain** |
+| **Reproducibility** | Ephemeral | Ephemeral | Ephemeral | Ephemeral | **Versionable `engine-config.json` -- same config = same pipeline** |
+| **Transparency** | Closed source | Closed source | Closed source | Closed source | **Fully open source -- every prompt, rule, and template is readable and editable** |
+| **Domain presets** | -- | -- | -- | -- | **20 presets (Legal, OSINT, CRE, AML, Biotech, etc.) + custom from scratch** |
+| **Ownership** | SaaS | SaaS | SaaS | SaaS | **Self-contained plugins you own, version-control, and share** |
+| **Setup required** | None | None | None | None | Claude Code + plugin install + wizard |
+| **Built-in search index** | Proprietary crawler | Bing | Google | Web search | Relies on Claude Code tools |
+| **Free tier** | 3/day | Limited | Limited | Limited | Requires Claude Code subscription |
+
+**The tradeoff is intentional.** The SaaS tools optimize for zero-setup convenience. This plugin optimizes for domain depth, verification rigor, and professional control. If you need a quick answer to a general question, use Perplexity. If you need a patent landscape analysis that distinguishes USPTO primary filings from EPO translations, verifies every claim against its cited source, and outputs a report structure your IP counsel expects -- build an engine.
+
 ## Installation
 
 Install directly from GitHub:
