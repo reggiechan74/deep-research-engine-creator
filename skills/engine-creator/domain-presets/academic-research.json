@@ -1,0 +1,196 @@
+{
+  "presetName": "Academic Research",
+  "presetDescription": "Pre-configured for systematic literature review, meta-analysis preparation, and academic research synthesis across disciplines. Suitable for dissertation literature reviews, grant proposal background research, and evidence-based policy analysis. Optimized for peer-reviewed source verification with APA 7th citation standards.",
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Peer-Reviewed Research",
+        "sources": [
+          "Journals indexed in Google Scholar with verified peer review",
+          "PubMed/MEDLINE indexed articles",
+          "JSTOR archived journals",
+          "Web of Science indexed publications",
+          "Scopus indexed articles",
+          "Cochrane systematic reviews and meta-analyses"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Publications",
+        "sources": [
+          "University press books (Oxford, Cambridge, MIT, Harvard, Stanford)",
+          "Edited academic volumes from recognized publishers",
+          "Major conference proceedings (ACM, IEEE, NeurIPS, AAAI, ICML)",
+          "National Academies Press publications",
+          "WHO, UNESCO, and World Bank research reports"
+        ]
+      },
+      "tier3": {
+        "name": "Pre-Prints & Working Papers",
+        "sources": [
+          "arXiv pre-prints",
+          "SSRN working papers",
+          "NBER working papers",
+          "Conference workshop papers",
+          "Technical reports from university research groups",
+          "Dissertation repositories (ProQuest, EThOS)"
+        ]
+      },
+      "tier4": {
+        "name": "Educational & Reference",
+        "sources": [
+          "Textbooks from academic publishers",
+          "Wikipedia articles (as starting points only, never as primary citations)",
+          "Educational websites from recognized institutions (.edu domains)",
+          "Course materials and lecture notes from top-tier universities",
+          "Encyclopedia entries (Stanford Encyclopedia of Philosophy, etc.)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Predatory journals (Beall's list and successors)",
+          "Unreferenced personal blogs",
+          "Social media posts and threads",
+          "Self-published books without peer review",
+          "Content mills and essay writing services"
+        ]
+      }
+    },
+    "preferredSites": [
+      "scholar.google.com",
+      "pubmed.ncbi.nlm.nih.gov",
+      "jstor.org",
+      "arxiv.org",
+      "ssrn.com",
+      "semanticscholar.org",
+      "sciencedirect.com",
+      "nature.com",
+      "science.org",
+      "doi.org"
+    ],
+    "excludedSources": [
+      "researchgate.net/publication",
+      "academia.edu"
+    ],
+    "searchTemplates": [
+      {
+        "name": "literature-search",
+        "pattern": "\"{research_topic}\" {methodology_keywords} site:{preferred_site}"
+      },
+      {
+        "name": "systematic-review",
+        "pattern": "\"{research_question}\" systematic review OR meta-analysis {year_range}"
+      },
+      {
+        "name": "citation-trace",
+        "pattern": "\"{cited_paper_title}\" OR \"{author_name}\" {research_area}"
+      },
+      {
+        "name": "methodology-search",
+        "pattern": "\"{method_name}\" {discipline} methodology framework validation"
+      },
+      {
+        "name": "replication-check",
+        "pattern": "\"{study_title}\" replication OR reproducibility OR \"failed to replicate\""
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["literature-search-specialist"]
+      },
+      "standard": {
+        "agents": ["literature-search-specialist", "methodological-reviewer"]
+      },
+      "deep": {
+        "agents": ["literature-search-specialist", "methodological-reviewer", "meta-analysis-specialist"]
+      },
+      "comprehensive": {
+        "agents": ["literature-search-specialist", "methodological-reviewer", "meta-analysis-specialist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "literature-search-specialist",
+        "role": "Literature Search Specialist",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Conducts systematic literature searches across academic databases using Boolean operators, MeSH terms, and controlled vocabulary. Identifies seminal papers, high-impact recent publications, and citation networks. Applies PRISMA-style screening criteria to filter results by relevance, quality, and recency.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "methodological-reviewer",
+        "role": "Methodological Reviewer",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Evaluates research methodology quality across quantitative, qualitative, and mixed-methods studies. Assesses sample sizes, study designs (RCT, cohort, case-control, cross-sectional), statistical approaches, internal and external validity, and potential biases. Applies domain-appropriate quality assessment tools (Cochrane Risk of Bias, Newcastle-Ottawa Scale, GRADE framework).",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "meta-analysis-specialist",
+        "role": "Meta-Analysis & Synthesis Specialist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes findings across multiple studies to identify patterns, contradictions, and research gaps. Performs narrative synthesis and prepares frameworks for quantitative meta-analysis (effect sizes, heterogeneity, publication bias). Maps the evolution of theoretical frameworks and identifies paradigm shifts, emerging consensus, and areas of active debate.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Supported by multiple peer-reviewed studies (tier-1) with consistent findings, robust methodologies (large sample sizes, appropriate designs), and successful replication. Represents established scientific consensus.",
+      "MEDIUM": "Supported by at least 1 peer-reviewed study from a reputable journal, corroborated by authoritative publications (tier-2). Methodology is sound but may have limitations (small sample, single geography, etc.).",
+      "LOW": "Based on pre-prints, working papers, or tier-3 sources without peer-reviewed corroboration. Findings may be preliminary, contested, or from studies with significant methodological limitations.",
+      "SPECULATIVE": "Based on theoretical extrapolation, expert opinion without empirical backing, or emerging research not yet replicated. May represent frontier hypotheses or nascent research areas."
+    },
+    "minimumEvidence": "All empirical claims require peer-reviewed citation. Theoretical claims require attribution to published academic work. Statistical claims must reference the original study with sample size and methodology noted. Claims about scientific consensus require evidence from systematic reviews or multiple independent research groups.",
+    "validationRules": [
+      "Verify that cited studies are published in journals indexed by major databases (Web of Science, Scopus, PubMed).",
+      "Check for retractions or corrections using Retraction Watch database.",
+      "Assess study methodology: note sample size, study design, statistical power, and potential biases.",
+      "Flag pre-prints and working papers as not yet peer-reviewed.",
+      "Check whether key findings have been replicated by independent research groups.",
+      "Identify potential conflicts of interest in funded research (industry sponsorship, author affiliations).",
+      "Reject claims sourced exclusively from predatory journals or unreferenced sources.",
+      "Note the recency of cited research and flag if the field has seen significant developments since publication."
+    ],
+    "citationStandard": "APA 7th Edition (or Chicago Author-Date where discipline conventions prefer it). Inline author-date citations (Author, Year) with full reference list. Include DOI for all available entries. For pre-prints, note the repository and submission date. Distinguish between peer-reviewed and non-peer-reviewed sources in the bibliography."
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Literature Review",
+      "Theoretical Framework",
+      "Methodology Assessment",
+      "Key Findings",
+      "Research Gaps & Contradictions",
+      "Future Directions",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_academic_review.md"
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting academic research to the standard expected for publication in a top-tier peer-reviewed journal. Intellectual rigor and methodological transparency are paramount. Every empirical claim must be traceable to specific studies with clear methodology. Distinguish between established findings, emerging evidence, and theoretical speculation. When summarizing research, always note the study design, sample characteristics, and key limitations. Maintain academic objectivity: present competing theories and contradictory findings fairly rather than selectively citing supporting evidence.",
+    "agentOverrides": {
+      "literature-search-specialist": "Conduct searches using structured Boolean queries with appropriate subject headings and controlled vocabulary. Prioritize systematic reviews and meta-analyses when available. Track citation chains forward and backward from seminal papers. Document your search strategy (databases searched, terms used, filters applied) for methodological transparency.",
+      "methodological-reviewer": "Apply appropriate quality assessment frameworks for each study type. For RCTs, assess randomization, blinding, attrition, and intention-to-treat analysis. For observational studies, evaluate confounding, selection bias, and measurement validity. For qualitative research, assess credibility, transferability, dependability, and confirmability.",
+      "meta-analysis-specialist": "Map the landscape of findings across studies. Identify patterns in effect sizes, note sources of heterogeneity, and assess potential publication bias. Build a conceptual framework showing how different theoretical perspectives relate to empirical findings. Highlight the most important research gaps where additional evidence would have the greatest impact."
+    },
+    "synthesisInstructions": "Organize findings thematically rather than study-by-study. Build a narrative that shows the evolution of understanding in the field. When studies conflict, analyze possible explanations (methodological differences, population differences, temporal factors). Clearly distinguish between what is well-established, what is emerging, and what remains unknown. End with actionable research gaps that could guide future investigation.",
+    "reportingTone": "Academic and scholarly, suitable for inclusion in a peer-reviewed literature review or grant proposal. Precise, evidence-based, and balanced. Use appropriate disciplinary terminology but define specialized terms. Maintain the distinction between correlation and causation. Write for an informed academic audience that values methodological rigor and intellectual honesty."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 20000,
+      "synthesis": 12000,
+      "reporting": 14000
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "presetName": "Market Intelligence",
+  "presetDescription": "Pre-configured for market research, competitive analysis, and industry intelligence. Suitable for market sizing, competitive landscape mapping, trend analysis, and strategic opportunity assessment. Optimized for data-driven analysis with multiple independent source verification.",
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Market Data",
+        "sources": [
+          "SEC filings (10-K, 10-Q, 8-K, S-1, proxy statements)",
+          "Annual reports and investor presentations",
+          "Government statistics (Bureau of Labor Statistics, Census Bureau, Statistics Canada)",
+          "Central bank publications (Federal Reserve, Bank of Canada)",
+          "SEDAR+ corporate filings (Canada)",
+          "Patent and trademark office databases"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Analysis",
+        "sources": [
+          "McKinsey Global Institute reports",
+          "Deloitte Insights and industry outlooks",
+          "BCG Henderson Institute publications",
+          "Gartner research and Magic Quadrants",
+          "Major investment bank research (Goldman Sachs, Morgan Stanley, JP Morgan)",
+          "IBISWorld industry reports",
+          "Statista verified market data",
+          "Forrester Research reports"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Commentary",
+        "sources": [
+          "Trade publications (specific to target industry)",
+          "Industry conference proceedings and keynotes",
+          "Expert analyst blogs with established track records",
+          "Professional association research papers",
+          "Pitchbook and Crunchbase verified data"
+        ]
+      },
+      "tier4": {
+        "name": "General Business",
+        "sources": [
+          "Bloomberg news articles",
+          "Wall Street Journal reporting",
+          "Financial Times coverage",
+          "Reuters business news",
+          "General news articles about companies or markets"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Company marketing materials and promotional content",
+          "Vendor press releases with unverified claims",
+          "Social media hype and influencer opinions",
+          "Unattributed market size estimates",
+          "Anonymous industry forum posts"
+        ]
+      }
+    },
+    "preferredSites": [
+      "sec.gov",
+      "bloomberg.com",
+      "statista.com",
+      "ibisworld.com",
+      "bls.gov",
+      "census.gov",
+      "sedarplus.ca",
+      "gartner.com",
+      "mckinsey.com",
+      "pitchbook.com"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "market-sizing",
+        "pattern": "\"{industry}\" market size revenue {geography} {year} site:{preferred_site}"
+      },
+      {
+        "name": "competitive-landscape",
+        "pattern": "\"{company}\" OR \"{competitor}\" market share {industry} {year}"
+      },
+      {
+        "name": "sec-filing-search",
+        "pattern": "\"{company}\" 10-K annual report {topic} site:sec.gov"
+      },
+      {
+        "name": "industry-trend",
+        "pattern": "\"{industry}\" trends forecast growth drivers {year_range}"
+      },
+      {
+        "name": "economic-data",
+        "pattern": "{economic_indicator} {geography} data {time_period} site:{preferred_site}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["market-data-researcher"]
+      },
+      "standard": {
+        "agents": ["market-data-researcher", "industry-analyst"]
+      },
+      "deep": {
+        "agents": ["market-data-researcher", "industry-analyst", "competitive-intelligence-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["market-data-researcher", "industry-analyst", "competitive-intelligence-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "market-data-researcher",
+        "role": "Market Data Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative market data from primary sources including SEC filings, government statistics, and authoritative industry databases. Excels at extracting financial metrics, growth rates, and market size figures, and reconciling data points across multiple sources to establish reliable baselines.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "industry-analyst",
+        "role": "Industry Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes industry structure, dynamics, and trends using frameworks like Porter's Five Forces, value chain analysis, and industry lifecycle models. Identifies macroeconomic drivers, regulatory impacts, and technology disruption vectors. Translates raw market data into actionable strategic insights and forward-looking assessments.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "competitive-intelligence-mapper",
+        "role": "Competitive Intelligence Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Maps competitive landscapes by analyzing company positioning, strategic moves, product portfolios, and financial performance across market participants. Builds competitive matrices, identifies market white spaces, and assesses barriers to entry. Synthesizes fragmented intelligence into structured competitive frameworks and strategic opportunity maps.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Supported by 2+ independent primary data sources (SEC filings, government statistics, or verified industry databases) with consistent figures. Data is within the past 2 years.",
+      "MEDIUM": "Supported by at least 1 primary source corroborated by authoritative analysis (tier-2 sources). Minor discrepancies between sources have been identified and explained.",
+      "LOW": "Based on a single source, or on tier-3/tier-4 sources without primary data corroboration. Data may be older than 2 years or from adjacent markets requiring extrapolation.",
+      "SPECULATIVE": "Projections or estimates derived from trend extrapolation, analogical reasoning from adjacent markets, or expert opinion without quantitative backing."
+    },
+    "minimumEvidence": "All market size and growth claims require 2+ independent data sources. Revenue figures for public companies must reference SEC filings or equivalent regulatory disclosures. Industry-wide statistics require at least 1 government or major research firm source.",
+    "validationRules": [
+      "Cross-check market size figures across at least 2 independent sources and note any material discrepancies.",
+      "Validate that all financial data references the most recent available reporting period.",
+      "Flag any data point older than 2 years as potentially outdated and note the vintage.",
+      "Verify company-specific claims against SEC filings or official investor communications.",
+      "Ensure CAGR calculations specify the base and terminal years and source methodology.",
+      "Reject market sizing claims sourced exclusively from vendor marketing materials or press releases.",
+      "Distinguish between total addressable market (TAM), serviceable addressable market (SAM), and serviceable obtainable market (SOM) when market sizing."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Financial filings cited with company name, filing type, filing date, and SEC accession number where available."
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Market Overview",
+      "Competitive Landscape",
+      "Market Sizing & Growth",
+      "Trend Analysis",
+      "Customer Segmentation",
+      "Strategic Opportunities",
+      "Risk Assessment",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_market_intelligence.md",
+    "specialDeliverables": [
+      "competitive-matrix",
+      "market-sizing-model",
+      "trend-timeline"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting market intelligence research to the standard expected by a senior strategy team at a Fortune 500 company. Every quantitative claim must be sourced and verifiable. Distinguish clearly between historical data, current metrics, and forward projections. When market estimates vary between sources, acknowledge the range and explain the methodology differences driving the variance. Always consider the perspective of both incumbents and disruptors when analyzing competitive dynamics.",
+    "agentOverrides": {
+      "market-data-researcher": "Prioritize primary quantitative data: revenue figures from SEC filings, employment data from BLS, demographic data from Census Bureau. When using third-party market estimates, always note the methodology and date. Reconcile conflicting data points explicitly rather than choosing one silently.",
+      "industry-analyst": "Apply structured analytical frameworks (Porter's Five Forces, PESTLE, value chain) where appropriate. Focus on identifying the 3-5 most impactful trends shaping the industry over the next 3-5 years. Quantify trends where possible rather than relying on qualitative descriptions.",
+      "competitive-intelligence-mapper": "Build detailed competitive profiles including market position, revenue scale, growth trajectory, strategic focus areas, and recent moves (M&A, product launches, partnerships). Identify market white spaces and underserved segments. Assess barriers to entry and switching costs."
+    },
+    "synthesisInstructions": "Lead with the most actionable insights. Quantify opportunities and risks where possible using data from the research phase. Present a balanced view that acknowledges both opportunities and threats. Include a clear 'so what' for each major finding. When data conflicts, present the range and your assessment of which estimate is most reliable and why.",
+    "reportingTone": "Professional and analytical, suitable for C-suite and board-level audiences. Data-driven with clear visualization callouts. Avoid jargon where possible; define industry-specific terms on first use. Write for decision-makers who need to act on the intelligence, not just understand it."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "presetName": "Legal Research",
+  "presetDescription": "Pre-configured for legal research across case law, statutes, regulations, and judicial interpretation. Suitable for litigation support, regulatory compliance analysis, and legal memoranda preparation. Optimized for multi-jurisdictional analysis with Bluebook citation standards.",
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Legal Sources",
+        "sources": [
+          "Westlaw case databases",
+          "LexisNexis legal research platform",
+          "CanLII (Canadian Legal Information Institute)",
+          "PACER (Public Access to Court Electronic Records)",
+          "Government legislation databases (congress.gov, laws-lois.justice.gc.ca)",
+          "Official court opinions and orders",
+          "Federal and state/provincial registers"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Legal Commentary",
+        "sources": [
+          "Law review journals (Harvard Law Review, Yale Law Journal, Stanford Law Review)",
+          "Practical Law (Thomson Reuters)",
+          "Legal treatises and restatements",
+          "American Law Institute publications",
+          "Bar association practice guides",
+          "Law commission reports"
+        ]
+      },
+      "tier3": {
+        "name": "Expert Legal Analysis",
+        "sources": [
+          "SCOTUSblog",
+          "Volokh Conspiracy (Reason)",
+          "Lawfare blog",
+          "Bar association publications and newsletters",
+          "CLE (Continuing Legal Education) materials",
+          "Law firm client alerts from Am Law 100 firms",
+          "Legal podcast transcripts from recognized experts"
+        ]
+      },
+      "tier4": {
+        "name": "General Legal Information",
+        "sources": [
+          "News coverage of legal matters (Reuters Legal, Law360)",
+          "Wikipedia legal articles",
+          "Legal encyclopedia entries (Nolo, FindLaw)",
+          "General news reporting on court decisions"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Social media legal opinions",
+          "Anonymous legal forums",
+          "Unattributed legal advice websites",
+          "AI-generated legal summaries without source verification",
+          "Reddit legal advice threads"
+        ]
+      }
+    },
+    "preferredSites": [
+      "canlii.ca",
+      "westlaw.com",
+      "lexisnexis.com",
+      "supremecourt.gov",
+      "law.cornell.edu",
+      "congress.gov",
+      "laws-lois.justice.gc.ca",
+      "courtlistener.com",
+      "scotusblog.com",
+      "pacer.gov"
+    ],
+    "excludedSources": [
+      "avvo.com/legal-answers",
+      "reddit.com/r/legaladvice"
+    ],
+    "searchTemplates": [
+      {
+        "name": "case-law-search",
+        "pattern": "\"{legal_issue}\" {jurisdiction} court decision site:{preferred_site}"
+      },
+      {
+        "name": "statute-lookup",
+        "pattern": "{statute_name} {section_number} {jurisdiction} legislation text"
+      },
+      {
+        "name": "legal-commentary",
+        "pattern": "\"{legal_doctrine}\" law review analysis {year_range}"
+      },
+      {
+        "name": "regulatory-search",
+        "pattern": "{regulation_topic} {agency} rule regulation {jurisdiction}"
+      },
+      {
+        "name": "precedent-search",
+        "pattern": "\"{case_name}\" cited precedent subsequent history"
+      }
+    ],
+    "languageFilters": ["en", "fr"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["case-law-researcher"]
+      },
+      "standard": {
+        "agents": ["case-law-researcher", "statutory-analyst"]
+      },
+      "deep": {
+        "agents": ["case-law-researcher", "statutory-analyst", "legal-precedent-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["case-law-researcher", "statutory-analyst", "legal-precedent-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "case-law-researcher",
+        "role": "Case Law Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Conducts comprehensive case law searches across multiple jurisdictions, identifying relevant court decisions, analyzing holdings and dicta, and tracking the evolution of legal doctrines through judicial opinions. Skilled at identifying controlling authority versus persuasive authority across federal and state/provincial courts.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "statutory-analyst",
+        "role": "Statutory & Regulatory Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Specializes in legislative analysis including statutory construction, regulatory interpretation, and legislative history research. Maps the interplay between primary legislation, delegated regulations, and agency guidance documents to provide comprehensive regulatory landscape assessments.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "legal-precedent-mapper",
+        "role": "Legal Precedent Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Performs citation network analysis to map how legal precedents have been applied, distinguished, or overruled across jurisdictions and time periods. Identifies emerging legal trends, circuit splits, and areas where the law is unsettled. Synthesizes complex multi-jurisdictional legal landscapes into structured analytical frameworks.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Supported by binding authority (controlling case law or applicable statute) from the relevant jurisdiction, confirmed through primary legal databases. Multiple consistent judicial interpretations exist.",
+      "MEDIUM": "Supported by persuasive authority (non-binding case law, secondary jurisdiction rulings, or authoritative legal commentary) with no conflicting binding authority identified.",
+      "LOW": "Based on limited authority, analogical reasoning from adjacent legal areas, or sources from significantly different jurisdictions. Binding authority on point has not been identified.",
+      "SPECULATIVE": "Legal inference or extrapolation from general principles without case law or statutory support. May reflect emerging legal theories not yet tested in court."
+    },
+    "minimumEvidence": "All legal claims require at least 1 primary case or statute citation. Claims about legal trends or doctrinal shifts require at least 2 supporting authorities from the relevant jurisdiction.",
+    "validationRules": [
+      "Verify that all cited statutes are current and have not been repealed, amended, or superseded.",
+      "Confirm that cited cases have not been overruled, reversed, or significantly limited by subsequent decisions.",
+      "Validate jurisdictional accuracy: ensure cited authority is from or applicable to the target jurisdiction.",
+      "Cross-check legislative references against official government databases (congress.gov, laws-lois.justice.gc.ca, state legislature sites).",
+      "Flag any case older than 10 years as potentially outdated unless it represents settled law or landmark authority.",
+      "Identify and disclose any circuit splits, conflicting appellate authority, or areas of legal uncertainty.",
+      "Reject claims sourced exclusively from tier-4 or tier-5 sources without corroboration from primary legal materials."
+    ],
+    "citationStandard": "Bluebook (21st Edition) citation format for U.S. sources; McGill Guide (10th Edition) for Canadian sources. Inline citations use footnote-style numbered references [1] with full case citations (party names, reporter volume, page, court, year) in the bibliography. Statutes cited with full title, section, and jurisdiction."
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Jurisdictional Analysis",
+      "Case Law Review",
+      "Statutory Framework",
+      "Judicial Interpretation",
+      "Comparative Analysis",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_legal_research_memo.md"
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting rigorous legal research to the standard expected of a senior associate at a major law firm. Accuracy is paramount: every legal assertion must be traceable to primary authority. Distinguish clearly between binding authority and persuasive authority. When analyzing case law, always note the court level, jurisdiction, and year. When statutory provisions are discussed, cite the exact section and note the version or amendment date. If the law is unsettled or evolving, say so explicitly rather than presenting one interpretation as definitive. Always consider both majority and minority positions where they exist.",
+    "agentOverrides": {
+      "case-law-researcher": "Focus on identifying the most recent controlling authority in the target jurisdiction. When multiple courts have addressed the issue, map the weight of authority. Always check for pending appeals or cert petitions that could affect precedential value.",
+      "statutory-analyst": "Trace the legislative history where relevant, including committee reports and floor statements that illuminate legislative intent. Map the full regulatory ecosystem: enabling statute, implementing regulations, and agency guidance or interpretive bulletins.",
+      "legal-precedent-mapper": "Build a citation map showing how key precedents have been cited, applied, distinguished, or criticized. Identify the strongest and weakest links in any chain of authority. Highlight any pending cases that could reshape the precedential landscape."
+    },
+    "synthesisInstructions": "Structure the analysis as a balanced legal memorandum. Present the strongest arguments on each side of the issue before reaching conclusions. When the law is unclear, present the range of reasonable interpretations with an assessment of which is most likely to prevail. Always identify risks and qualifications to any conclusion.",
+    "reportingTone": "Professional legal memorandum style suitable for partner review. Precise, analytical, and objective. Avoid advocacy language unless specifically analyzing arguments. Use terms of art correctly and define specialized legal concepts on first use."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 18000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

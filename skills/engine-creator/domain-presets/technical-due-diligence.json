@@ -1,0 +1,203 @@
+{
+  "presetName": "Technical Due Diligence",
+  "presetDescription": "Pre-configured for technology assessment, patent landscape analysis, and technical due diligence investigations. Suitable for M&A technology evaluation, IP portfolio assessment, standards compliance analysis, and competitive technology benchmarking. Optimized for patent verification and technical specification accuracy.",
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Technical Data",
+        "sources": [
+          "Patent databases (USPTO, EPO, WIPO, Google Patents, CIPO)",
+          "Standards bodies publications (IEEE, ISO, NIST, W3C, IETF RFCs)",
+          "Government technical reports (NIST, NSF, DOE, NRC)",
+          "Official product specifications and datasheets from manufacturers",
+          "Peer-reviewed technical journals (IEEE Transactions, ACM journals)"
+        ]
+      },
+      "tier2": {
+        "name": "Technical Specifications",
+        "sources": [
+          "Vendor technical documentation and API references",
+          "Published whitepapers with methodology disclosure",
+          "Independent benchmark reports (SPEC, TPC, MLPerf)",
+          "IETF RFCs and Internet Drafts",
+          "Technical standards in development (draft ISO, IEEE working groups)"
+        ]
+      },
+      "tier3": {
+        "name": "Expert Community",
+        "sources": [
+          "Developer documentation and official SDK guides",
+          "Public GitHub repositories with verified authorship",
+          "Conference talks from recognized venues (Strange Loop, QCon, USENIX, SIGMOD, KDD)",
+          "Technical blogs from recognized domain experts (staff engineers, CTO blogs)",
+          "Open-source project wikis and design documents"
+        ]
+      },
+      "tier4": {
+        "name": "General Technical",
+        "sources": [
+          "Stack Overflow accepted answers with high vote counts",
+          "Tech news publications (Ars Technica, IEEE Spectrum, The Register)",
+          "Tutorial sites and documentation aggregators",
+          "Technology review articles and product comparisons"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Marketing materials and vendor sales collateral",
+          "Unsubstantiated benchmark claims without methodology",
+          "Anonymous technical forum posts",
+          "Vendor-sponsored comparison reports without disclosed methodology",
+          "AI-generated technical content without expert review"
+        ]
+      }
+    },
+    "preferredSites": [
+      "patents.google.com",
+      "uspto.gov",
+      "github.com",
+      "ieee.org",
+      "nist.gov",
+      "w3.org",
+      "ietf.org",
+      "epo.org",
+      "wipo.int",
+      "arxiv.org"
+    ],
+    "excludedSources": [
+      "g2.com",
+      "trustradius.com",
+      "capterra.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "patent-search",
+        "pattern": "\"{technology_keyword}\" {classification_code} patent site:{preferred_site}"
+      },
+      {
+        "name": "patent-family",
+        "pattern": "\"{patent_number}\" family continuation divisional priority"
+      },
+      {
+        "name": "standards-compliance",
+        "pattern": "\"{standard_name}\" {version} compliance requirements specification"
+      },
+      {
+        "name": "technical-architecture",
+        "pattern": "\"{technology_name}\" architecture design specification {version}"
+      },
+      {
+        "name": "benchmark-search",
+        "pattern": "\"{technology_name}\" benchmark performance comparison {metric} {year}"
+      },
+      {
+        "name": "ip-landscape",
+        "pattern": "\"{technology_area}\" patent landscape assignee filing trend {year_range}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["patent-search-specialist"]
+      },
+      "standard": {
+        "agents": ["patent-search-specialist", "technology-assessor"]
+      },
+      "deep": {
+        "agents": ["patent-search-specialist", "technology-assessor", "ip-landscape-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["patent-search-specialist", "technology-assessor", "ip-landscape-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "patent-search-specialist",
+        "role": "Patent Search Specialist",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "technology-assessor",
+        "role": "Technology Assessor",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Evaluates technology maturity, architecture quality, and standards compliance. Assesses technology readiness levels (TRL), identifies technical debt indicators, and evaluates scalability, security, and performance characteristics against industry benchmarks. Compares implementation approaches against best practices and identifies potential technical risks including vendor lock-in, obsolescence, and architectural limitations.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "ip-landscape-mapper",
+        "role": "IP Landscape Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes patent data, technical standards, and competitive technology intelligence into comprehensive IP landscape assessments. Maps patent filing trends, identifies key assignees and inventors, and assesses freedom-to-operate risks. Builds technology comparison matrices and patent family trees that visualize the competitive IP environment. Identifies potential licensing opportunities, infringement risks, and white space for innovation.",
+        "tools": ["Read", "Write", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified through official patent databases or standards body publications. Technical claims confirmed by independent benchmarks with disclosed methodology. Multiple authoritative sources agree on specifications and performance characteristics.",
+      "MEDIUM": "Supported by vendor technical documentation corroborated by at least 1 independent source (expert review, published benchmark, or peer-reviewed analysis). Technical specifications are internally consistent.",
+      "LOW": "Based on a single vendor source, community documentation, or tier-3/tier-4 sources without independent verification. Technical claims are plausible but not independently benchmarked.",
+      "SPECULATIVE": "Based on roadmap announcements, patent applications (not granted), or extrapolation from current technical capabilities. Represents projected rather than demonstrated performance."
+    },
+    "minimumEvidence": "All patent claims require patent number verification against official patent office databases. Technical performance claims require at least 1 independent benchmark or peer-reviewed evaluation. Standards compliance claims require reference to specific standard versions and sections.",
+    "validationRules": [
+      "Verify all patent numbers against official patent office databases (USPTO, EPO, WIPO) and confirm current status (active, expired, abandoned).",
+      "Validate technical specifications against the most current version of referenced standards.",
+      "Cross-check benchmark claims against independent testing methodologies (SPEC, TPC, MLPerf) where applicable.",
+      "Confirm patent assignee information is current (patents may have been transferred or licensed).",
+      "Flag any technology claims based solely on marketing materials or vendor sales documentation.",
+      "Verify that cited RFCs and standards are current and not superseded by newer versions.",
+      "Assess open-source dependencies for license compatibility and maintenance status.",
+      "Distinguish between granted patents and pending applications when assessing IP strength."
+    ],
+    "citationStandard": "APA 7th Edition with patent-specific extensions. Patents cited as: Inventor(s), Patent Title, Patent Number, Filing Date, Grant Date, Assignee. Standards cited as: Standards Body, Standard Number:Year, Title, Section. Inline numbered references [1] with full bibliography. Include patent office URLs and DOIs where available."
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Technology Assessment",
+      "Patent Landscape",
+      "Standards Compliance",
+      "Architecture Review",
+      "Competitive Technology Analysis",
+      "IP Risk Matrix",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_tech_due_diligence.md",
+    "specialDeliverables": [
+      "patent-family-tree",
+      "technology-comparison-matrix",
+      "standards-compliance-checklist"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting technical due diligence to the standard expected by a principal engineer or VP of Engineering evaluating a technology acquisition or strategic partnership. Technical accuracy is paramount: every specification, patent claim, and performance metric must be verified against authoritative sources. Distinguish between demonstrated capabilities and projected roadmap items. When assessing technology maturity, use Technology Readiness Levels (TRL 1-9) as a framework. Evaluate not just current capabilities but also maintainability, scalability trajectory, and potential technical debt. Consider both the technology itself and the ecosystem (community, tooling, talent availability) around it.",
+    "agentOverrides": {
+      "patent-search-specialist": "Search across all major patent offices (USPTO, EPO, WIPO, national offices as relevant). For each key patent, document: patent number, title, abstract, filing date, grant date, current assignee, claim count, and citation count. Identify patent families (continuations, divisionals, international filings). Track prosecution history for key patents to assess claim scope evolution.",
+      "technology-assessor": "Evaluate technology against multiple dimensions: functional capability, performance benchmarks, scalability, security posture, standards compliance, integration complexity, and operational maturity. Use the Technology Readiness Level framework (TRL 1-9) to assess maturity. Compare against industry best practices and competing solutions. Identify key technical risks including single points of failure, vendor dependencies, and technical debt indicators.",
+      "ip-landscape-mapper": "Build a comprehensive IP landscape showing: filing trends over time, top assignees by patent count, geographic filing patterns, and technology cluster mapping using patent classification codes. Identify potential freedom-to-operate issues by mapping overlapping claims. Assess the overall strength of the target IP portfolio (breadth, depth, geographic coverage, remaining life). Identify white spaces where limited patent protection exists."
+    },
+    "synthesisInstructions": "Structure the analysis to support an investment or strategic decision. Lead with the technology assessment summary and key risk findings. Present patent landscape data with clear visualization callouts (patent family trees, filing trend charts, assignee matrices). Provide explicit go/no-go signals on standards compliance. Quantify IP risks where possible (number of potentially blocking patents, years of remaining patent life, geographic coverage gaps). End with clear, actionable recommendations prioritized by risk and impact.",
+    "reportingTone": "Professional technical assessment suitable for engineering leadership and M&A decision-makers. Precise and evidence-based, with appropriate technical depth. Avoid unnecessary jargon but use correct technical terminology. Write for an audience that is technically sophisticated but may not be specialists in the specific technology under review. Include clear definitions of domain-specific terms."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 18000,
+      "synthesis": 12000,
+      "reporting": 12000
+    }
+  }
+}
