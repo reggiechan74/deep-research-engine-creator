@@ -8,7 +8,7 @@ description: "Domain-specialized research engine for {{domain}}. Multi-agent pip
 Launch a comprehensive multi-agent research system specialized for **{{domain}}** research,
 serving **{{audience}}**.
 
-This engine implements a five-phase research pipeline with tier-based depth routing. It is
+This engine implements a {{pipelinePhaseCount}}-phase research pipeline with tier-based depth routing. It is
 fully self-contained -- no external research plugin dependencies are required. All protocols,
 agent definitions, quality standards, and output specifications are defined in this file.
 
@@ -26,13 +26,14 @@ agent definitions, quality standards, and output specifications are defined in t
 
 ## Research Architecture
 
-This engine implements a **five-phase research system** with tier-based depth routing:
+This engine implements a **{{pipelinePhaseCount}}-phase research system** with tier-based depth routing:
 
 1. **Phase 0: Tier Detection** -- Parse flags, configure paths and depth
 2. **Phase 1: Research Planning** -- Strategic framework development and agent task design
 3. **Phase 2: Parallel Research** -- Multiple specialist agents research simultaneously with iterative refinement
 4. **Phase 3: Synthesis** -- Multi-source integration, contradiction resolution, and gap analysis
-5. **Phase 4: Professional Reporting** -- Comprehensive report generation with consolidated bibliography
+5. **Phase 4: {{phase4Name}}** -- {{phase4Description}}
+{{vvcPhaseLines}}
 
 ### Tier Configuration
 
@@ -91,6 +92,8 @@ SPECULATIVE (○○○): {{confidenceSpeculative}}
 
 **Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
 claims MUST be HIGH confidence or explicitly flagged as exceptions. {{minimumEvidence}}
+
+{{vvcClaimTaxonomyBlock}}
 
 ### Source Credibility Hierarchy
 
@@ -231,8 +234,9 @@ The {{engineDisplayName}} research system uses these available sub-agents:
 {{subAgentList}}
 
 Each sub-agent type provides different capabilities matched to its pipeline role. The
-planning and synthesis specialists are fixed roles; research agents are domain-specialized
-instances configured for this engine's specific focus areas.
+planning, synthesis, and reporting specialists are fixed pipeline roles; research agents
+are domain-specialized instances configured for this engine's specific focus areas.
+{{vvcSubAgentNote}}
 
 ---
 
@@ -342,7 +346,7 @@ instructions to:
 
 ---
 
-### Phase 4: Professional Reporting
+### Phase 4: {{phase4Name}}
 
 After synthesis completion, deploy the **research-reporting-specialist** with instructions to:
 
@@ -352,10 +356,11 @@ After synthesis completion, deploy the **research-reporting-specialist** with in
 - Develop structured content with logical flow and narrative coherence
 - Include actionable implementation guidelines and practical applications
 - Reporting tone: {{reportingTone}}
+{{vvcClaimTaggingInstructions}}
 
 #### Report Sections
 
-The final report MUST include these sections in order:
+The {{phase4ReportType}} report MUST include these sections in order:
 
 {{reportSections}}
 
@@ -377,8 +382,12 @@ The final report MUST include these sections in order:
 - Document any deviations from planned research approach
 - Add limitations/risks section and "so what" analysis tied to decision impact
 - Note any deviations from planned approach identified during synthesis
-- Save report to `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md`
+- Save report to `BASE_DIR/[TOPIC_SLUG]_{{phase4OutputFile}}`
 - Output format (500 tokens or fewer in chat): `## Executive Brief | ## Key Findings (with IDs + confidence) | ## Recommendations | ## Limitations/Risks | ## Files Written`
+
+{{vvcVerifyPhaseBlock}}
+
+{{vvcCorrectPhaseBlock}}
 
 Now executing research deployment...
 
@@ -395,6 +404,7 @@ Research reports will be saved to:
 {{fileStructure}}
 ├── [TOPIC_SLUG]_Methodology_Log.md
 ├── [TOPIC_SLUG]_Synthesis_Report.md
+{{vvcFileStructure}}
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
 ├── [TOPIC_SLUG]_Citation_Verification_Report.md  # When verification enabled
 └── [TOPIC_SLUG]_Master_Bibliography.md
@@ -417,6 +427,7 @@ File naming follows the convention: {{fileNaming}}
 - **Tier-based depth routing** matches research effort to topic complexity
 - **Domain specialization** -- all agents operate within {{domain}} context, applying field-specific knowledge and source preferences
 - **Structured output standards** ensure consistent, parseable research artifacts across all agents
+{{vvcFeatureBullets}}
 
 ---
 
@@ -540,6 +551,7 @@ Planning:       {{planningBudget}} tokens output max
 Research:       {{researchBudget}} tokens output max (per agent, files + chat)
 Synthesis:      {{synthesisBudget}} tokens output max
 Reporting:      {{reportingBudget}} tokens output max
+{{vvcBudgetLine}}
 ```
 
 ### Context Efficiency Rules
@@ -650,6 +662,23 @@ engine configuration (engine-config.json).
 - `{{deadLinkInstructions}}` -- expanded instructions for the selected dead link strategy
 - `{{probeOnDiscovery}}` -- whether to verify sources immediately when found
 - `{{verificationReportConfig}}` -- verification report generation instructions
+
+### VVC (Verification, Validation & Correction)
+- `{{pipelinePhaseCount}}` -- total number of pipeline phases (5 without VVC, 7 with VVC)
+- `{{pipelinePhaseDescription}}` -- human-readable phase count description
+- `{{phase4Name}}` -- Phase 4 heading ("Draft Reporting" with VVC, "Professional Reporting" without)
+- `{{phase4Description}}` -- Phase 4 description text
+- `{{phase4ReportType}}` -- "draft" with VVC, "final" without
+- `{{phase4OutputFile}}` -- output filename ("Draft_Report.md" with VVC, "Comprehensive_Report.md" without)
+- `{{vvcPhaseLines}}` -- Phase 5-6 lines in the architecture list (empty when VVC disabled)
+- `{{vvcClaimTaxonomyBlock}}` -- Claim Type Taxonomy section with [VC]/[PO]/[IE] definitions and verification scope table (empty when VVC disabled)
+- `{{vvcClaimTaggingInstructions}}` -- Instructions for the reporting agent to tag claims with [VC]/[PO]/[IE] (empty when VVC disabled)
+- `{{vvcVerifyPhaseBlock}}` -- Complete Phase 5 VVC-Verify section (empty when VVC disabled or tier is quick)
+- `{{vvcCorrectPhaseBlock}}` -- Complete Phase 6 VVC-Correct section (empty when VVC disabled or tier behavior is not "full")
+- `{{vvcFileStructure}}` -- File output entries for VVC artifacts (Draft_Report.md, VVC_Verification_Report.md, VVC_Correction_Log.md)
+- `{{vvcFeatureBullets}}` -- Key Workflow Features bullets for VVC (empty when VVC disabled)
+- `{{vvcBudgetLine}}` -- Token budget line for VVC phase (empty when VVC disabled)
+- `{{vvcSubAgentNote}}` -- Note about VVC specialist in sub-agent list (empty when VVC disabled)
 
 ### Operational
 - `{{operationalLessons}}` -- accumulated post-mortem findings from past research runs

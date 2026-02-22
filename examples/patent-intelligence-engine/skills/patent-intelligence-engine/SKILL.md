@@ -8,7 +8,7 @@ description: "Domain-specialized research engine for intellectual property and p
 Launch a comprehensive multi-agent research system specialized for **Intellectual property and patent landscape analysis** research,
 serving **IP attorneys, technology transfer officers, and R&D strategists**.
 
-This engine implements a five-phase research pipeline with tier-based depth routing. It is
+This engine implements a seven-phase research pipeline with tier-based depth routing. It is
 fully self-contained -- no external research plugin dependencies are required. All protocols,
 agent definitions, quality standards, and output specifications are defined in this file.
 
@@ -26,22 +26,24 @@ agent definitions, quality standards, and output specifications are defined in t
 
 ## Research Architecture
 
-This engine implements a **five-phase research system** with tier-based depth routing:
+This engine implements a **seven-phase research system** with tier-based depth routing:
 
 1. **Phase 0: Tier Detection** -- Parse flags, configure paths and depth
 2. **Phase 1: Research Planning** -- Strategic framework development and agent task design
 3. **Phase 2: Parallel Research** -- Multiple specialist agents research simultaneously with iterative refinement
 4. **Phase 3: Synthesis** -- Multi-source integration, contradiction resolution, and gap analysis
-5. **Phase 4: Professional Reporting** -- Comprehensive report generation with consolidated bibliography
+5. **Phase 4: Draft Reporting** -- Draft report generation with claim tagging for VVC verification
+6. **Phase 5: VVC-Verify** -- Verify draft report claims against cited sources, produce verification report
+7. **Phase 6: VVC-Correct** -- Implement corrections, produce final Comprehensive Report + correction log
 
 ### Tier Configuration
 
-| Tier | Planning | Research Agents | Synthesis | Report | User Gate |
-|------|----------|----------------|-----------|--------|-----------|
-| Quick | No | patent-search-specialist | No | Inline | No |
-| Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Full | --approve only |
-| Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Full | --approve only |
-| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Full | Always |
+| Tier | Planning | Research Agents | Synthesis | Report | VVC | User Gate |
+|------|----------|----------------|-----------|--------|-----|-----------|
+| Quick | No | patent-search-specialist | No | Inline | None | No |
+| Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Draft | Verify-only | --approve only |
+| Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Draft | Full | --approve only |
+| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Draft | Full | Always |
 
 ---
 
@@ -94,6 +96,25 @@ SPECULATIVE (○○○): Based on published patent applications (not yet granted
 
 **Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
 claims MUST be HIGH confidence or explicitly flagged as exceptions. All patent claims require patent number verification against at least one official patent office database (USPTO, EPO, WIPO). Patent status (active, expired, abandoned, pending) must be confirmed. Claim scope assessments require reference to actual claim text. FTO conclusions require identification of specific patent claims and their relationship to the subject technology.
+
+### Claim Type Taxonomy
+
+Every factual assertion in the draft report (Phase 4) MUST be tagged with one of these claim types:
+
+| Tag | Label | Description | Requires Verification |
+|-----|-------|-------------|----------------------|
+| `[VC]` | Verifiable Claim | Factual assertion about patent data (numbers, dates, assignees, claim counts, filing status) with a cited source that can be independently verified against official patent office records | Yes |
+| `[PO]` | Professional Opinion | Expert interpretation or analytical judgment derived from patent landscape evidence, such as FTO risk assessments, whitespace opportunity evaluations, or portfolio strength comparisons | No |
+| `[IE]` | Inferred/Extrapolated | Logical inference or extrapolation from patent filing trends, classification patterns, or market data without direct source confirmation | No |
+
+### VVC Verification Scope
+
+| Confidence Level | Verification Rate | Rationale |
+|-----------------|-------------------|-----------|
+| HIGH | 100% | All HIGH confidence verifiable claims are always verified |
+| MEDIUM | 75% | Balanced depth for MEDIUM confidence claims |
+| LOW | 0% | LOW confidence claims are not verified by default |
+| SPECULATIVE | 0% | Speculative claims cannot be verified against sources |
 
 ### Source Credibility Hierarchy
 
@@ -262,10 +283,12 @@ The Patent Intelligence Engine research system uses these available sub-agents:
 - patent-search-specialist (Patent Search Specialist)
 - prior-art-analyst (Prior Art Analyst)
 - ip-landscape-mapper (IP Landscape Mapper)
+- vvc-specialist (Verification, Validation & Correction Specialist)
 
 Each sub-agent type provides different capabilities matched to its pipeline role. The
-planning and synthesis specialists are fixed roles; research agents are domain-specialized
-instances configured for this engine's specific focus areas.
+planning, synthesis, and reporting specialists are fixed pipeline roles; research agents
+are domain-specialized instances configured for this engine's specific focus areas.
+The vvc-specialist is a pipeline agent that runs in Phases 5-6 (post-reporting). It does NOT participate in Phase 2 research.
 
 ---
 
@@ -397,7 +420,7 @@ instructions to:
 
 ---
 
-### Phase 4: Professional Reporting
+### Phase 4: Draft Reporting
 
 After synthesis completion, deploy the **research-reporting-specialist** with instructions to:
 
@@ -407,10 +430,11 @@ After synthesis completion, deploy the **research-reporting-specialist** with in
 - Develop structured content with logical flow and narrative coherence
 - Include actionable implementation guidelines and practical applications
 - Reporting tone: Professional patent intelligence assessment suitable for IP attorneys, technology transfer officers, and C-suite decision-makers. Precise, evidence-based, and legally informed without constituting legal advice. Use correct patent terminology (claims, specifications, prosecution history, continuations, divisionals, priority dates) but define specialized terms on first use. Write for an audience that understands IP fundamentals but may not be specialists in the specific technology domain. Include appropriate disclaimers that the analysis is informational and does not constitute a legal opinion.
+- **CLAIM TAGGING (REQUIRED):** Tag every factual assertion with its claim type: `[VC]` for verifiable claims with cited sources, `[PO]` for professional opinions/analytical judgments, `[IE]` for inferences/extrapolations. Place tags at the end of each claim sentence before the citation. Example: 'Toyota invested $142M in solid-state battery research [VC][^3]'. This tagging is essential for the VVC verification phase.
 
 #### Report Sections
 
-The final report MUST include these sections in order:
+The draft report MUST include these sections in order:
 
 1. Executive Summary
 2. Patent Landscape Overview
@@ -443,8 +467,99 @@ The final report MUST include these sections in order:
 - Document any deviations from planned research approach
 - Add limitations/risks section and "so what" analysis tied to decision impact
 - Note any deviations from planned approach identified during synthesis
-- Save report to `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md`
+- Save report to `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
 - Output format (500 tokens or fewer in chat): `## Executive Brief | ## Key Findings (with IDs + confidence) | ## Recommendations | ## Limitations/Risks | ## Files Written`
+
+---
+
+### Phase 5: VVC-Verify
+
+**Tier behavior:** Quick: skip | Standard: run | Deep: run | Comprehensive: run
+
+After the draft report is complete, deploy the **vvc-specialist** with instructions to:
+
+- **FIRST ACTION**: Read the draft report at `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
+- Read all bibliography files and the master bibliography at `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`
+- **Extract** all `[VC]`-tagged claims with their cited sources and confidence tiers
+- **Apply verification scope:** 100% of HIGH confidence [VC] claims, 75% of MEDIUM confidence [VC] claims, 0% of LOW and SPECULATIVE claims
+- **For each claim selected for verification:**
+  1. Locate the cited source (fetch URL via WebFetch or search for the source)
+  2. Extract the relevant quote or data point from the source
+  3. Analyze alignment between the claim text and the source content
+  4. Classify alignment: CONFIRMED | PARAPHRASED | OVERSTATED | UNDERSTATED | DISPUTED | UNSUPPORTED | SOURCE_UNAVAILABLE
+  5. Recommend action: KEEP | REVISE | DOWNGRADE | REMOVE | REPLACE_SOURCE
+- **Output:** Save verification report to `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
+
+#### Verification Report Structure
+
+```
+## VVC Verification Report: [TOPIC]
+
+### Summary
+- Total [VC] claims extracted: N
+- Claims selected for verification: N (per scope rules)
+- CONFIRMED: N (%)
+- PARAPHRASED: N (%)
+- OVERSTATED: N (%)
+- UNDERSTATED: N (%)
+- DISPUTED: N (%)
+- UNSUPPORTED: N (%)
+- SOURCE_UNAVAILABLE: N (%)
+
+### Per-Claim Verification Table
+| # | Claim Text (truncated) | Source | Confidence | Classification | Recommendation | Notes |
+|---|------------------------|--------|------------|----------------|----------------|-------|
+
+### Issues Found
+[List of claims requiring correction with details]
+
+### Recommendations
+[Prioritized list of corrections to implement in Phase 6]
+```
+
+- Output format (400 tokens or fewer in chat): `## Verification Summary | ## Key Issues (with claim refs) | ## Stats | ## Files Written`
+
+**Standard tier:** Stop after Phase 5. The draft report becomes the final report alongside the verification report. Do NOT proceed to Phase 6.
+
+---
+
+### Phase 6: VVC-Correct
+
+**Tier behavior:** Quick: skip | Standard: skip | Deep: run | Comprehensive: run
+
+After verification is complete, deploy the **vvc-specialist** (second pass) with instructions to:
+
+- **FIRST ACTION**: Read the verification report at `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
+- Read the draft report at `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
+- **Implement corrections** for all REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE recommendations:
+  - **REVISE:** Rewrite the claim to accurately reflect the source content
+  - **DOWNGRADE:** Lower the confidence tier and add qualifying language
+  - **REMOVE:** Delete the claim and adjust surrounding narrative for coherence
+  - **REPLACE_SOURCE:** Find and cite a more accurate source for the claim
+- **Preserve** all KEEP and CONFIRMED claims unchanged
+- **Add Verification Statement** appendix to the final report documenting the VVC process
+- **Output:**
+  - `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md` (final corrected report)
+  - `BASE_DIR/[TOPIC_SLUG]_VVC_Correction_Log.md` (detailed log of all changes made)
+
+#### Correction Log Structure
+
+```
+## VVC Correction Log: [TOPIC]
+
+### Summary
+- Total corrections applied: N
+- Revisions: N
+- Downgrades: N
+- Removals: N
+- Source replacements: N
+
+### Correction Details
+| # | Original Claim | Issue | Action Taken | Corrected Text | Source Change |
+|---|----------------|-------|--------------|----------------|--------------|
+```
+
+- Output format (400 tokens or fewer in chat): `## Corrections Applied | ## Changes Summary | ## Final Report Stats | ## Files Written`
 
 Now executing research deployment...
 
@@ -466,8 +581,11 @@ Research reports will be saved to:
 ├── [TOPIC_SLUG]_ip-landscape-mapper_Bibliography.md
 ├── [TOPIC_SLUG]_Methodology_Log.md
 ├── [TOPIC_SLUG]_Synthesis_Report.md
+├── [TOPIC_SLUG]_Draft_Report.md
+├── [TOPIC_SLUG]_VVC_Verification_Report.md
+├── [TOPIC_SLUG]_VVC_Correction_Log.md            # When tier behavior is 'full'
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
-├── [TOPIC_SLUG]_Citation_Verification_Report.md  # When verification enabled
+├── [TOPIC_SLUG]_Citation_Verification_Report.md   # When verification enabled
 └── [TOPIC_SLUG]_Master_Bibliography.md
 ```
 
@@ -488,6 +606,9 @@ File naming follows the convention: {date}_{topic_slug}_patent_intelligence.md
 - **Tier-based depth routing** matches research effort to topic complexity
 - **Domain specialization** -- all agents operate within Intellectual property and patent landscape analysis context, applying field-specific knowledge and source preferences
 - **Structured output standards** ensure consistent, parseable research artifacts across all agents
+- **Verification, Validation & Correction (VVC)** -- two-pass post-reporting system that verifies [VC]-tagged claims against cited sources and auto-corrects the draft
+- **Claim type taxonomy** -- claims tagged as [VC] (verifiable), [PO] (professional opinion), or [IE] (inferred) to focus verification effort
+- **Tier-aware VVC** -- Quick: no VVC, Standard: verify-only, Deep/Comprehensive: full verify+correct
 
 ---
 
@@ -611,6 +732,7 @@ Planning:       2500 tokens output max
 Research:       18000 tokens output max (per agent, files + chat)
 Synthesis:      12000 tokens output max
 Reporting:      12000 tokens output max
+VVC:            8000 tokens output max (verification + correction combined)
 ```
 
 ### Context Efficiency Rules

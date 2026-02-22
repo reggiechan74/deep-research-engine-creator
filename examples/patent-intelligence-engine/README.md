@@ -44,6 +44,7 @@ ln -s "$(pwd)/patent-intelligence-engine" ~/.claude/plugins/patent-intelligence-
 | patent-search-specialist | Patent Search Specialist | sonnet | general-purpose |
 | prior-art-analyst | Prior Art Analyst | sonnet | expert-instructor |
 | ip-landscape-mapper | IP Landscape Mapper | sonnet | intelligence-analyst |
+| vvc-specialist | Verification, Validation & Correction Specialist | sonnet | general-purpose |
 
 ## Source Credibility Hierarchy
 
@@ -67,6 +68,16 @@ ln -s "$(pwd)/patent-intelligence-engine" ~/.claude/plugins/patent-intelligence-
 
 This engine uses a four-tier confidence scoring system (HIGH/MEDIUM/LOW/SPECULATIVE) with mandatory source credibility tracking. All HIGH-confidence claims require verification against Tier 1-3 sources. Patent numbers must be verified against official patent office databases. The engine enforces minimum evidence thresholds and validation rules specific to intellectual property research.
 
+## Verification, Validation & Correction (VVC)
+
+This engine includes a two-pass VVC system that verifies draft report claims against cited sources and auto-corrects errors:
+
+- **Claim Tagging:** Phase 4 tags every assertion as `[VC]` (Verifiable Claim), `[PO]` (Professional Opinion), or `[IE]` (Inferred/Extrapolated)
+- **Phase 5 (VVC-Verify):** Extracts `[VC]` claims, fetches cited sources, classifies alignment (CONFIRMED/PARAPHRASED/OVERSTATED/DISPUTED/UNSUPPORTED), recommends corrections
+- **Phase 6 (VVC-Correct):** Implements REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE recommendations, produces the final Comprehensive Report + correction log
+- **Verification Scope:** 100% HIGH, 75% MEDIUM, 0% LOW/SPECULATIVE
+- **Tier Behavior:** Quick: none | Standard: verify-only | Deep: full | Comprehensive: full
+
 ## Output Structure
 
 Research reports are saved to a timestamped directory using the engine's configured file naming convention (`{date}_{topic_slug}_patent_intelligence.md`).
@@ -83,6 +94,9 @@ Research reports are saved to a timestamped directory using the engine's configu
 ├── [TOPIC_SLUG]_ip-landscape-mapper_Bibliography.md
 ├── [TOPIC_SLUG]_Methodology_Log.md
 ├── [TOPIC_SLUG]_Synthesis_Report.md
+├── [TOPIC_SLUG]_Draft_Report.md
+├── [TOPIC_SLUG]_VVC_Verification_Report.md
+├── [TOPIC_SLUG]_VVC_Correction_Log.md
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
 ├── [TOPIC_SLUG]_Citation_Verification_Report.md
 └── [TOPIC_SLUG]_Master_Bibliography.md

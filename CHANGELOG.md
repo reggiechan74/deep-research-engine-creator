@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-02-22
+
+### Added
+- **Verification, Validation & Correction (VVC) system** -- two-pass post-reporting pipeline that verifies draft report claims against cited sources and auto-corrects errors
+  - Phase 4 renamed to "Draft Reporting" with mandatory `[VC]`/`[PO]`/`[IE]` claim tagging
+  - Phase 5 (VVC-Verify): extracts verifiable claims, fetches sources, classifies alignment (CONFIRMED/PARAPHRASED/OVERSTATED/UNDERSTATED/DISPUTED/UNSUPPORTED/SOURCE_UNAVAILABLE), produces verification report
+  - Phase 6 (VVC-Correct): implements corrections, produces final Comprehensive Report + correction log
+- **Claim type taxonomy**: `[VC]` Verifiable Claim, `[PO]` Professional Opinion, `[IE]` Inferred/Extrapolated -- extensible via wizard
+- **Tier-aware VVC behavior**: Quick: none, Standard: verify-only, Deep: full, Comprehensive: full
+- **Configurable verification scope**: 100% HIGH (fixed), MEDIUM% (default 75), LOW% (default 0), 0% SPECULATIVE (fixed)
+- **VVC specialist agent** (`vvc-specialist`) -- pipeline agent using `general-purpose` subagent type for WebFetch source verification
+- **High-accuracy presets**: Legal, OSINT, Financial DD, AML, Academic get 100% MEDIUM / 25-50% LOW verification rates
+- VVC configuration in wizard Section 6 with customizable claim types, verification scope, and per-tier behavior
+- VVC token budget (default 8000) in advanced configuration
+- Check 4i in `/test-engine` for VVC configuration validation including negative check that vvc-specialist is NOT in tier agent arrays
+- 18 new VVC placeholder derivation rules in engine creator wizard
+- VVC sections in base-research-skill, extension-skill, command, and readme templates
+
+### Changed
+- Pipeline architecture expanded from 5-phase to 7-phase when VVC enabled (backward-compatible: 5-phase when VVC disabled/absent)
+- Patent Intelligence Engine example updated with VVC configuration, vvc-specialist agent, and regenerated 7-phase SKILL.md
+- All 20 domain presets updated with VVC configuration blocks
+- Schema files (engine-config-schema.json, preset-schema.json) extended with VVC object and claimTypeDefinition
+
 ## [1.1.0] - 2026-02-22
 
 ### Added

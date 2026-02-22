@@ -148,6 +148,46 @@
             }
           },
           "additionalProperties": false
+        },
+        "vvc": {
+          "type": "object",
+          "description": "Verification, Validation & Correction (VVC) pipeline configuration. When enabled, adds post-reporting verification and correction phases.",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether VVC pipeline phases are active."
+            },
+            "claimTypes": {
+              "type": "array",
+              "description": "Claim type taxonomy for categorizing assertions in the draft report.",
+              "items": { "$ref": "#/$defs/claimTypeDefinition" },
+              "minItems": 1
+            },
+            "verificationScope": {
+              "type": "object",
+              "description": "Percentage of verifiable claims to check at each confidence level.",
+              "additionalProperties": false,
+              "properties": {
+                "HIGH": { "type": "integer", "const": 100 },
+                "MEDIUM": { "type": "integer", "default": 75, "minimum": 0, "maximum": 100 },
+                "LOW": { "type": "integer", "default": 0, "minimum": 0, "maximum": 100 },
+                "SPECULATIVE": { "type": "integer", "const": 0 }
+              }
+            },
+            "tierBehavior": {
+              "type": "object",
+              "description": "VVC behavior per research tier.",
+              "additionalProperties": false,
+              "properties": {
+                "quick": { "type": "string", "const": "none" },
+                "standard": { "type": "string", "enum": ["none", "verify-only", "full"], "default": "verify-only" },
+                "deep": { "type": "string", "enum": ["none", "verify-only", "full"], "default": "full" },
+                "comprehensive": { "type": "string", "enum": ["none", "verify-only", "full"], "default": "full" }
+              }
+            }
+          }
         }
       },
       "additionalProperties": false
@@ -195,7 +235,8 @@
             "planning": { "type": "integer", "minimum": 0 },
             "research": { "type": "integer", "minimum": 0 },
             "synthesis": { "type": "integer", "minimum": 0 },
-            "reporting": { "type": "integer", "minimum": 0 }
+            "reporting": { "type": "integer", "minimum": 0 },
+            "vvc": { "type": "integer", "minimum": 0 }
           },
           "additionalProperties": false
         },
@@ -229,6 +270,18 @@
           "minItems": 1
         },
         "followUpRound": { "type": "boolean" }
+      }
+    },
+    "claimTypeDefinition": {
+      "type": "object",
+      "description": "Definition of a claim type for the VVC claim taxonomy.",
+      "required": ["tag", "label", "description", "requiresVerification"],
+      "additionalProperties": false,
+      "properties": {
+        "tag": { "type": "string", "pattern": "^[A-Z]{2,4}$" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "requiresVerification": { "type": "boolean" }
       }
     },
     "agentDefinition": {

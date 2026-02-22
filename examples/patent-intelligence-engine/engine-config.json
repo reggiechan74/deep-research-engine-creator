@@ -185,6 +185,14 @@
         "model": "sonnet",
         "specialization": "Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.",
         "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "vvc-specialist",
+        "role": "Verification, Validation & Correction Specialist",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Verifies patent intelligence draft report claims against cited sources through systematic source-claim alignment analysis. Fetches cited patent office records, technical papers, and industry sources to confirm that factual assertions (patent numbers, filing dates, assignee names, claim counts, market figures) accurately reflect source content. Classifies claim-source alignment and recommends corrections for overstated, understated, disputed, or unsupported claims. Produces verification reports with per-claim assessment tables and correction logs documenting all changes made to the final report.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
       }
     ]
   },
@@ -218,6 +226,26 @@
       "verificationReport": {
         "enabled": true,
         "scope": "high-confidence-only"
+      }
+    },
+    "vvc": {
+      "enabled": true,
+      "claimTypes": [
+        {"tag": "VC", "label": "Verifiable Claim", "description": "Factual assertion about patent data (numbers, dates, assignees, claim counts, filing status) with a cited source that can be independently verified against official patent office records", "requiresVerification": true},
+        {"tag": "PO", "label": "Professional Opinion", "description": "Expert interpretation or analytical judgment derived from patent landscape evidence, such as FTO risk assessments, whitespace opportunity evaluations, or portfolio strength comparisons", "requiresVerification": false},
+        {"tag": "IE", "label": "Inferred/Extrapolated", "description": "Logical inference or extrapolation from patent filing trends, classification patterns, or market data without direct source confirmation", "requiresVerification": false}
+      ],
+      "verificationScope": {
+        "HIGH": 100,
+        "MEDIUM": 75,
+        "LOW": 0,
+        "SPECULATIVE": 0
+      },
+      "tierBehavior": {
+        "quick": "none",
+        "standard": "verify-only",
+        "deep": "full",
+        "comprehensive": "full"
       }
     }
   },
@@ -261,7 +289,8 @@
       "planning": 2500,
       "research": 18000,
       "synthesis": 12000,
-      "reporting": 12000
+      "reporting": 12000,
+      "vvc": 8000
     }
   }
 }

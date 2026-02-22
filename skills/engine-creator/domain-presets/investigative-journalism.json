@@ -179,6 +179,26 @@
         "enabled": true,
         "scope": "high-confidence-only"
       }
+    },
+    "vvc": {
+      "enabled": true,
+      "claimTypes": [
+        {"tag": "VC", "label": "Verifiable Claim", "description": "Factual assertion with a cited source that can be independently verified", "requiresVerification": true},
+        {"tag": "PO", "label": "Professional Opinion", "description": "Expert interpretation or analytical judgment derived from evidence", "requiresVerification": false},
+        {"tag": "IE", "label": "Inferred/Extrapolated", "description": "Logical inference or extrapolation from available data without direct source support", "requiresVerification": false}
+      ],
+      "verificationScope": {
+        "HIGH": 100,
+        "MEDIUM": 75,
+        "LOW": 0,
+        "SPECULATIVE": 0
+      },
+      "tierBehavior": {
+        "quick": "none",
+        "standard": "verify-only",
+        "deep": "full",
+        "comprehensive": "full"
+      }
     }
   },
   "outputStructure": {

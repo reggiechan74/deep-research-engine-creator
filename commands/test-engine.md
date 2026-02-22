@@ -50,6 +50,7 @@ For each agent defined in `agentPipeline.agents` in the config:
 
 - Verify a corresponding `.md` file exists in the `agents/` directory
 - The file should be named `{agentId}.md` where `agentId` matches the agent's `id` field
+- This includes the `vvc-specialist` agent when VVC is enabled — it should have an agent file even though it does not appear in tier agent arrays
 
 Record PASS if all agents have matching files, FAIL with the list of missing agent files.
 
@@ -92,6 +93,17 @@ Perform multi-level structural validation on `engine-config.json`:
 - Verify `verificationMode` is one of: "none", "spot-check", "comprehensive"
 - Verify `deadLinkHandling` is one of: "flag-only", "archive-fallback", "exclude-from-high"
 - If `sourceFreshnessThreshold` is "custom", verify `sourceFreshnessCustomYears` is present and valid
+
+**4i: VVC configuration validation (if present).** If `qualityFramework.vvc` exists:
+- Verify `enabled` is a boolean
+- If `enabled` is true:
+  - Verify `claimTypes` is a non-empty array where each element has `tag` (2-4 uppercase letters), `label`, `description`, and `requiresVerification` (boolean)
+  - Verify `verificationScope` exists with `HIGH` = 100, `SPECULATIVE` = 0, `MEDIUM` in 0-100, `LOW` in 0-100
+  - Verify `tierBehavior` exists with `quick` = "none" and `standard`, `deep`, `comprehensive` each one of: "none", "verify-only", "full"
+  - Verify `vvc-specialist.md` exists in the `agents/` directory
+  - Verify `vvc-specialist` is listed in `agentPipeline.agents[].id`
+  - **CRITICAL:** Verify `vvc-specialist` does NOT appear in any tier's `agents` array (`agentPipeline.tiers.{quick,standard,deep,comprehensive}.agents`). The VVC agent is a pipeline agent (Phases 5-6), NOT a Phase 2 research agent.
+  - If `advanced.tokenBudgets` exists, verify `vvc` field is present with a positive integer value
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 

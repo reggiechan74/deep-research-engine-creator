@@ -119,6 +119,8 @@ Dead link handling: {{deadLinkHandling}}
 Probe on discovery: {{probeOnDiscovery}}
 Verification report: {{verificationReportConfig}}
 
+{{vvcExtensionOverride}}
+
 ### Output Structure Override
 
 Replace the base skill's report sections with:
@@ -251,6 +253,9 @@ with values from the engine configuration (engine-config.json).
 - `{{agentOverrides}}` -- per-agent prompt overrides keyed by agent ID
 - `{{synthesisInstructions}}` -- additional instructions for the synthesis agent
 - `{{reportingTone}}` -- desired tone and style for the final report
+
+### VVC (Verification, Validation & Correction)
+- `{{vvcExtensionOverride}}` -- VVC configuration override block (empty when VVC disabled)
 
 ### Advanced Configuration
 - `{{maxIterations}}` -- maximum research-refine cycles per question

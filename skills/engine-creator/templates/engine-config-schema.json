@@ -447,6 +447,87 @@
               }
             }
           }
+        },
+        "vvc": {
+          "type": "object",
+          "description": "Verification, Validation & Correction (VVC) pipeline configuration. When enabled, adds two post-reporting phases that verify draft report claims against cited sources and auto-correct errors. If omitted, the engine operates without VVC and Phase 4 produces the final report directly.",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether VVC pipeline phases are active. When disabled, Phase 4 produces the final Comprehensive Report directly."
+            },
+            "claimTypes": {
+              "type": "array",
+              "description": "Claim type taxonomy for categorizing assertions in the draft report. Each claim type determines whether verification is required. Default: VC (Verifiable Claim), PO (Professional Opinion), IE (Inferred/Extrapolated).",
+              "items": {
+                "$ref": "#/$defs/claimTypeDefinition"
+              },
+              "minItems": 1
+            },
+            "verificationScope": {
+              "type": "object",
+              "description": "Percentage of verifiable claims to check at each confidence level. Controls the depth-vs-cost tradeoff of VVC verification.",
+              "additionalProperties": false,
+              "properties": {
+                "HIGH": {
+                  "type": "integer",
+                  "const": 100,
+                  "description": "HIGH confidence claims are always verified (100%). This is fixed and cannot be changed."
+                },
+                "MEDIUM": {
+                  "type": "integer",
+                  "default": 75,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage of MEDIUM confidence verifiable claims to check. Default: 75%."
+                },
+                "LOW": {
+                  "type": "integer",
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage of LOW confidence verifiable claims to check. Default: 0%."
+                },
+                "SPECULATIVE": {
+                  "type": "integer",
+                  "const": 0,
+                  "description": "SPECULATIVE claims are never verified (0%). This is fixed and cannot be changed."
+                }
+              }
+            },
+            "tierBehavior": {
+              "type": "object",
+              "description": "VVC behavior per research tier. 'none' = no VVC, 'verify-only' = Phase 5 only (verification report, no auto-correction), 'full' = Phase 5 + Phase 6 (verify and correct).",
+              "additionalProperties": false,
+              "properties": {
+                "quick": {
+                  "type": "string",
+                  "const": "none",
+                  "description": "Quick tier: no VVC (inline summary only)."
+                },
+                "standard": {
+                  "type": "string",
+                  "enum": ["none", "verify-only", "full"],
+                  "default": "verify-only",
+                  "description": "Standard tier VVC behavior. Default: verify-only."
+                },
+                "deep": {
+                  "type": "string",
+                  "enum": ["none", "verify-only", "full"],
+                  "default": "full",
+                  "description": "Deep tier VVC behavior. Default: full."
+                },
+                "comprehensive": {
+                  "type": "string",
+                  "enum": ["none", "verify-only", "full"],
+                  "default": "full",
+                  "description": "Comprehensive tier VVC behavior. Default: full."
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -569,6 +650,12 @@
               "description": "Token budget for the final report generation phase.",
               "minimum": 0,
               "examples": [10000]
+            },
+            "vvc": {
+              "type": "integer",
+              "description": "Token budget for the VVC verification and correction phases combined. Only used when VVC is enabled.",
+              "minimum": 0,
+              "examples": [8000]
             }
           }
         },
@@ -635,6 +722,34 @@
           "type": "boolean",
           "description": "Whether agents perform an additional research round to fill gaps found during initial synthesis.",
           "default": false
+        }
+      }
+    },
+    "claimTypeDefinition": {
+      "type": "object",
+      "description": "Definition of a claim type for the VVC claim taxonomy. Claim types categorize assertions in the draft report to determine which ones undergo verification.",
+      "required": ["tag", "label", "description", "requiresVerification"],
+      "additionalProperties": false,
+      "properties": {
+        "tag": {
+          "type": "string",
+          "description": "Short uppercase tag used inline in reports, rendered as [VC], [PO], etc.",
+          "pattern": "^[A-Z]{2,4}$",
+          "examples": ["VC", "PO", "IE", "LH"]
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for this claim type.",
+          "examples": ["Verifiable Claim", "Professional Opinion", "Inferred/Extrapolated"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of when this claim type applies.",
+          "examples": ["Factual assertion with a cited source that can be independently verified"]
+        },
+        "requiresVerification": {
+          "type": "boolean",
+          "description": "Whether claims of this type should be verified against their cited sources during VVC. Typically true for factual claims (VC), false for opinions and inferences (PO, IE)."
         }
       }
     },

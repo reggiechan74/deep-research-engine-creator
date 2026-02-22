@@ -58,6 +58,7 @@ Show current hierarchy from preset or sample analysis; build from scratch if no 
 1. AskUserQuestion: **Basic** (recommended structure, confirm tier assignments) or **Advanced** (configure each agent individually).
 2. **Basic:** Show tier structure and agent list. AskUserQuestion: Accept, Add Agent, Remove Agent, Modify Agent.
 3. **Advanced:** Per agent ask: ID (kebab-case), role, sub-agent type (AskUserQuestion: general-purpose, expert-instructor, intelligence-analyst), model (AskUserQuestion: sonnet, opus, haiku), specialization instructions. Then ask tier assignments and follow-up round settings.
+4. **VVC agent:** When VVC is enabled (Section 6), automatically include `vvc-specialist` as a pipeline agent. This agent is NOT added to any tier's `agents` array — it runs in Phases 5-6, not Phase 2. Include it in `agentPipeline.agents` for file generation but do not assign it to tiers. The VVC agent definition uses `subagentType: "general-purpose"` (needs WebFetch for source verification, Read/Write/Edit for reports). Auto-derive specialization from the engine's domain.
 
 ### Section 6: Quality Framework
 
@@ -102,6 +103,45 @@ Use AskUserQuestion: "Generate a standalone Citation Verification Report?"
   - "Yes, for all sources" -- comprehensive audit
   - "No" -- skip verification report
 
+#### Verification, Validation & Correction (VVC)
+
+After citation management, configure the VVC pipeline:
+
+Use AskUserQuestion: "Enable Verification, Validation & Correction (VVC)? VVC adds two post-reporting phases that verify draft report claims against cited sources and auto-correct errors."
+- Options:
+  - "Yes, enable VVC (Recommended)" -- adds Phase 5 (verification) and Phase 6 (correction)
+  - "No, skip VVC" -- Phase 4 produces the final report directly
+
+If VVC enabled:
+
+Use AskUserQuestion: "What percentage of MEDIUM-confidence claims should be verified? (HIGH is always 100%, SPECULATIVE is always 0%)"
+- Options:
+  - "75% (Recommended)" -- balanced verification depth
+  - "100%" -- verify all MEDIUM claims (higher accuracy, more tokens)
+  - "50%" -- lighter verification
+  - Custom (free text, 0-100)
+
+Use AskUserQuestion: "What percentage of LOW-confidence claims should be verified?"
+- Options:
+  - "0% (Recommended)" -- skip LOW confidence verification
+  - "25%" -- spot-check LOW claims
+  - "50%" -- moderate LOW claim verification
+  - Custom (free text, 0-100)
+
+Use AskUserQuestion: "Customize claim type taxonomy? Default types: [VC] Verifiable Claim, [PO] Professional Opinion, [IE] Inferred/Extrapolated"
+- Options:
+  - "Accept defaults (Recommended)" -- use VC/PO/IE taxonomy
+  - "Add domain-specific types" -- add custom types (e.g., [LH] Legal Holding, [SD] Statistical Data)
+
+If adding custom types: ask for tag (2-4 uppercase letters), label, description, and whether it requires verification.
+
+Use AskUserQuestion: "VVC tier behavior?"
+- Options:
+  - "Standard defaults (Recommended)" -- Quick: none, Standard: verify-only, Deep: full, Comprehensive: full
+  - "Customize per tier" -- configure each tier individually
+
+If customizing per tier: for each of Standard, Deep, Comprehensive, ask: none / verify-only / full. Quick is always "none".
+
 ### Section 7: Output Structure
 
 1. **Report sections** -- Show ordered list. AskUserQuestion: Accept, Add, Remove, Reorder.
@@ -111,7 +151,7 @@ Use AskUserQuestion: "Generate a standalone Citation Verification Report?"
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
@@ -197,7 +237,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{quickAgentId}}` | First agent ID from `tiers.quick.agents` |
 | `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (agent IDs), Synthesis (Yes/No), Report (Inline/Full), User Gate |
 | `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **[id]** (model: [model], type: [subagentType]) with specialization:\n\n[specialization]\n\n[promptOverride if present]" |
-| `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- [id] ([role])" |
+| `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- [id] ([role])". If VVC enabled, also append: "- vvc-specialist (Verification, Validation & Correction Specialist)" |
 | `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
 | `{{verificationModeInstructions}}` | Expand from `citationManagement.verificationMode`: "none" → "Source verification is disabled. Trust agent-reported citations without independent verification."; "spot-check" → "Verify a random sample of HIGH-confidence citations (minimum 3 or 20% of HIGH citations, whichever is greater). Record verification results in Methodology_Log.md."; "comprehensive" → "Verify every cited source. Check URL accessibility, confirm source content supports the claim, and record all results in a dedicated verification pass." |
 | `{{deadLinkInstructions}}` | Expand from `citationManagement.deadLinkHandling`: "flag-only" → "Mark dead links with [DEAD LINK] tag in the bibliography. Do not attempt recovery."; "archive-fallback" → "Attempt Wayback Machine retrieval at https://web.archive.org/web/*/[URL]. If archived version found, use it and note [ARCHIVED: date] in bibliography. If not found, mark as [DEAD LINK]."; "exclude-from-high" → "Downgrade any claim that relies solely on unreachable sources from HIGH to MEDIUM confidence. Note the downgrade reason in the claims table." |
@@ -209,6 +249,24 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{researchBudget}}` | From `advanced.tokenBudgets.research` (default: 15000) |
 | `{{synthesisBudget}}` | From `advanced.tokenBudgets.synthesis` (default: 8000) |
 | `{{reportingBudget}}` | From `advanced.tokenBudgets.reporting` (default: 10000) |
+| `{{pipelinePhaseCount}}` | If `qualityFramework.vvc.enabled` is true: "seven"; otherwise: "five" |
+| `{{pipelinePhaseDescription}}` | If VVC enabled: "seven-phase"; otherwise: "five-phase" |
+| `{{phase4Name}}` | If VVC enabled: "Draft Reporting"; otherwise: "Professional Reporting" |
+| `{{phase4Description}}` | If VVC enabled: "Draft report generation with claim tagging for VVC verification"; otherwise: "Comprehensive report generation with consolidated bibliography" |
+| `{{phase4ReportType}}` | If VVC enabled: "draft"; otherwise: "final" |
+| `{{phase4OutputFile}}` | If VVC enabled: "Draft_Report.md"; otherwise: "Comprehensive_Report.md" |
+| `{{vvcPhaseLines}}` | If VVC enabled: "6. **Phase 5: VVC-Verify** -- Verify draft report claims against cited sources, produce verification report\n7. **Phase 6: VVC-Correct** -- Implement corrections, produce final Comprehensive Report + correction log"; otherwise: empty string |
+| `{{vvcClaimTaxonomyBlock}}` | If VVC enabled: generate "### Claim Type Taxonomy" section listing each claimType from config (tag, label, description, requiresVerification) plus "### VVC Verification Scope" table showing HIGH/MEDIUM/LOW/SPECULATIVE percentages; otherwise: empty string |
+| `{{vvcClaimTaggingInstructions}}` | If VVC enabled: "- **CLAIM TAGGING (REQUIRED):** Tag every factual assertion with its claim type: `[VC]` for verifiable claims with cited sources, `[PO]` for professional opinions/analytical judgments, `[IE]` for inferences/extrapolations. Place tags at the end of each claim sentence before the citation. Example: 'Toyota invested $142M in solid-state battery research [VC][^3]'. This tagging is essential for the VVC verification phase."; otherwise: empty string |
+| `{{vvcVerifyPhaseBlock}}` | If VVC enabled AND tier behavior is "verify-only" or "full": generate complete Phase 5 VVC-Verify section with instructions to deploy **vvc-specialist** to: read draft report + all bibliographies, extract all [VC] claims with cited sources and confidence tiers, apply verification scope (100% HIGH, {MEDIUM}% MEDIUM, {LOW}% LOW, 0% SPECULATIVE), per-claim protocol (locate source → extract quote → analyze alignment → classify as CONFIRMED/PARAPHRASED/OVERSTATED/UNDERSTATED/DISPUTED/UNSUPPORTED/SOURCE_UNAVAILABLE → recommend KEEP/REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE), output `_VVC_Verification_Report.md` with summary stats + per-claim table; otherwise: empty string |
+| `{{vvcCorrectPhaseBlock}}` | If VVC enabled AND tier behavior is "full": generate complete Phase 6 VVC-Correct section with instructions to deploy **vvc-specialist** (second pass) to: read verification report + draft report, implement REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE recommendations, output `_Comprehensive_Report.md` (final) + `_VVC_Correction_Log.md` + Verification Statement appendix; if tier behavior is "verify-only": empty string (Phase 4 draft becomes final with verification report alongside) |
+| `{{vvcFileStructure}}` | If VVC enabled: "├── [TOPIC_SLUG]_Draft_Report.md\n├── [TOPIC_SLUG]_VVC_Verification_Report.md\n├── [TOPIC_SLUG]_VVC_Correction_Log.md  # When tier behavior is 'full'"; otherwise: empty string |
+| `{{vvcFeatureBullets}}` | If VVC enabled: "- **Verification, Validation & Correction (VVC)** -- two-pass post-reporting system that verifies [VC]-tagged claims against cited sources and auto-corrects the draft\n- **Claim type taxonomy** -- claims tagged as [VC] (verifiable), [PO] (professional opinion), or [IE] (inferred) to focus verification effort\n- **Tier-aware VVC** -- Quick: no VVC, Standard: verify-only, Deep/Comprehensive: full verify+correct"; otherwise: empty string |
+| `{{vvcBudgetLine}}` | If VVC enabled: "VVC:            {vvcBudget} tokens output max (verification + correction combined)"; otherwise: empty string. Default vvcBudget: from `advanced.tokenBudgets.vvc` (default: 8000) |
+| `{{vvcSubAgentNote}}` | If VVC enabled: "The vvc-specialist is a pipeline agent that runs in Phases 5-6 (post-reporting). It does NOT participate in Phase 2 research."; otherwise: empty string |
+| `{{vvcExtensionOverride}}` | If VVC enabled: generate "#### VVC Configuration Override" section listing: enabled, claim types, verification scope (MEDIUM%, LOW%), tier behavior per tier; otherwise: empty string |
+| `{{vvcTierNote}}` | If VVC enabled: "**VVC:** Quick: none | Standard: verify-only | Deep: full | Comprehensive: full"; otherwise: empty string |
+| `{{vvcReadmeSection}}` | If VVC enabled: generate "## Verification, Validation & Correction (VVC)" section with brief description of the two-pass system, claim types, verification scope, and tier behavior; otherwise: empty string |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
