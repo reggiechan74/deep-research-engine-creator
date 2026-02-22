@@ -163,7 +163,7 @@ Execute sequentially after user confirms.
 **Step 3 -- plugin.json.** Read `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/plugin-json.tmpl`, replace placeholders from engineMeta, write to `{OUTPUT_DIR}/.claude-plugin/plugin.json`.
 Replace `{{engineDescription}}` with `engineMeta.description` (default: "A domain-specialized research engine for {domain}").
 Replace `{{authorName}}` with `engineMeta.author.name` (default: empty string).
-Replace `{{authorEmail}}` with `engineMeta.author.email` (default: empty string).
+Replace `{{authorEmail}}` with `engineMeta.author.email`. **If the email value is empty or `engineMeta.author.email` is absent, remove the entire `"email": "{{authorEmail}}"` line from the generated plugin.json output** (including the trailing comma if it becomes the last property in the author object). Do not emit `"email": ""` — an empty string fails email format validation.
 Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "keyword2", "keyword3"` (quoted, comma-separated).
 
 **Step 4 -- engine-config.json.** Write assembled config as formatted JSON to `{OUTPUT_DIR}/engine-config.json`.
@@ -241,5 +241,7 @@ Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`:
 | `plugin-json.tmpl` | Plugin manifest |
 | `readme-template.md.tmpl` | Plugin README |
 | `engine-config-schema.json` | Config validation schema |
+| `preset-schema.json` | Domain preset validation schema |
+| `plugin-manifest-schema.json` | Plugin manifest validation schema |
 
 Domain presets at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/domain-presets/`: `legal-research.json`, `market-intelligence.json`, `academic-research.json`, `osint-investigation.json`, `technical-due-diligence.json`.
