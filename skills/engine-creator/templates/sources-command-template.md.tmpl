@@ -1,0 +1,38 @@
+---
+description: "Display source hierarchy and configuration for {{engineDisplayName}}"
+allowed-tools: ["Read"]
+---
+
+# {{engineDisplayName}} — Source Configuration
+
+Display the source credibility hierarchy, preferred sites, excluded sources, search templates, and filters configured for this research engine.
+
+## Source Credibility Hierarchy
+
+{{sourceHierarchyTable}}
+
+## Preferred Sites
+
+The following domains are prioritized during web searches:
+
+{{preferredSites}}
+
+## Excluded Sources
+
+The following domains or source types are never used:
+
+{{excludedSources}}
+
+## Search Templates
+
+Pre-configured search query patterns with runtime placeholder substitution:
+
+{{searchTemplatesTable}}
+
+## Filters
+
+{{filters}}
+
+---
+
+*Source configuration is defined in the engine's `engine-config.json`. To modify, edit the config and regenerate or update the engine.*

@@ -1,0 +1,52 @@
+---
+description: "Launch {{engineDisplayName}} for domain-specialized deep research"
+argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve]"
+allowed-tools: Task, WebFetch, WebSearch, Write, Read, Edit, Glob, Grep
+---
+
+# {{engineDisplayName}} — Research Command
+
+Launch a domain-specialized multi-agent research system for {{domain}} research. The system uses tiered research depth, iterative search refinement, cross-agent coordination, and structured confidence scoring to produce professional-grade research outputs.
+
+This engine specializes in {{domain}} research for {{audience}}.
+
+## Usage
+
+- `/research [topic]` -- Standard tier (default)
+- `/research [topic] --quick` -- Quick tier: fast factual lookup
+- `/research [topic] --deep` -- Deep tier: full multi-agent pipeline
+- `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds
+- `/research [topic] --approve` -- Pause for user approval after planning phase
+
+## Phase 0: Tier Detection & Configuration
+
+Parse tier from `$ARGUMENTS`:
+- If `--quick` is present, set tier to Quick
+- If `--standard` is present, set tier to Standard
+- If `--deep` is present, set tier to Deep
+- If `--comprehensive` is present, set tier to Comprehensive
+- If `--approve` is present, pause after planning phase for user approval
+- Otherwise, default to Standard tier
+- Strip flag tokens from `$ARGUMENTS` to derive the research topic
+
+Derive configuration:
+- `TOPIC_SLUG` from topic: lowercase, hyphenate spaces, strip punctuation
+- `RUN_TS` as `YYYY-MM-DD_HHMMSS_ET` (Eastern Time via bash: `TZ='America/New_York' date '+%Y-%m-%d_%H%M%S_ET'`)
+- `BASE_DIR="02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}"`
+- All files and directories live under `BASE_DIR`
+
+## Tier Configuration
+
+{{tierSummary}}
+
+## Research Engine Skill
+
+Follow the research engine skill at `${CLAUDE_PLUGIN_ROOT}/skills/{{skillDirName}}/SKILL.md`.
+
+The skill file contains the complete multi-phase research pipeline, agent definitions, source strategy, quality framework, and output structure for this engine. Execute all phases as defined there.
+
+## Execution
+
+Parse the tier from arguments, configure paths, then hand off to the skill file for full pipeline execution.
+
+Starting {{engineDisplayName}} research system...
