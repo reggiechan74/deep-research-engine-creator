@@ -1,0 +1,546 @@
+---
+name: {{engineDisplayName}} Research Engine
+description: >-
+  This skill should be used when the user invokes the /research command or asks about
+  {{domain}} research. It provides a complete multi-agent research pipeline specialized
+  for {{domain}}. The engine conducts wide and deep research using tiered research depth,
+  iterative search refinement, cross-agent coordination, and structured confidence scoring
+  to produce professional-grade research outputs for {{audience}}.
+version: {{engineVersion}}
+---
+
+# {{engineDisplayName}} Research Engine
+
+Launch a comprehensive multi-agent research system specialized for **{{domain}}** research,
+serving **{{audience}}**.
+
+This engine implements a four-phase research pipeline with tier-based depth routing. It is
+fully self-contained -- no external research plugin dependencies are required. All protocols,
+agent definitions, quality standards, and output specifications are defined in this file.
+
+## Usage
+
+- `/research [topic]` -- Standard tier (default): {{standardTierDescription}}
+- `/research [topic] --quick` -- Quick tier: {{quickTierDescription}}
+- `/research [topic] --deep` -- Deep tier: {{deepTierDescription}}
+- `/research [topic] --comprehensive` -- Comprehensive tier: {{comprehensiveTierDescription}}
+- `/research [topic] --outline-only` -- Planning phase only (produces outline, then stops)
+- `/research [topic] --approve` -- Pause for user approval after Phase 1 before proceeding
+
+---
+
+## Research Architecture
+
+This engine implements a **four-phase research system** with tier-based depth routing:
+
+1. **Phase 0: Tier Detection** -- Parse flags, configure paths and depth
+2. **Phase 1: Research Planning** -- Strategic framework development and agent task design
+3. **Phase 2: Parallel Research** -- Multiple specialist agents research simultaneously with iterative refinement
+4. **Phase 3: Synthesis** -- Multi-source integration, contradiction resolution, and gap analysis
+5. **Phase 4: Professional Reporting** -- Comprehensive report generation with consolidated bibliography
+
+### Tier Configuration
+
+| Tier | Planning | Research Agents | Synthesis | Report | User Gate |
+|------|----------|----------------|-----------|--------|-----------|
+{{tierConfigTable}}
+
+---
+
+## Phase 0: Tier Detection & Global Configuration
+
+Parse tier from `$ARGUMENTS`:
+
+- If `--quick` is present, set tier to **Quick**
+- If `--standard` is present, set tier to **Standard**
+- If `--deep` is present, set tier to **Deep**
+- If `--comprehensive` is present, set tier to **Comprehensive**
+- If `--outline-only` is present, set tier to Standard but stop after Phase 1
+- If `--approve` is present, pause after Phase 1 for user approval
+- Otherwise, default to **Standard** tier
+- Strip flag tokens from `$ARGUMENTS` to derive the research topic
+
+### Derive Configuration
+
+```
+TOPIC_SLUG  = lowercase topic, hyphenate spaces, strip punctuation
+RUN_TS      = YYYY-MM-DD_HHMMSS_ET (Eastern Time via bash: TZ='America/New_York' date '+%Y-%m-%d_%H%M%S_ET')
+BASE_DIR    = "02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}"
+ENGINE_ID   = "{{engineName}}"
+```
+
+All files and directories live under `BASE_DIR`. Use `{{engineName}}` as prefix in
+file naming where engine identification is needed. Never restate the prompt in chat;
+write long data to files and keep chat responses concise.
+
+---
+
+## Global Standards
+
+Apply to ALL agents across ALL tiers. These standards are non-negotiable and must be
+followed by every agent in the pipeline.
+
+### Confidence Scoring Framework
+
+```
+HIGH        (●●●): {{confidenceHigh}}
+MEDIUM      (●●○): {{confidenceMedium}}
+LOW         (●○○): {{confidenceLow}}
+SPECULATIVE (○○○): {{confidenceSpeculative}}
+```
+
+**Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
+claims MUST be HIGH confidence or explicitly flagged as exceptions. {{minimumEvidence}}
+
+### Source Credibility Hierarchy
+
+```
+Tier 1 ({{tier1Name}}):  {{tier1Sources}}
+Tier 2 ({{tier2Name}}):  {{tier2Sources}}
+Tier 3 ({{tier3Name}}):  {{tier3Sources}}
+Tier 4 ({{tier4Name}}):  {{tier4Sources}}
+Tier 5 ({{tier5Name}}):  {{tier5Sources}}
+```
+
+**Rule:** No HIGH confidence claim can rest solely on Tier 4-5 sources. At minimum,
+one Tier 1-3 source is required for any HIGH confidence assertion.
+
+### Citation & Evidence Standards
+
+- **Citation format:** {{citationStandard}}
+- Use numbered footnotes `[^1]`, `[^2]`, etc. for inline source references
+- Use citation IDs by agent type: `[W-01]` (web), `[E-01]` (expert), `[I-01]` (intel)
+- Master bibliography maps IDs to full citations with clickable URLs
+- Do not repeat full citations in chat; use IDs and defer to bibliography files
+- **Evidence rules:** No high-impact claim without 2+ independent sources, or mark as LOW confidence
+- **Adversarial sweep:** Always look for refutations, critiques, failure cases, and contradictory data
+- Log contradictions in methodology file
+
+### Validation Rules
+
+{{validationRules}}
+
+### Structured Output Standards
+
+- Use claims/evidence/confidence tables for all findings
+- Log queries, engines, and filters to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
+- Save claims tables per agent as `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
+- Each claims table row must include: Claim | Evidence | Confidence Tier | Source IDs | Source Credibility Tier
+
+### Context Discipline
+
+- Summarize sources immediately; per-source abstracts of 120 words or fewer; use IDs not full citations in chat
+- Each agent chat response of 500 tokens or fewer; avoid meta narration
+- Pass-based workflow: Pass 1 (initial sweep + notes), Pass 2 (synthesis of top claims/gaps), Pass 3 (targeted follow-up on gaps)
+- Before each pass, reload only outline + top notes to manage context window
+- Abort conditions: stop recursion when no new credible sources after 2 alternate branches or depth cap reached
+- Note all stops and aborts in methodology log
+
+---
+
+## Search Query Generation Protocol
+
+For each research question, generate a minimum of 4 queries before searching:
+
+1. **Direct query** -- Core terminology and primary keywords for the question
+2. **Synonym variant** -- Alternative terms, {{domain}}-specific jargon, regional naming conventions
+3. **Adversarial** -- "problems with [X]", "criticism of [X]", "failure of [X]", "[X] controversy"
+4. **Expert-source targeted** -- `site:` filters for preferred authoritative domains
+
+### Preferred Sites for Targeted Queries
+
+{{preferredSites}}
+
+### Domain-Specific Search Templates
+
+{{additionalSearchTemplates}}
+
+Additional queries may be generated for geographic variants, temporal slices, or
+domain-specific databases as the topic demands. All queries must be logged to
+`BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md` with timestamps and result counts.
+
+---
+
+## Iterative Search-Assess-Refine Protocol
+
+Each Phase 2 agent follows this protocol for each assigned research question:
+
+```
+For each assigned research question:
+
+  Pass 1 -- SEARCH: Execute diversified query set (4+ queries per question)
+    - Apply Search Query Generation Protocol
+    - Cast wide net across source types and credibility tiers
+    - Record all queries and results in Methodology_Log.md
+
+  Pass 2 -- ASSESS: Evaluate sufficiency
+    - Are there 2+ independent sources for key claims?
+    - Are there unanswered sub-questions?
+    - Are there contradictions needing resolution?
+    - Score current evidence against Confidence Scoring Framework
+
+  Pass 3 -- REFINE (if gaps found):
+    - Generate targeted follow-up queries addressing specific gaps
+    - Execute search with refined queries
+    - Assess again against sufficiency criteria
+    - Max {{maxIterations}} iterations per research question
+
+  ABORT when:
+    - No new credible sources after 2 alternate query branches
+    - Depth cap reached ({{maxIterations}} iterations)
+    - Topic branch determined to be outside engine scope
+
+  LOG: Each iteration recorded in Methodology_Log.md with:
+    - Queries executed (with engine/filters)
+    - Results found (count, top sources)
+    - Sufficiency assessment
+    - Decision (continue, refine, or abort)
+```
+
+---
+
+## Cross-Agent Coordination Protocol
+
+To prevent duplicate work and maximize coverage across parallel research agents:
+
+- **Shared file:** `BASE_DIR/[TOPIC_SLUG]_Shared_Sources.md`
+- **Format:** table with columns `| URL | Title | Relevance | Agent_ID | Timestamp |`
+- Each Phase 2 agent: append high-value discoveries immediately after finding them
+- Each Phase 2 agent: read Shared_Sources.md before starting each new search branch
+- Skip already-covered sources; prioritize coverage gaps
+- Create Shared_Sources.md if it does not exist on first write
+
+---
+
+## Failure Recovery Protocol
+
+```
+- Agent timeout with no output       --> Log gap in methodology file; proceed with remaining agents
+- Agent produces no useful findings   --> Record gap; synthesis agent prioritizes gap-closing
+- All agents fail on research question --> Flag as UNRESEARCHABLE with explanation
+- Cross-agent contradictions          --> Synthesis runs dedicated reconciliation sub-task
+- User reports factual error          --> Trigger targeted verification mini-search
+```
+
+---
+
+## Sub-Agent System
+
+The {{engineDisplayName}} research system uses these available sub-agents:
+
+{{subAgentList}}
+
+Each sub-agent type provides different capabilities matched to its pipeline role. The
+planning and synthesis specialists are fixed roles; research agents are domain-specialized
+instances configured for this engine's specific focus areas.
+
+---
+
+## Execution Strategy -- Quick Tier
+
+If `--quick` detected, deploy a SINGLE agent (**{{quickAgentId}}**) with the following
+instructions:
+
+**Domain:** {{domain}}
+
+**Instructions:**
+- Conduct focused web research on the topic within the {{domain}} domain
+- Apply Search Query Generation Protocol (minimum 4 query types per question)
+- Apply Iterative Search-Assess-Refine Protocol (max 2 iterations)
+- Apply Global Standards for evidence quality and confidence scoring
+- Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
+- Note source credibility tier (1-5) for each source used
+- Produce inline summary directly in chat response (no file output structure needed)
+- Format: `## Summary | ## Key Findings (with confidence) | ## Sources | ## Limitations`
+
+After deploying the quick agent, skip all remaining phases.
+
+---
+
+## Execution Strategy -- Standard / Deep / Comprehensive Tiers
+
+### Phase 1: Strategic Research Planning
+
+Deploy **research-planning-specialist** with instructions to:
+
+- Analyze {{domain}} research topic complexity, scope, and domain requirements
+- Create systematic research framework mapping key investigation areas
+- Build scope grid:
+  - Core research questions
+  - Sub-questions and hypotheses
+  - Dissenting angles and contrarian viewpoints
+  - Geographic and temporal slices relevant to {{domain}}
+- Identify optimal source types, authorities, and investigation methods
+- Rank sources: primary > secondary > tertiary per the Source Credibility Hierarchy
+- Design specific task assignments for downstream agents by question/region/era/counterposition to reduce overlap
+- Establish quality standards, verification protocols, and synthesis strategies
+- Generate research timeline and dependency mapping
+- Create output specifications and integration protocols
+- Include specific agent assignments, methodologies, and quality standards in the outline
+- Create the foundation document that all subsequent research agents will read and follow
+- Add gap-closing loop plan to revisit open questions after initial synthesis
+- Save outline to `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+- Output format (300 tokens or fewer in chat): `## Focus | ## Scope Grid | ## Tasking | ## Risks/Gaps | ## Files Written`
+
+**User Gates:**
+- If `--outline-only`: Stop here. Present outline summary and exit.
+- If `--comprehensive` OR `--approve`: Present outline to user for approval before proceeding to Phase 2.
+
+---
+
+### Phase 2: Parallel Research Execution
+
+Deploy research agents simultaneously per tier configuration. Each agent operates
+independently but coordinates through Shared_Sources.md.
+
+{{agentDeploymentBlocks}}
+
+#### Common Agent Requirements
+
+Every Phase 2 research agent MUST:
+
+1. **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md` AND `BASE_DIR/[TOPIC_SLUG]_Shared_Sources.md` (create Shared_Sources.md if it does not exist)
+2. Follow assigned research domains and methodologies from the outline
+3. Apply Search Query Generation Protocol (minimum 4 query types per research question)
+4. Apply Iterative Search-Assess-Refine Protocol (max {{maxIterations}} iterations per question)
+5. Append high-value sources to `Shared_Sources.md` as discovered
+6. Apply domain-specific focus: {{agentSpecialization}}
+7. Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) for every claim
+8. Note source credibility tier (1-5) for each source used
+9. Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md`
+10. Save claims table: `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
+11. Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
+12. Apply Global Standards and outline quality standards
+13. Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+
+---
+
+### Phase 3: Research Synthesis
+
+After all Phase 2 research agents complete, deploy the **synthesis-specialist** with
+instructions to:
+
+- **FIRST ACTION**: Read the research outline file `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+- Compare planned research coverage against actual research execution
+- Read ALL agent output files: results, claims tables, bibliographies, shared sources
+- Integrate findings from all research agents into coherent knowledge framework
+- Cross-reference facts and claims across multiple independent sources
+- Mark claims with confidence scores using the Confidence Scoring Framework
+- Resolve contradictions and inconsistencies in research findings
+- Generate meta-insights and higher-level implications
+- Create unified understanding from fragmented information streams
+- Note gaps between planned and executed research for the reporting agent
+- {{synthesisInstructions}}
+- **Comprehensive tier only:** Propose targeted follow-up searches for uncovered gaps and dispatch mini-search tasks (200 tokens or fewer per gap) with results saved as new claim rows and bibliography entries
+- Apply outline-specified synthesis protocols and quality standards
+- Save synthesis to `BASE_DIR/[TOPIC_SLUG]_Synthesis_Report.md`
+- Output format (400 tokens or fewer in chat): `## Coverage Check | ## Integrated Findings (7 bullets or fewer, with IDs + confidence) | ## Conflicts/Confidence | ## Gaps/Follow-ups | ## Files Written`
+
+---
+
+### Phase 4: Professional Reporting
+
+After synthesis completion, deploy the **research-reporting-specialist** with instructions to:
+
+- Reference original research objectives and report specifications from the outline
+- Transform synthesized findings into comprehensive professional report
+- Create executive summary with key findings and strategic recommendations
+- Develop structured content with logical flow and narrative coherence
+- Include actionable implementation guidelines and practical applications
+- Reporting tone: {{reportingTone}}
+
+#### Report Sections
+
+The final report MUST include these sections in order:
+
+{{reportSections}}
+
+#### Citation Requirements
+
+- **USE FOOTNOTES**: Include numbered footnote citations throughout the report: `[^1]`, `[^2]`, etc.
+- Place footnotes at end of each major section with full citations and clickable URLs
+- Use {{citationStandard}} format throughout
+- **BIBLIOGRAPHY CONSOLIDATION**: Create master bibliography file: `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`
+- Read all agent bibliography files and consolidate
+- Deduplicate using Bibliography Deduplication Rules (below)
+- Organize by source type and credibility tier
+- Include source attribution (which agent/method found each source)
+- Cross-reference footnote numbers with master bibliography entries
+
+#### Reporting Standards
+
+- Include methodology section referencing the original research outline
+- Document any deviations from planned research approach
+- Add limitations/risks section and "so what" analysis tied to decision impact
+- Note any deviations from planned approach identified during synthesis
+- Save report to `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md`
+- Output format (500 tokens or fewer in chat): `## Executive Brief | ## Key Findings (with IDs + confidence) | ## Recommendations | ## Limitations/Risks | ## Files Written`
+
+Now executing research deployment...
+
+---
+
+## File Output Structure
+
+Research reports will be saved to:
+
+```
+02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}/
+├── [TOPIC_SLUG]_Research_Outline.md
+├── [TOPIC_SLUG]_Shared_Sources.md
+{{fileStructure}}
+├── [TOPIC_SLUG]_Methodology_Log.md
+├── [TOPIC_SLUG]_Synthesis_Report.md
+├── [TOPIC_SLUG]_Comprehensive_Report.md
+└── [TOPIC_SLUG]_Master_Bibliography.md
+```
+
+File naming follows the convention: {{fileNaming}}
+
+---
+
+## Key Workflow Features
+
+- **Planning agent creates outline first** -- all downstream agents read it as their first action, ensuring coordinated coverage
+- **Iterative Search-Assess-Refine loops** prevent one-shot shallow research; each question gets up to {{maxIterations}} refinement passes
+- **Cross-agent Shared_Sources.md** prevents duplicate work and maximizes coverage across parallel agents
+- **Individual bibliography creation** with fault tolerance -- if one agent fails, other citations are preserved
+- **Gap-closing loop after synthesis** (Comprehensive tier) -- targeted follow-up searches for uncovered gaps
+- **Methodology logs** record every search query, engine, filter, and assessment for reproducibility
+- **Confidence scoring on every claim** using the four-tier framework (HIGH/MEDIUM/LOW/SPECULATIVE)
+- **Source credibility hierarchy** enforces evidence quality -- no HIGH confidence claim on Tier 4-5 sources alone
+- **Tier-based depth routing** matches research effort to topic complexity
+- **Domain specialization** -- all agents operate within {{domain}} context, applying field-specific knowledge and source preferences
+- **Structured output standards** ensure consistent, parseable research artifacts across all agents
+
+---
+
+## Bibliography & Footnote Standards
+
+### In-Text Citations
+
+- Use numbered footnotes for immediate source reference: `[^1]`, `[^2]`, etc.
+- Sequential numbering per document (not per section)
+- Place footnote markers immediately after relevant statements
+- Example: `According to the report[^1], the market grew at 15% CAGR.`
+
+### Footnote Placement
+
+- Place footnotes at the end of each major section for immediate context
+- Use {{citationStandard}} format in footnotes with clickable URLs
+- Cross-reference master bibliography when applicable
+
+### Master Bibliography
+
+- All citations follow {{citationStandard}} format with clickable URLs
+- Include complete source information with access dates
+- Organize by source type and credibility tier
+- Cross-reference footnote numbers where sources appear in reports
+- Include source attribution indicating which agent discovered each source
+
+### Bibliography Deduplication Rules
+
+- Same URL --> merge, keep earliest discovery timestamp
+- Same content, different URLs --> note both, mark canonical
+- Different editions/versions --> keep most recent unless historical context needed
+- Conflicting information from same source --> note both dates and what changed
+
+---
+
+## Context Management Guidelines
+
+Keep each agent's working set lean to maximize effective research within token budgets.
+
+### Token Budgets (approximate)
+
+```
+Planning:       {{planningBudget}} tokens output max
+Research:       {{researchBudget}} tokens output max (per agent, files + chat)
+Synthesis:      {{synthesisBudget}} tokens output max
+Reporting:      {{reportingBudget}} tokens output max
+```
+
+### Context Efficiency Rules
+
+- Always read the outline first; then load only the question-specific files/notes needed
+- Use structured outputs (tables, bullet summaries, query logs) instead of long prose to minimize token footprint
+- Chunk long-source notes: summarize per source immediately after reading; store extended quotes in per-source appendices if needed
+- Use citation IDs (`[W-01]`, `[E-01]`, `[I-01]`) and refer to them instead of repeating full citations
+- For long runs, operate in passes: (1) initial sweep + notes, (2) synthesis of top claims/gaps, (3) targeted follow-up on gaps, resetting context to only outline + top notes each pass
+- When a document is large, capture a condensed abstract, key data points, and contradictions; keep raw text out of the main context
+- Encourage tool-side chunked reading (page/section-level) and avoid reloading full documents once summarized
+
+---
+
+## Domain Preamble
+
+{{globalPreamble}}
+
+This preamble applies to all agents in the pipeline. Every research action, source
+evaluation, and analytical judgment should be informed by this domain context. Agents
+should apply {{domain}}-specific knowledge, terminology, and analytical frameworks
+appropriate to this field. All research outputs should be relevant and actionable for
+{{audience}}.
+
+---
+
+## Placeholder Reference
+
+This section documents all template variables used in this skill file. When the engine
+generator processes this template, each placeholder is replaced with values from the
+engine configuration (engine-config.json).
+
+### Engine Metadata
+- `{{engineName}}` -- kebab-case plugin name for directory and file naming
+- `{{engineDisplayName}}` -- human-readable engine name for display
+- `{{engineVersion}}` -- semantic version of the engine configuration
+- `{{domain}}` -- short description of the research domain
+- `{{audience}}` -- target users for this research engine
+
+### Scope Configuration
+- `{{standardTierDescription}}` -- description of standard tier capabilities
+- `{{quickTierDescription}}` -- description of quick tier capabilities
+- `{{deepTierDescription}}` -- description of deep tier capabilities
+- `{{comprehensiveTierDescription}}` -- description of comprehensive tier capabilities
+
+### Source Strategy
+- `{{tier1Name}}` / `{{tier1Sources}}` -- Tier 1 credibility definition
+- `{{tier2Name}}` / `{{tier2Sources}}` -- Tier 2 credibility definition
+- `{{tier3Name}}` / `{{tier3Sources}}` -- Tier 3 credibility definition
+- `{{tier4Name}}` / `{{tier4Sources}}` -- Tier 4 credibility definition
+- `{{tier5Name}}` / `{{tier5Sources}}` -- Tier 5 credibility definition
+- `{{additionalSearchTemplates}}` -- domain-specific search query templates
+- `{{preferredSites}}` -- prioritized domains for web searches
+
+### Agent Pipeline
+- `{{tierConfigTable}}` -- markdown table of tier configurations
+- `{{quickAgentId}}` -- agent ID used for the quick tier
+- `{{agentDeploymentBlocks}}` -- per-agent deployment instructions
+- `{{subAgentList}}` -- list of available sub-agent types
+- `{{agentSpecialization}}` -- domain-specific agent focus areas
+
+### Quality Framework
+- `{{confidenceHigh}}` -- criteria for HIGH confidence scoring
+- `{{confidenceMedium}}` -- criteria for MEDIUM confidence scoring
+- `{{confidenceLow}}` -- criteria for LOW confidence scoring
+- `{{confidenceSpeculative}}` -- criteria for SPECULATIVE confidence scoring
+- `{{minimumEvidence}}` -- minimum evidence threshold for claim inclusion
+- `{{validationRules}}` -- validation rules applied during synthesis
+- `{{citationStandard}}` -- citation format and referencing style
+
+### Output Structure
+- `{{reportSections}}` -- ordered list of report section headings
+- `{{fileStructure}}` -- per-agent file output entries
+- `{{fileNaming}}` -- file naming convention template
+
+### Prompts
+- `{{globalPreamble}}` -- domain-wide context prepended to all agent prompts
+- `{{synthesisInstructions}}` -- additional instructions for the synthesis agent
+- `{{reportingTone}}` -- desired tone and style for the final report
+
+### Advanced Configuration
+- `{{maxIterations}}` -- maximum research-refine cycles per question
+- `{{planningBudget}}` -- token budget for planning phase
+- `{{researchBudget}}` -- token budget for research phase (per agent)
+- `{{synthesisBudget}}` -- token budget for synthesis phase
+- `{{reportingBudget}}` -- token budget for reporting phase
