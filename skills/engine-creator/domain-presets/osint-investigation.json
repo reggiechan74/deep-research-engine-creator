@@ -1,6 +1,7 @@
 {
   "presetName": "OSINT Investigation",
   "presetDescription": "Pre-configured for open-source intelligence gathering and analysis. Suitable for corporate due diligence, person-of-interest research, digital footprint analysis, and network mapping. Optimized for multi-source corroboration with strict confidence attribution standards and temporal consistency validation.",
+  "keywords": ["osint", "open-source-intelligence", "digital-footprint", "investigation", "correlation"],
   "sourceStrategy": {
     "credibilityTiers": {
       "tier1": {

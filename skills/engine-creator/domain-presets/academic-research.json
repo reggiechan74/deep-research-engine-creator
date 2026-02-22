@@ -1,6 +1,7 @@
 {
   "presetName": "Academic Research",
   "presetDescription": "Pre-configured for systematic literature review, meta-analysis preparation, and academic research synthesis across disciplines. Suitable for dissertation literature reviews, grant proposal background research, and evidence-based policy analysis. Optimized for peer-reviewed source verification with APA 7th citation standards.",
+  "keywords": ["academic", "peer-reviewed", "systematic-review", "literature-review", "research"],
   "sourceStrategy": {
     "credibilityTiers": {
       "tier1": {

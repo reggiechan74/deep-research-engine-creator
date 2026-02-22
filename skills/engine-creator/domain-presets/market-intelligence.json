@@ -1,30 +1,41 @@
 {
   "presetName": "Market Intelligence",
   "presetDescription": "Pre-configured for market research, competitive analysis, and industry intelligence. Suitable for market sizing, competitive landscape mapping, trend analysis, and strategic opportunity assessment. Optimized for data-driven analysis with multiple independent source verification.",
+  "keywords": ["market", "competitive-analysis", "financial", "industry-trends", "market-sizing"],
   "sourceStrategy": {
     "credibilityTiers": {
       "tier1": {
         "name": "Primary Market Data",
         "sources": [
-          "SEC filings (10-K, 10-Q, 8-K, S-1, proxy statements)",
-          "Annual reports and investor presentations",
-          "Government statistics (Bureau of Labor Statistics, Census Bureau, Statistics Canada)",
+          "SEC EDGAR filings (sec.gov — 10-K, 10-Q, 8-K, S-1, proxy statements)",
+          "SEDAR+ corporate filings (sedarplus.ca — Canada)",
+          "Federal Reserve FRED economic data (fred.stlouisfed.org)",
+          "Bureau of Labor Statistics (bls.gov)",
+          "Statistics Canada (statcan.gc.ca)",
+          "Company annual reports and investor presentations (10-K filings)",
           "Central bank publications (Federal Reserve, Bank of Canada)",
-          "SEDAR+ corporate filings (Canada)",
-          "Patent and trademark office databases"
+          "Census Bureau data (census.gov)",
+          "Patent and trademark office databases",
+          "Gartner research and Magic Quadrants (subscription required)",
+          "Forrester Research reports (subscription required)"
         ]
       },
       "tier2": {
         "name": "Authoritative Analysis",
         "sources": [
+          "Google Finance (google.com/finance)",
+          "Yahoo Finance (finance.yahoo.com)",
+          "World Bank Open Data (data.worldbank.org)",
+          "OECD Data (data.oecd.org)",
+          "Census Bureau economic data (census.gov)",
           "McKinsey Global Institute reports",
           "Deloitte Insights and industry outlooks",
           "BCG Henderson Institute publications",
-          "Gartner research and Magic Quadrants",
           "Major investment bank research (Goldman Sachs, Morgan Stanley, JP Morgan)",
-          "IBISWorld industry reports",
           "Statista verified market data",
-          "Forrester Research reports"
+          "IBISWorld industry reports (subscription required)",
+          "PitchBook data and analytics (subscription required)",
+          "CB Insights research (subscription required)"
         ]
       },
       "tier3": {
@@ -60,14 +71,18 @@
     },
     "preferredSites": [
       "sec.gov",
-      "bloomberg.com",
-      "statista.com",
-      "ibisworld.com",
+      "sedarplus.ca",
+      "fred.stlouisfed.org",
       "bls.gov",
       "census.gov",
-      "sedarplus.ca",
-      "gartner.com",
+      "data.worldbank.org",
+      "data.oecd.org",
+      "finance.yahoo.com",
+      "statista.com",
       "mckinsey.com",
+      "bloomberg.com",
+      "gartner.com",
+      "ibisworld.com",
       "pitchbook.com"
     ],
     "excludedSources": [

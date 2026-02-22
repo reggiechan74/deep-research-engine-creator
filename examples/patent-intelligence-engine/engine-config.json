@@ -8,7 +8,13 @@
     "version": "1.0.0",
     "mode": "self-contained",
     "createdAt": "2026-02-21T19:00:00-05:00",
-    "createdBy": "deep-research-engine-creator v1.0.0"
+    "createdBy": "deep-research-engine-creator/1.0.0",
+    "description": "A domain-specialized research engine for intellectual property and patent landscape analysis",
+    "author": {
+      "name": "Deep Research Engine Creator",
+      "email": ""
+    },
+    "keywords": ["patent", "intellectual-property", "landscape-analysis", "prior-art", "freedom-to-operate"]
   },
   "sampleQuestions": [
     "What is the patent landscape for solid-state battery technology?",

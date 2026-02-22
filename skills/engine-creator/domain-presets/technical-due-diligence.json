@@ -1,6 +1,7 @@
 {
   "presetName": "Technical Due Diligence",
   "presetDescription": "Pre-configured for technology assessment, patent landscape analysis, and technical due diligence investigations. Suitable for M&A technology evaluation, IP portfolio assessment, standards compliance analysis, and competitive technology benchmarking. Optimized for patent verification and technical specification accuracy.",
+  "keywords": ["technical", "due-diligence", "patent", "standards-compliance", "ip-landscape"],
   "sourceStrategy": {
     "credibilityTiers": {
       "tier1": {

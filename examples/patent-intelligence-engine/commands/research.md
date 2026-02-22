@@ -47,7 +47,7 @@ Derive configuration:
 
 ## Research Engine Skill
 
-Follow the research engine skill at `${CLAUDE_PLUGIN_ROOT}/skills/patent-research/SKILL.md`.
+Follow the research engine skill at `${CLAUDE_PLUGIN_ROOT}/skills/patent-intelligence-engine/SKILL.md`.
 
 The skill file contains the complete multi-phase research pipeline, agent definitions, source strategy, quality framework, and output structure for this engine. Execute all phases as defined there.
 

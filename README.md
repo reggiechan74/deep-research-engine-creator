@@ -14,7 +14,7 @@ claude --plugin-dir ./deep-research-engine-creator
 /create-engine --preset market
 
 # 3. Answer the wizard questions — domain, sources, agents, quality, output
-#    The wizard walks you through 8 sections with smart defaults.
+#    The wizard walks you through 9 sections with smart defaults.
 
 # 4. Validate the generated engine
 /test-engine ./generated-engines/your-engine/
@@ -88,7 +88,7 @@ Self-contained engines include the complete research orchestration logic (planni
 
 ## The Wizard Interview
 
-The wizard uses progressive disclosure across 8 sections. When a domain preset is loaded, sections 3-8 are pre-filled with smart defaults that you can accept or customize.
+The wizard uses progressive disclosure across 9 sections. When a domain preset is loaded, sections 4-9 are pre-filled with smart defaults that you can accept or customize.
 
 | Section | What It Covers |
 |---------|----------------|
@@ -99,7 +99,8 @@ The wizard uses progressive disclosure across 8 sections. When a domain preset i
 | 5. Agent Pipeline | Basic (recommended defaults) or advanced (per-agent configuration of roles, models, tools) |
 | 6. Quality Framework | Confidence scoring levels, minimum evidence thresholds, validation rules, citation standard |
 | 7. Output Structure | Report sections, file naming templates, special deliverables (matrices, maps, etc.) |
-| 8. Advanced + Prompts | Optional: iteration limits, token budgets, custom agent prompts, global preamble |
+| 8. Advanced Configuration | Optional: iteration limits, token budgets, custom hooks, MCP integrations |
+| 9. Custom Prompts | Global preamble, per-agent prompt overrides, synthesis instructions, reporting tone |
 
 After all sections are complete, the wizard shows a full preview of the engine configuration and asks for confirmation before generating any files.
 

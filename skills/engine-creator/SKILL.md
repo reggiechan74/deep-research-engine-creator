@@ -16,15 +16,18 @@ Create domain-specialized deep-research engine plugins through a structured wiza
 
 ## Wizard Interview Protocol
 
-Guide the user through 8 sections sequentially. Use `AskUserQuestion` for every structured choice. Pre-fill sections 3-8 when a domain preset is selected. Skip re-asking confirmed pre-filled fields.
+Guide the user through 9 sections sequentially. Use `AskUserQuestion` for every structured choice. Pre-fill sections 4-9 when a domain preset is selected. Skip re-asking confirmed pre-filled fields.
 
 ### Section 1: Domain Identity
 
 1. **Engine name** -- Ask for kebab-case name (e.g. `patent-intelligence`). Validate pattern `^[a-z0-9]+(-[a-z0-9]+)*$`; suggest correction if invalid.
 2. **Domain description** -- "What field does this engine research?"
 3. **Target audience** -- "Who uses the research output?"
-4. **Domain preset** -- AskUserQuestion: Legal Research, Market Intelligence, Academic Research, OSINT Investigation, Technical Due Diligence, Custom (no preset). If preset selected, read from `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/domain-presets/{preset-name}.json` and pre-fill sections 3-8. Inform user: "Loaded the {preset} preset -- you can accept or customize defaults."
-5. **Output mode** -- AskUserQuestion: Self-contained (full pipeline, no dependencies) or Extension (overlay requiring base /deep-research plugin).
+4. **Engine description** -- Auto-derive default: "A domain-specialized research engine for {domain}". Show to user: "Engine description for plugin manifest: [default]. Accept or customize?" via AskUserQuestion.
+5. **Author** -- Attempt to read from git config: `git config user.name` and `git config user.email`. Show: "Author: {name} <{email}>. Accept or customize?" If git config unavailable, ask for name and email. These are optional — user can skip.
+6. **Keywords** -- Auto-derive from domain + question types. Show: "Suggested keywords: [list]. Accept or customize?" via AskUserQuestion.
+7. **Domain preset** -- AskUserQuestion: Legal Research, Market Intelligence, Academic Research, OSINT Investigation, Technical Due Diligence, Custom (no preset). If preset selected, read from `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/domain-presets/{preset-name}.json` and pre-fill sections 4-9. Inform user: "Loaded the {preset} preset -- you can accept or customize defaults."
+8. **Output mode** -- AskUserQuestion: Self-contained (full pipeline, no dependencies) or Extension (overlay requiring base /deep-research plugin).
 
 ### Section 2: Research Scope & Objectives
 
@@ -33,14 +36,14 @@ Guide the user through 8 sections sequentially. Use `AskUserQuestion` for every 
 3. **Temporal focus** -- AskUserQuestion: Current State Only, Historical + Current, Trend Forecasting, All Timeframes
 4. **Primary deliverable** -- AskUserQuestion: Briefing Document, Comprehensive Report, Analytical Assessment, Literature Review, Investigative Dossier, Custom
 
-### Section 2.5: Sample Research Questions
+### Section 3: Sample Research Questions
 
 1. Ask for 3-5 example research questions via AskUserQuestion text prompt.
 2. Analyze samples to auto-suggest: source types needed, agent specializations, search template patterns, output structure elements (e.g., comparison matrix for comparative questions).
 3. Present: "Based on your sample questions, I recommend..." with categorized suggestions.
 4. AskUserQuestion: Accept All, Customize, Skip.
 
-### Section 3: Source Strategy
+### Section 4: Source Strategy
 
 Show current hierarchy from preset or sample analysis; build from scratch if no preset.
 
@@ -50,13 +53,13 @@ Show current hierarchy from preset or sample analysis; build from scratch if no 
 4. **Filters** -- AskUserQuestion: No Filters, Language Only (ISO 639-1 codes), Geographic Only (country codes), Both.
 5. **Search templates** -- Show existing. AskUserQuestion: Accept Current, Add New, Modify, Remove.
 
-### Section 4: Agent Pipeline Design
+### Section 5: Agent Pipeline Design
 
 1. AskUserQuestion: **Basic** (recommended structure, confirm tier assignments) or **Advanced** (configure each agent individually).
 2. **Basic:** Show tier structure and agent list. AskUserQuestion: Accept, Add Agent, Remove Agent, Modify Agent.
 3. **Advanced:** Per agent ask: ID (kebab-case), role, sub-agent type (AskUserQuestion: general-purpose, expert-instructor, intelligence-analyst), model (AskUserQuestion: sonnet, opus, haiku), specialization instructions. Then ask tier assignments and follow-up round settings.
 
-### Section 5: Quality Framework
+### Section 6: Quality Framework
 
 Show preset values or defaults; ask to confirm or customize:
 
@@ -99,19 +102,19 @@ Use AskUserQuestion: "Generate a standalone Citation Verification Report?"
   - "Yes, for all sources" -- comprehensive audit
   - "No" -- skip verification report
 
-### Section 6: Output Structure
+### Section 7: Output Structure
 
 1. **Report sections** -- Show ordered list. AskUserQuestion: Accept, Add, Remove, Reorder.
 2. **File naming** -- Show template (e.g. `{date}_{topic_slug}_research_report.md`). Accept or customize.
 3. **Special deliverables** -- "Any special artifacts? (e.g., competitive matrix, patent family tree)" Free text or "None".
 
-### Section 7: Advanced Configuration
+### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
 2. If yes: max iterations (1-5, default 3), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
-### Section 8: Custom Prompts
+### Section 9: Custom Prompts
 
 1. AskUserQuestion: "Customize agent prompts?" Yes or No (use preset defaults).
 2. If yes: global preamble (free text), per-agent overrides (ask per agent: "Custom instructions for {role}?"), synthesis instructions, reporting tone.
@@ -125,7 +128,7 @@ After all sections complete:
 
 1. Assemble `engine-config.json` matching schema at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/engine-config-schema.json`.
 2. Set `schemaVersion` to `"1.0"`.
-3. Set `engineMeta.createdAt` using bash: `TZ='America/New_York' date -u '+%Y-%m-%dT%H:%M:%SZ'`. Never hardcode timestamps.
+3. Set `engineMeta.createdAt` using bash: `TZ='America/New_York' date '+%Y-%m-%dT%H:%M:%S%:z'`. Never hardcode timestamps.
 4. Set `engineMeta.createdBy` to `"deep-research-engine-creator/1.0.0"` and `version` to `"1.0.0"`.
 5. Derive `displayName` from engine name: kebab-case to Title Case.
 6. Fill unanswered optional fields with sensible defaults or omit.
@@ -143,7 +146,7 @@ Present to user before generating:
 4. Agent pipeline table: Agent ID, Role, Sub-agent Type, Model, Active Tiers
 5. Source hierarchy: tier names with top 3 sources each
 6. Report sections list
-7. Sample questions from section 2.5
+7. Sample questions from section 3
 
 Ask: "Ready to generate? Confirm or choose a section to modify." AskUserQuestion: Confirm and Generate, Modify a Section. If modifying, re-run that section, update config, re-preview.
 
@@ -158,6 +161,10 @@ Execute sequentially after user confirms.
 **Step 2 -- Create directories.** Under `OUTPUT_DIR`: `.claude-plugin/`, `commands/`, `agents/`, `skills/{skillDirName}/` (skillDirName = engineMeta.name).
 
 **Step 3 -- plugin.json.** Read `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/plugin-json.tmpl`, replace placeholders from engineMeta, write to `{OUTPUT_DIR}/.claude-plugin/plugin.json`.
+Replace `{{engineDescription}}` with `engineMeta.description` (default: "A domain-specialized research engine for {domain}").
+Replace `{{authorName}}` with `engineMeta.author.name` (default: empty string).
+Replace `{{authorEmail}}` with `engineMeta.author.email` (default: empty string).
+Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "keyword2", "keyword3"` (quoted, comma-separated).
 
 **Step 4 -- engine-config.json.** Write assembled config as formatted JSON to `{OUTPUT_DIR}/engine-config.json`.
 
@@ -167,7 +174,7 @@ Execute sequentially after user confirms.
 
 **Step 7 -- Agent files.** For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks. Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
-**Step 8 -- SKILL.md.** Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. Replace ALL placeholders:
+**Step 8 -- SKILL.md.** Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. For extension mode: before template substitution, verify the base `/deep-research` skill exists. Check `.claude/commands/deep-research.md` first, then `skills/*/SKILL.md` containing "deep-research". If found, set `{{baseSkillPath}}` to the discovered path. If not found, warn user: "Base /deep-research skill not found. Extension mode requires it. Generate as self-contained instead?" and offer AskUserQuestion. Replace ALL placeholders:
 - Simple values: direct substitution
 - Arrays (`{{reportSections}}`, `{{preferredSites}}`): markdown numbered list
 - Objects (`{{tierConfigTable}}`): markdown table rows
@@ -175,6 +182,33 @@ Execute sequentially after user confirms.
 - `{{subAgentList}}`: research-planning-specialist, synthesis-specialist, research-reporting-specialist, plus custom agents
 - `{{fileStructure}}`: per-agent file entries (Claims, Bibliography)
 - Missing optionals: sensible defaults or empty string
+
+#### Placeholder Derivation Rules
+
+Some placeholders are not direct config fields but are derived from config values. Apply these rules:
+
+| Placeholder | Derivation Rule |
+|---|---|
+| `{{quickTierDescription}}` | Build from `tiers.quick.agents`: "Single-agent lookup using [first agent's role]" |
+| `{{standardTierDescription}}` | Build from `tiers.standard.agents`: "[N] agents: [role1], [role2]" |
+| `{{deepTierDescription}}` | Build from `tiers.deep.agents`: "Full pipeline with [N] agents: [role1], [role2], [role3]" |
+| `{{comprehensiveTierDescription}}` | Build from `tiers.comprehensive.agents` + followUpRound: "All [N] agents + follow-up round" |
+| `{{agentSpecialization}}` | Concatenate all agent `specialization` strings, joined by "; " |
+| `{{quickAgentId}}` | First agent ID from `tiers.quick.agents` |
+| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (agent IDs), Synthesis (Yes/No), Report (Inline/Full), User Gate |
+| `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **[id]** (model: [model], type: [subagentType]) with specialization:\n\n[specialization]\n\n[promptOverride if present]" |
+| `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- [id] ([role])" |
+| `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
+| `{{verificationModeInstructions}}` | Expand from `citationManagement.verificationMode`: "none" → "Source verification is disabled. Trust agent-reported citations without independent verification."; "spot-check" → "Verify a random sample of HIGH-confidence citations (minimum 3 or 20% of HIGH citations, whichever is greater). Record verification results in Methodology_Log.md."; "comprehensive" → "Verify every cited source. Check URL accessibility, confirm source content supports the claim, and record all results in a dedicated verification pass." |
+| `{{deadLinkInstructions}}` | Expand from `citationManagement.deadLinkHandling`: "flag-only" → "Mark dead links with [DEAD LINK] tag in the bibliography. Do not attempt recovery."; "archive-fallback" → "Attempt Wayback Machine retrieval at https://web.archive.org/web/*/[URL]. If archived version found, use it and note [ARCHIVED: date] in bibliography. If not found, mark as [DEAD LINK]."; "exclude-from-high" → "Downgrade any claim that relies solely on unreachable sources from HIGH to MEDIUM confidence. Note the downgrade reason in the claims table." |
+| `{{verificationReportConfig}}` | If `verificationReport.enabled` is true: "Generate a standalone Citation Verification Report. Scope: [scope value]. Include summary statistics, per-citation verification table, issues found, and remediation recommendations." If false: "Verification report generation is disabled." |
+| `{{operationalLessons}}` | Default: "No entries yet — update after first research run with `/post-mortem`." |
+| `{{maxIterations}}` | From `advanced.maxIterationsPerQuestion` (default: 3) |
+| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 5) |
+| `{{planningBudget}}` | From `advanced.tokenBudgets.planning` (default: 2000) |
+| `{{researchBudget}}` | From `advanced.tokenBudgets.research` (default: 15000) |
+| `{{synthesisBudget}}` | From `advanced.tokenBudgets.synthesis` (default: 8000) |
+| `{{reportingBudget}}` | From `advanced.tokenBudgets.reporting` (default: 10000) |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 

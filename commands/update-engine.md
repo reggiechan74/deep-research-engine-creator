@@ -73,10 +73,13 @@ If confirmed, regenerate only the affected files based on what changed:
 
 | What Changed | Files to Regenerate |
 |---|---|
-| Source strategy, quality framework, output structure, or custom prompts | `skills/{name}/SKILL.md` |
-| Agent pipeline (agents added/removed/modified) | Agent `.md` files in `agents/` + `skills/{name}/SKILL.md` |
-| Engine metadata (name, description, version, mode) | `.claude-plugin/plugin.json` + `README.md` |
-| Any change at all | `README.md` (always regenerated) |
+| Source strategy | `skills/{name}/SKILL.md` + `commands/sources.md` |
+| Quality framework, output structure, or custom prompts | `skills/{name}/SKILL.md` |
+| Agent pipeline (agents added/removed/modified) | Agent `.md` files in `agents/` + `skills/{name}/SKILL.md` + `commands/research.md` |
+| Engine metadata (name, description, version, mode) | `.claude-plugin/plugin.json` + `README.md` + `commands/research.md` + `commands/sources.md` |
+| Mode change (self-contained ↔ extension) | **Full regeneration** of ALL files — SKILL.md template changes entirely |
+| Name change | Rename `skills/{old}/` → `skills/{new}/`, update all internal path references |
+| Any change at all | `README.md` + `engine-config.json` (always updated) |
 
 Use template files from `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/` for all regeneration.
 

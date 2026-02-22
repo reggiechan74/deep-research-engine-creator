@@ -23,7 +23,7 @@ Check `$ARGUMENTS` for a `--preset` flag. Map short names to preset files:
 If a preset is specified, read it from:
 `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/domain-presets/{preset-file}`
 
-This will pre-fill sections 3-8 of the wizard interview with smart defaults. Inform the user which preset was loaded.
+This will pre-fill sections 4-9 of the wizard interview with smart defaults. Inform the user which preset was loaded.
 
 ## 2. Load the Skill
 
@@ -38,13 +38,13 @@ Follow the **Wizard Interview Protocol** from the skill exactly:
 
 - **Section 1**: Domain Identity (name, description, audience, preset, output mode)
 - **Section 2**: Research Scope & Objectives (question types, geographic scope, temporal focus, deliverable)
-- **Section 2.5**: Sample Research Questions (collect 3-5 examples, auto-suggest configuration)
-- **Section 3**: Source Strategy (credibility tiers, preferred/excluded sources, filters, search templates)
-- **Section 4**: Agent Pipeline Design (basic or advanced agent configuration)
-- **Section 5**: Quality Framework (confidence scoring, evidence thresholds, validation rules, citation standard)
-- **Section 6**: Output Structure (report sections, file naming, special deliverables)
-- **Section 7**: Advanced Configuration (iterations, token budgets, hooks, MCP integrations)
-- **Section 8**: Custom Prompts (global preamble, per-agent overrides, synthesis instructions, tone)
+- **Section 3**: Sample Research Questions (collect 3-5 examples, auto-suggest configuration)
+- **Section 4**: Source Strategy (credibility tiers, preferred/excluded sources, filters, search templates)
+- **Section 5**: Agent Pipeline Design (basic or advanced agent configuration)
+- **Section 6**: Quality Framework (confidence scoring, evidence thresholds, validation rules, citation standard)
+- **Section 7**: Output Structure (report sections, file naming, special deliverables)
+- **Section 8**: Advanced Configuration (iterations, token budgets, hooks, MCP integrations)
+- **Section 9**: Custom Prompts (global preamble, per-agent overrides, synthesis instructions, tone)
 
 ## Key Rules
 

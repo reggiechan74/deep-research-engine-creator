@@ -36,10 +36,14 @@ base skill.
 
 Before executing any research, verify the base `/deep-research` skill is available:
 
-1. Check for the file `.claude/commands/deep-research.md` in the project root
+1. Check for the file `{{baseSkillPath}}` (verified at generation time)
 2. If the file exists, proceed with the overrides defined below
-3. If the file does NOT exist, stop and inform the user:
+3. If the file does NOT exist, try fallback locations:
+   - `.claude/commands/deep-research.md` in the project root
+   - Any installed plugin skill matching `skills/*/SKILL.md` that contains "deep-research" in its description
+4. If no base skill is found at any location, stop and inform the user:
    > "This engine requires the base `/deep-research` skill to be installed.
+   > Checked: {{baseSkillPath}} and fallback locations.
    > Please install it first, then re-run this command."
 
 Do not attempt to execute any research phases without the base skill present.
@@ -159,7 +163,7 @@ These prompts are injected into the base skill's agent instructions during execu
 To execute this extension engine, Claude must merge these overrides with the base
 `/deep-research` skill in the following order:
 
-1. **Read** the base deep-research skill (`.claude/commands/deep-research.md`)
+1. **Read** the base deep-research skill (`{{baseSkillPath}}`)
 2. **Replace** the Source Credibility Hierarchy section with the overrides above
 3. **Replace** the tier configuration table and agent deployment blocks with the
    Agent Pipeline Override above
@@ -196,6 +200,7 @@ with values from the engine configuration (engine-config.json).
 - `{{engineVersion}}` -- semantic version of the engine configuration
 - `{{domain}}` -- short description of the research domain
 - `{{audience}}` -- target users for this research engine
+- `{{baseSkillPath}}` -- verified path to the base deep-research skill (set at generation time)
 
 ### Source Strategy
 - `{{tier1Name}}` / `{{tier1Sources}}` -- Tier 1 credibility definition

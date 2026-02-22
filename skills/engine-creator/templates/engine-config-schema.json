@@ -78,6 +78,35 @@
           "type": "string",
           "description": "Identifier of the tool and version that generated this configuration.",
           "examples": ["deep-research-engine-creator/1.0.0"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Short description of the engine for plugin manifests and documentation.",
+          "examples": ["A domain-specialized research engine for patent landscape analysis"]
+        },
+        "author": {
+          "type": "object",
+          "description": "Author information for the plugin manifest. Optional — auto-populated from git config if available.",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Author's full name.",
+              "examples": ["Jane Smith"]
+            },
+            "email": {
+              "type": "string",
+              "description": "Author's email address.",
+              "format": "email",
+              "examples": ["jane@example.com"]
+            }
+          }
+        },
+        "keywords": {
+          "type": "array",
+          "description": "Keywords for the plugin manifest. Auto-derived from domain and question types if not specified.",
+          "items": { "type": "string" },
+          "examples": [["patent", "intellectual-property", "landscape-analysis"]]
         }
       }
     },
@@ -356,6 +385,8 @@
         "citationManagement": {
           "type": "object",
           "description": "Controls how citations are verified, validated, and reported",
+          "additionalProperties": false,
+          "required": ["verificationMode", "deadLinkHandling", "probeOnDiscovery"],
           "properties": {
             "verificationMode": {
               "type": "string",
@@ -399,6 +430,8 @@
             "verificationReport": {
               "type": "object",
               "description": "Configuration for the standalone citation verification report",
+              "additionalProperties": false,
+              "required": ["enabled"],
               "properties": {
                 "enabled": {
                   "type": "boolean",
@@ -592,7 +625,7 @@
       "properties": {
         "agents": {
           "type": "array",
-          "description": "Agent IDs activated for this tier. Must reference IDs defined in agentPipeline.agents.",
+          "description": "Agent IDs activated for this tier. Each ID MUST reference an id defined in agentPipeline.agents[]. The /test-engine command validates this cross-reference.",
           "items": {
             "type": "string"
           },

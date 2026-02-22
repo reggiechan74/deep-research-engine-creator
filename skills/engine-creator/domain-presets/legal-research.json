@@ -1,29 +1,37 @@
 {
   "presetName": "Legal Research",
   "presetDescription": "Pre-configured for legal research across case law, statutes, regulations, and judicial interpretation. Suitable for litigation support, regulatory compliance analysis, and legal memoranda preparation. Optimized for multi-jurisdictional analysis with Bluebook citation standards.",
+  "keywords": ["legal", "case-law", "statutory-analysis", "regulatory", "litigation"],
   "sourceStrategy": {
     "credibilityTiers": {
       "tier1": {
         "name": "Primary Legal Sources",
         "sources": [
-          "Westlaw case databases",
-          "LexisNexis legal research platform",
-          "CanLII (Canadian Legal Information Institute)",
-          "PACER (Public Access to Court Electronic Records)",
+          "CanLII (Canadian Legal Information Institute — canlii.org)",
+          "PACER (Public Access to Court Electronic Records — pacer.gov)",
+          "Google Scholar Case Law",
+          "Supreme Court databases (supremecourt.gov, scc-csc.ca)",
+          "State and provincial court websites",
           "Government legislation databases (congress.gov, laws-lois.justice.gc.ca)",
           "Official court opinions and orders",
-          "Federal and state/provincial registers"
+          "Federal and state/provincial registers",
+          "Westlaw case databases (subscription required)",
+          "LexisNexis legal research platform (subscription required)"
         ]
       },
       "tier2": {
         "name": "Authoritative Legal Commentary",
         "sources": [
-          "Law review journals (Harvard Law Review, Yale Law Journal, Stanford Law Review)",
-          "Practical Law (Thomson Reuters)",
+          "Law review articles via Google Scholar",
+          "SSRN legal papers (papers.ssrn.com)",
+          "Court filing databases and commentary (PACER, CanLII commentary)",
           "Legal treatises and restatements",
           "American Law Institute publications",
           "Bar association practice guides",
-          "Law commission reports"
+          "Law commission reports",
+          "Law review journals via HeinOnline (subscription required)",
+          "Practical Law — Thomson Reuters (subscription required)",
+          "Bloomberg Law (subscription required)"
         ]
       },
       "tier3": {
@@ -59,16 +67,18 @@
       }
     },
     "preferredSites": [
-      "canlii.ca",
-      "westlaw.com",
-      "lexisnexis.com",
+      "canlii.org",
+      "pacer.gov",
+      "scholar.google.com",
       "supremecourt.gov",
       "law.cornell.edu",
       "congress.gov",
       "laws-lois.justice.gc.ca",
       "courtlistener.com",
       "scotusblog.com",
-      "pacer.gov"
+      "papers.ssrn.com",
+      "westlaw.com",
+      "lexisnexis.com"
     ],
     "excludedSources": [
       "avvo.com/legal-answers",

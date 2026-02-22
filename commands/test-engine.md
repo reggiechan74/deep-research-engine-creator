@@ -55,18 +55,40 @@ Record PASS if all agents have matching files, FAIL with the list of missing age
 
 ### Check 4: Config Validity
 
-Verify `engine-config.json` contains all required top-level keys:
+Perform multi-level structural validation on `engine-config.json`:
 
-- `schemaVersion`
-- `engineMeta`
-- `sampleQuestions`
-- `scope`
-- `sourceStrategy`
-- `agentPipeline`
-- `qualityFramework`
-- `outputStructure`
+**4a: Required top-level keys.** Verify these keys exist:
+- `schemaVersion`, `engineMeta`, `sampleQuestions`, `scope`, `sourceStrategy`, `agentPipeline`, `qualityFramework`, `outputStructure`
 
-Record PASS if all keys are present, FAIL with the list of missing keys.
+**4b: engineMeta structure.** Verify `engineMeta` contains:
+- `name` (matches pattern `^[a-z0-9]+(-[a-z0-9]+)*$`)
+- `displayName`, `domain`, `audience`, `version`, `mode`, `createdAt`, `createdBy`
+
+**4c: Agent-tier cross-reference.** For each tier in `agentPipeline.tiers` (quick, standard, deep, comprehensive):
+- Extract the agent IDs listed in `tier.agents`
+- Verify each ID exists in `agentPipeline.agents[].id`
+- Record FAIL with list of dangling references if any ID doesn't match
+
+**4d: Quality framework structure.** Verify `qualityFramework` contains:
+- `confidenceScoring` with keys: HIGH, MEDIUM, LOW, SPECULATIVE
+- `minimumEvidence` (non-empty string)
+- `validationRules` (non-empty array)
+- `citationStandard` (non-empty string)
+
+**4e: Source hierarchy completeness.** Verify `sourceStrategy.credibilityTiers` contains:
+- All 5 tiers (tier1 through tier5)
+- Each tier has non-empty `name` and `sources` array
+
+**4f: Unresolved placeholder scan.** Scan ALL `.md` files in the engine directory:
+- Search for pattern `\{\{[a-zA-Z]+\}\}` (double-brace placeholders)
+- Record FAIL with list of files and unresolved placeholders if any found
+- This catches generation failures where template substitution was incomplete
+
+**4g: Citation management validation (if present).** If `qualityFramework.citationManagement` exists:
+- Verify `verificationMode` is one of: "none", "spot-check", "comprehensive"
+- Verify `deadLinkHandling` is one of: "flag-only", "archive-fallback", "exclude-from-high"
+
+Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 
 ### Check 5: Quick Smoke Test
 
