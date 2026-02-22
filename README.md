@@ -2,6 +2,10 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/reggiechan74/deep-research-engine-creator/blob/main/LICENSE)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet?logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=)](https://github.com/reggiechan74/deep-research-engine-creator)
+[![GitHub last commit](https://img.shields.io/github/last-commit/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/commits/main)
+[![GitHub stars](https://img.shields.io/github/stars/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/stargazers)
+[![Domain Presets](https://img.shields.io/badge/Domain_Presets-20-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/skills/engine-creator/domain-presets)
 
 Create domain-specialized deep-research engines as standalone Claude Code plugins.
 
