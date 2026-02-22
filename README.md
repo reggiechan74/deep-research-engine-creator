@@ -67,13 +67,14 @@ A growing number of benchmarks now evaluate deep research agents. The results pa
 
 ## Installation
 
-Install directly from GitHub:
+Add the marketplace and install:
 
 ```bash
-claude plugin add reggiechan74/deep-research-engine-creator
+/plugin marketplace add reggiechan74/deep-research-engine-creator
+/plugin install deep-research-engine-creator
 ```
 
-Or clone and install manually:
+Or clone and load manually (for development/testing):
 
 ```bash
 git clone https://github.com/reggiechan74/deep-research-engine-creator.git
@@ -92,8 +93,8 @@ claude --plugin-dir ./deep-research-engine-creator
 # 3. Validate the generated engine
 /test-engine ./generated-engines/your-engine/
 
-# 4. Install and use the generated engine
-claude plugin add ./generated-engines/your-engine/
+# 4. Load and use the generated engine
+claude --plugin-dir ./generated-engines/your-engine/
 /research "your topic"
 ```
 
@@ -427,11 +428,11 @@ Several open-source benchmarks exist for evaluating deep research agents. You ca
 **1. Generate an engine and load it:**
 
 ```bash
-# Generate a legal research engine
-claude --plugin-dir ./deep-research-engine-creator
-# Run /create-engine --preset legal, complete the wizard
+# With the plugin installed, run the wizard
+/create-engine --preset legal
+# Complete the wizard to generate the engine
 
-# Load the generated engine
+# Load the generated engine for testing
 claude --plugin-dir ./generated-engines/legal-research-engine
 ```
 
