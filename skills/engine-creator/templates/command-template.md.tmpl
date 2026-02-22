@@ -1,6 +1,6 @@
 ---
 description: "Launch {{engineDisplayName}} for domain-specialized deep research"
-argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve]"
+argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--outline-only]"
 allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep"]
 ---
 
@@ -17,6 +17,7 @@ This engine specializes in {{domain}} research for {{audience}}.
 - `/research [topic] --deep` -- Deep tier: full multi-agent pipeline
 - `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds
 - `/research [topic] --approve` -- Pause for user approval after planning phase
+- `/research [topic] --outline-only` -- Stop after planning phase (outline only)
 
 ## Phase 0: Tier Detection & Configuration
 
@@ -25,6 +26,7 @@ Parse tier from `$ARGUMENTS`:
 - If `--standard` is present, set tier to Standard
 - If `--deep` is present, set tier to Deep
 - If `--comprehensive` is present, set tier to Comprehensive
+- If `--outline-only` is present, set tier to Standard but stop after Phase 1
 - If `--approve` is present, pause after planning phase for user approval
 - Otherwise, default to Standard tier
 - Strip flag tokens from `$ARGUMENTS` to derive the research topic

@@ -57,6 +57,8 @@ Record PASS if all agents have matching files, FAIL with the list of missing age
 
 Perform multi-level structural validation on `engine-config.json`:
 
+**4a-schema: JSON Schema validation.** Validate the engine config against the schema at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/engine-config-schema.json` (or the bundled schema if running outside the creator context). Report any schema violations including type mismatches, missing required fields, pattern failures, and enum violations. If schema validation passes, proceed with relational checks below that cannot be expressed in JSON Schema.
+
 **4a: Required top-level keys.** Verify these keys exist:
 - `schemaVersion`, `engineMeta`, `sampleQuestions`, `scope`, `sourceStrategy`, `agentPipeline`, `qualityFramework`, `outputStructure`
 
@@ -79,14 +81,17 @@ Perform multi-level structural validation on `engine-config.json`:
 - All 5 tiers (tier1 through tier5)
 - Each tier has non-empty `name` and `sources` array
 
-**4f: Unresolved placeholder scan.** Scan ALL `.md` files in the engine directory:
-- Search for pattern `\{\{[a-zA-Z]+\}\}` (double-brace placeholders)
+**4f: Unresolved placeholder scan.** Scan ALL `.md` and `.json` files in the engine directory (excluding `engine-config-schema.json` and `preset-schema.json`):
+- Search for pattern `\{\{[a-zA-Z0-9_-]+\}\}` (double-brace placeholders with letters, digits, underscores, hyphens)
 - Record FAIL with list of files and unresolved placeholders if any found
 - This catches generation failures where template substitution was incomplete
 
-**4g: Citation management validation (if present).** If `qualityFramework.citationManagement` exists:
+**4g: Domain preset validation (if presets used).** If the engine was generated from a domain preset, validate the preset file against `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/preset-schema.json`. Report any structural violations.
+
+**4h: Citation management validation (if present).** If `qualityFramework.citationManagement` exists:
 - Verify `verificationMode` is one of: "none", "spot-check", "comprehensive"
 - Verify `deadLinkHandling` is one of: "flag-only", "archive-fallback", "exclude-from-high"
+- If `sourceFreshnessThreshold` is "custom", verify `sourceFreshnessCustomYears` is present and valid
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 

@@ -1,0 +1,240 @@
+{
+  "presetName": "Energy & Utilities",
+  "presetDescription": "Pre-configured for energy sector research including electricity markets, oil/gas analysis, renewable energy, utility rate cases, grid infrastructure, energy policy, and carbon markets. Optimized for regulatory-heavy research with multi-jurisdiction coverage.",
+  "keywords": ["energy", "utilities", "electricity", "oil-gas", "renewables", "grid", "rate-case", "carbon-markets"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Regulatory & Market Data",
+        "sources": [
+          "EIA (eia.gov — U.S. Energy Information Administration data, reports, and forecasts)",
+          "FERC (ferc.gov — Federal Energy Regulatory Commission filings, orders, and market data)",
+          "IESO (ieso.ca — Independent Electricity System Operator, Ontario market data)",
+          "AESO (aeso.ca — Alberta Electric System Operator market data and reports)",
+          "NEB/CER (cer-rec.gc.ca — Canada Energy Regulator filings and energy data)",
+          "IEA (iea.org — International Energy Agency statistics and analysis)",
+          "IRENA (irena.org — International Renewable Energy Agency data and reports)",
+          "State and provincial utility commission filings (PUC, OEB, AUC, BCUC, REGIE)",
+          "ISO/RTO market data (PJM, MISO, ERCOT, CAISO, NYISO, ISO-NE, SPP)",
+          "NERC (nerc.com — reliability standards, assessments, and ERO enterprise data)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Energy Analysis",
+        "sources": [
+          "S&P Global Commodity Insights (energy price data and market analysis)",
+          "Wood Mackenzie (energy research and asset valuation)",
+          "BloombergNEF (clean energy and commodity market research)",
+          "Lazard LCOE/LCOS analysis (annual levelized cost of energy and storage reports)",
+          "Utility 10-K and 10-Q filings (SEC EDGAR and SEDAR+)",
+          "NERC reliability reports (seasonal and long-term assessments)",
+          "Natural Resources Canada (nrcan.gc.ca — Canadian energy data and policy analysis)",
+          "Enverus (drilling and energy production data)",
+          "RBC Capital Markets and BMO energy sector research"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Energy Commentary",
+        "sources": [
+          "Rocky Mountain Institute (rmi.org — energy transition research and analysis)",
+          "EPRI (epri.com — Electric Power Research Institute technical reports)",
+          "IEEE Power & Energy publications and conference proceedings",
+          "Energy law journals and regulatory law reviews",
+          "Utility industry association reports (EEI — Edison Electric Institute, CEA — Canadian Electricity Association, CEATI International)",
+          "Lawrence Berkeley National Laboratory energy research",
+          "NREL (nrel.gov — National Renewable Energy Laboratory technical reports)"
+        ]
+      },
+      "tier4": {
+        "name": "General Energy News",
+        "sources": [
+          "Utility Dive (utilitydive.com — utility sector trade news)",
+          "Greentech Media / Wood Mackenzie news",
+          "S&P Global Market Intelligence news articles",
+          "Reuters energy reporting",
+          "Oil Price (oilprice.com — oil and gas market news)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Social media energy price predictions and influencer commentary",
+          "Anonymous forum posts on energy and commodity markets",
+          "Unverified energy company marketing claims and promotional materials",
+          "Vendor white papers with unsubstantiated technology performance claims",
+          "Crowdsourced energy data without methodology disclosure"
+        ]
+      }
+    },
+    "preferredSites": [
+      "eia.gov",
+      "ferc.gov",
+      "ieso.ca",
+      "aeso.ca",
+      "cer-rec.gc.ca",
+      "iea.org",
+      "irena.org",
+      "nerc.com",
+      "sec.gov",
+      "sedarplus.ca",
+      "nrcan.gc.ca",
+      "rmi.org",
+      "epri.com",
+      "nrel.gov",
+      "pjm.com",
+      "misoenergy.org",
+      "ercot.com",
+      "caiso.com"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com",
+      "reddit.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "regulatory-filing",
+        "pattern": "\"{utility}\" rate case filing {year} {jurisdiction} site:{preferred_site}"
+      },
+      {
+        "name": "iso-market-data",
+        "pattern": "\"{iso_rto}\" {market_product} price data {time_period} site:{preferred_site}"
+      },
+      {
+        "name": "generation-mix",
+        "pattern": "\"{region}\" generation mix renewable capacity {fuel_type} {year} site:{preferred_site}"
+      },
+      {
+        "name": "lcoe-analysis",
+        "pattern": "LCOE LCOS \"{technology}\" levelized cost {year} Lazard OR NREL OR BloombergNEF"
+      },
+      {
+        "name": "carbon-market",
+        "pattern": "\"{carbon_program}\" allowance price emission intensity {jurisdiction} {year}"
+      },
+      {
+        "name": "grid-infrastructure",
+        "pattern": "\"{region}\" transmission capacity interconnection queue {year} site:{preferred_site}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["energy-market-researcher"]
+      },
+      "standard": {
+        "agents": ["energy-market-researcher", "regulatory-analyst"]
+      },
+      "deep": {
+        "agents": ["energy-market-researcher", "regulatory-analyst", "infrastructure-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["energy-market-researcher", "regulatory-analyst", "infrastructure-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "energy-market-researcher",
+        "role": "Energy Market Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative energy market data from primary sources including EIA, FERC, ISO/RTO databases, and utility regulatory filings. Specializes in electricity price data, commodity market fundamentals, generation capacity statistics, and energy production/consumption metrics. Reconciles data across jurisdictions and time periods to establish reliable baselines for energy market analysis.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "regulatory-analyst",
+        "role": "Regulatory Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes energy regulatory frameworks, utility rate cases, and policy developments across federal, state, and provincial jurisdictions. Distinguishes between regulated and deregulated market structures and their implications for investment and pricing. Tracks FERC orders, PUC decisions, OEB rulings, and legislative developments. Assesses the impact of carbon pricing schemes, renewable portfolio standards, clean energy mandates, and grid reliability requirements on market participants.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "infrastructure-strategist",
+        "role": "Infrastructure Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Evaluates grid infrastructure capacity, transmission constraints, and interconnection queues to assess investment opportunities and systemic risks. Applies LCOE and LCOS frameworks to compare generation and storage technologies across markets. Identifies strategic positioning opportunities in energy transition, grid modernization, and distributed energy resources. Synthesizes regulatory, market, and infrastructure intelligence into structured investment theses and risk assessments for energy sector stakeholders.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against regulatory filings or ISO/RTO market data with corroboration from at least one additional primary source (EIA, FERC, NEB/CER, or equivalent). Data is current within the past 2 years.",
+      "MEDIUM": "Supported by a recognized energy analytics firm (Wood Mackenzie, BloombergNEF, S&P Global Commodity Insights) and corroborated by at least one regulatory or government source. Minor discrepancies between sources identified and explained.",
+      "LOW": "Based on a single industry report, trade publication, or data older than 2 years requiring extrapolation to current conditions.",
+      "SPECULATIVE": "Projections derived from trend extrapolation, modeling assumptions, or proposed policy changes not yet enacted. Forward price curves and capacity expansion scenarios fall into this category unless sourced from an ISO/RTO official forecast."
+    },
+    "minimumEvidence": "All generation capacity, energy price, and market size claims require 2+ independent data sources. Utility financial figures must reference SEC/SEDAR+ filings or equivalent regulatory disclosures. LCOE and LCOS figures must cite Lazard, NREL, or BloombergNEF with vintage year specified. Regulatory claims must reference the specific order, decision, or filing docket number.",
+    "validationRules": [
+      "Cross-check capacity and generation statistics across at least 2 independent sources (e.g., EIA and ISO/RTO) and note any material discrepancies.",
+      "Distinguish between installed capacity (MW), nameplate capacity, and dispatchable capacity; clarify which is reported.",
+      "Validate that all LCOE/LCOS figures specify the technology, geography, vintage year, and discount rate assumptions.",
+      "Flag any energy price data older than 12 months as potentially outdated given commodity market volatility.",
+      "Verify utility-specific financial claims against the most recent 10-K or 10-Q filing; note the filing date.",
+      "Identify the specific regulatory jurisdiction (federal, state, provincial) for all rate, tariff, and policy claims.",
+      "Distinguish between deregulated/competitive markets and vertically integrated regulated utility markets when discussing pricing or investment returns.",
+      "Reference the applicable docket or proceeding number for all rate case and regulatory order citations."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Regulatory filings cited with docket number, filing date, and jurisdiction. EIA and ISO/RTO data cited with specific dataset name, report series, and access date.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Energy Market Overview",
+      "Regulatory Landscape",
+      "Generation Mix Analysis",
+      "Grid Infrastructure Assessment",
+      "Rate & Tariff Analysis",
+      "Renewable Energy Assessment",
+      "Carbon & Emissions Analysis",
+      "Investment Outlook",
+      "Risk Assessment",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_energy_analysis.md",
+    "specialDeliverables": [
+      "generation-mix-chart",
+      "rate-comparison-table",
+      "regulatory-timeline",
+      "carbon-intensity-analysis",
+      "grid-capacity-map"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting energy sector research to the standard expected by utility regulators, energy investors, and grid planners. Every quantitative claim must be sourced from a regulatory filing, government energy agency, or recognized energy analytics firm. Clearly distinguish between regulated and deregulated market structures and their implications for pricing, returns, and investment risk. Include jurisdiction-specific regulatory context for all rate, policy, and market structure findings. Reference LCOE and LCOS metrics when comparing generation and storage technologies. Acknowledge uncertainty in forward projections, particularly those dependent on proposed but not-yet-enacted policy changes.",
+    "agentOverrides": {
+      "energy-market-researcher": "Prioritize primary quantitative data from EIA, FERC, IESO, AESO, NEB/CER, and ISO/RTO market databases. For Canadian markets, cross-reference NEB/CER data with provincial system operator reports. When using third-party energy analytics estimates (Wood Mackenzie, BloombergNEF), always note the methodology, assumptions, and publication date. Reconcile conflicting capacity or price figures explicitly, noting the source and time period of each.",
+      "regulatory-analyst": "Apply structured analysis to regulatory proceedings including rate cases, interconnection policy, and carbon compliance frameworks. Identify the specific regulatory body, docket number, and decision timeline for all proceedings cited. Distinguish between cost-of-service regulation, performance-based regulation, and competitive market rules. Assess how pending regulatory changes may affect utility financials, renewable development economics, and grid investment timelines across the relevant jurisdictions.",
+      "infrastructure-strategist": "Evaluate grid infrastructure constraints, interconnection queue backlogs, and transmission investment needs using NERC assessments and ISO/RTO planning reports. Apply LCOE and LCOS benchmarks from Lazard or NREL to assess technology competitiveness across markets. Identify strategic opportunities in grid modernization, energy storage deployment, and clean energy integration. Build investment theses that account for both regulated returns and merchant market exposure, specifying the applicable market structure."
+    },
+    "synthesisInstructions": "Lead with the most actionable insights for the target audience of utility regulators, energy investors, and grid planners. Quantify investment opportunities and regulatory risks using data from the research phase. Present market dynamics across both regulated and deregulated jurisdictions where relevant, noting structural differences. Include a clear 'so what' for each major finding. When data or forecasts conflict across sources, present the range and assess which estimate is most reliable given the source methodology and vintage.",
+    "reportingTone": "Professional and analytical, suitable for regulatory staff, institutional investors, and infrastructure planners. Data-driven with clear callouts for charts and tables. Define energy-sector acronyms on first use (e.g., LCOE, ISO, RTO, PPA, RPS). Write for decision-makers who must act on the intelligence — distinguish between findings that are settled, evolving, and speculative."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

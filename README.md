@@ -61,6 +61,17 @@ Presets pre-fill the wizard with domain-specific defaults for source hierarchies
 | `--preset cyber` | Cybersecurity & Threat Intel | CVE/NVD, MITRE ATT&CK, IOC tracking, attack surface mapping |
 | `--preset medical` | Healthcare & Medical | PubMed, clinical trials, FDA/EMA, GRADE evidence grading |
 | `--preset findd` | Financial Due Diligence | SEC filings, beneficial ownership, litigation, M&A analysis |
+| `--preset energy` | Energy & Utilities | EIA, FERC, IESO, ISO/RTO markets, LCOE, rate cases |
+| `--preset infra` | Infrastructure & Development | EA registries, municipal planning, corridor analysis, P3 |
+| `--preset esg` | ESG & Climate Risk | CDP, TCFD/ISSB, carbon accounting, governance scoring |
+| `--preset policy` | Government & Public Policy | Legislative tracking, lobbying disclosure, policy impact |
+| `--preset supply` | Supply Chain & Logistics | WTO/Comtrade, tariff analysis, supplier risk, freight data |
+| `--preset geopolit` | Geopolitical & Political Risk | Country risk, sanctions, conflict monitoring, scenario planning |
+| `--preset insurance` | Insurance & Actuarial | NAIC filings, AM Best, catastrophe models, loss ratios |
+| `--preset biotech` | Biotechnology & Life Sciences | Drug pipelines, GenBank, clinical stages, PTRS assessment |
+| `--preset defense` | Aerospace & Defense | DSCA, SAM.gov procurement, TRL, ITAR/EAR compliance |
+| `--preset investigate` | Investigative Journalism | Public records, corporate registries, FOI, evidence chains |
+| `--preset aml` | AML & Regulatory Compliance | FATF, FinCEN, sanctions screening, PEP, beneficial ownership |
 
 Or choose **Custom** during the wizard to build a configuration from scratch.
 

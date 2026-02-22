@@ -1,0 +1,248 @@
+{
+  "presetName": "Biotechnology & Life Sciences",
+  "presetDescription": "Pre-configured for biotech research including drug pipeline analysis, gene therapy assessment, biologics development, preclinical/clinical stage evaluation, technology platform assessment, and biotech investment due diligence. Optimized for scientific rigor with regulatory pathway awareness.",
+  "keywords": ["biotechnology", "life-sciences", "drug-pipeline", "gene-therapy", "biologics", "preclinical", "biotech-investment"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Scientific & Regulatory Databases",
+        "sources": [
+          "PubMed/MEDLINE (pubmed.ncbi.nlm.nih.gov) — peer-reviewed biomedical literature",
+          "ClinicalTrials.gov — registered trial protocols, status, and results",
+          "FDA Biologics License Application (BLA) database and Purple Book",
+          "EMA European Public Assessment Reports (EPAR — ema.europa.eu)",
+          "GenBank/NCBI databases (ncbi.nlm.nih.gov) — genetic sequence data",
+          "UniProt protein sequence and function database (uniprot.org)",
+          "RCSB Protein Data Bank (rcsb.org) — structural biology data",
+          "USPTO patent database (patents.google.com, USPTO Patent Full-Text Database)",
+          "EPO Espacenet patent database (espacenet.epo.org)",
+          "WHO Prequalification database (extranet.who.int/prequal)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Scientific & Pipeline Intelligence",
+        "sources": [
+          "Nature Biotechnology (nature.com/nbt) — high-impact peer-reviewed research",
+          "Cell and Cell Press family journals (cell.com)",
+          "Science and Science Translational Medicine (science.org)",
+          "bioRxiv preprints (biorxiv.org) — note: not yet peer-reviewed",
+          "Evaluate Pharma pipeline data and commercial intelligence (evaluate.com)",
+          "Citeline/Pharma Intelligence pipeline and trial databases (citeline.com)",
+          "Cortellis drug discovery and development intelligence (clarivate.com/cortellis)",
+          "IQVIA pipeline intelligence and market data (iqvia.com)",
+          "SEC filings — S-1, 10-K, 10-Q for public biotech pipeline disclosure (sec.gov)",
+          "SEDAR+ filings for Canadian biotech companies (sedarplus.ca)"
+        ]
+      },
+      "tier3": {
+        "name": "Industry Associations & Conference Proceedings",
+        "sources": [
+          "BIO (Biotechnology Innovation Organization) industry reports (bio.org)",
+          "Academic research center publications (Broad Institute, Salk Institute, Scripps Research)",
+          "ASGCT (American Society of Gene & Cell Therapy) conference proceedings and publications",
+          "ISSCR (International Society for Stem Cell Research) publications (isscr.org)",
+          "AACR (American Association for Cancer Research) conference proceedings",
+          "ASH (American Society of Hematology) publications for cell/gene therapy",
+          "ASCO (American Society of Clinical Oncology) oncology pipeline data",
+          "J.P. Morgan Healthcare Conference presentations and transcripts",
+          "BIO Convention and BIO Europe presentation materials"
+        ]
+      },
+      "tier4": {
+        "name": "Biotech News & Analyst Commentary",
+        "sources": [
+          "STAT News (statnews.com)",
+          "Endpoints News (endpts.com)",
+          "FierceBiotech (fiercebiotech.com)",
+          "BioPharma Dive (biopharmadive.com)",
+          "Genetic Engineering & Biotechnology News — GEN (genengnews.com)",
+          "Biotech analyst reports (major bank equity research — Goldman Sachs, Morgan Stanley, SVB Securities)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Social media biotech stock hype and retail investor forums",
+          "Unverified mechanism-of-action claims without cited experimental data",
+          "Company press releases announcing results with no data disclosure",
+          "AI-generated drug predictions without experimental validation",
+          "Biotech influencer commentary without scientific citations"
+        ]
+      }
+    },
+    "preferredSites": [
+      "pubmed.ncbi.nlm.nih.gov",
+      "clinicaltrials.gov",
+      "fda.gov",
+      "ema.europa.eu",
+      "ncbi.nlm.nih.gov",
+      "rcsb.org",
+      "uniprot.org",
+      "biorxiv.org",
+      "sec.gov",
+      "evaluate.com",
+      "nature.com",
+      "cell.com",
+      "science.org",
+      "bio.org",
+      "statnews.com"
+    ],
+    "excludedSources": [
+      "wikipedia.org",
+      "reddit.com",
+      "stocktwits.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "pipeline-lookup",
+        "pattern": "\"{drug_name}\" OR \"{target}\" clinical trial phase {phase} \"{indication}\" site:clinicaltrials.gov"
+      },
+      {
+        "name": "scientific-literature",
+        "pattern": "\"{target}\" OR \"{mechanism}\" \"{indication}\" {year} site:pubmed.ncbi.nlm.nih.gov"
+      },
+      {
+        "name": "regulatory-filing",
+        "pattern": "\"{drug_name}\" BLA OR EPAR approval \"{company}\" {year} site:fda.gov OR site:ema.europa.eu"
+      },
+      {
+        "name": "patent-search",
+        "pattern": "\"{technology_platform}\" OR \"{compound_class}\" biotech patent {year} site:patents.google.com"
+      },
+      {
+        "name": "competitive-pipeline",
+        "pattern": "\"{indication}\" pipeline competitive landscape \"{mechanism}\" {year} site:{preferred_site}"
+      },
+      {
+        "name": "sec-biotech-filing",
+        "pattern": "\"{company}\" 10-K OR S-1 pipeline clinical \"{drug_name}\" site:sec.gov"
+      },
+      {
+        "name": "preprint-search",
+        "pattern": "\"{target}\" OR \"{platform_technology}\" preclinical efficacy safety {year} site:biorxiv.org"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["scientific-literature-researcher"]
+      },
+      "standard": {
+        "agents": ["scientific-literature-researcher", "pipeline-analyst"]
+      },
+      "deep": {
+        "agents": ["scientific-literature-researcher", "pipeline-analyst", "biotech-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["scientific-literature-researcher", "pipeline-analyst", "biotech-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "scientific-literature-researcher",
+        "role": "Scientific Literature Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches and synthesizes primary scientific literature from PubMed, bioRxiv, ClinicalTrials.gov, and NCBI databases. Extracts mechanism-of-action details, efficacy and safety data from published studies, preclinical animal model results, and biomarker evidence. Identifies key opinion leaders (KOLs) and landmark publications. Reconciles conflicting data across studies and flags data gaps requiring further investigation.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "pipeline-analyst",
+        "role": "Pipeline Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Maps drug development pipelines using ClinicalTrials.gov, Evaluate Pharma, Citeline, and SEC disclosures. Tracks trial phase, enrollment status, primary endpoints, read-out timelines, and probability of technical and regulatory success (PTRS). Assesses FDA and EMA regulatory pathways including Breakthrough Therapy Designation, Fast Track, Orphan Drug, and Accelerated Approval. Analyzes patent landscapes, expiry timelines, and freedom-to-operate considerations.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "biotech-strategist",
+        "role": "Biotech Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes scientific, pipeline, regulatory, and commercial data into investment-grade biotech analysis. Builds competitive landscape matrices, assesses platform technology differentiation, evaluates commercial opportunity sizing (rNPV, peak sales estimates), and identifies partnership, licensing, or M&A catalysts. Assesses manufacturing and CMC (chemistry, manufacturing, and controls) risks for biologics and cell/gene therapies. Produces risk-stratified investment theses calibrated to development stage.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Published in top-tier peer-reviewed journals (Nature, Cell, Science, NEJM, Lancet) AND confirmed in ClinicalTrials.gov with posted results data. Regulatory actions (approvals, CRLs) confirmed via FDA or EMA official communications.",
+      "MEDIUM": "bioRxiv preprint with supporting ClinicalTrials.gov registration OR recognized pipeline database entry (Evaluate Pharma, Citeline) corroborated by company SEC disclosure. Phase II data presented at major conference with full data package.",
+      "LOW": "Single conference abstract or company press release without peer-reviewed backing. Pipeline data from only one secondary source without ClinicalTrials.gov registration or regulatory filing confirmation.",
+      "SPECULATIVE": "Preclinical or in-vitro data extrapolated to clinical predictions, mechanism-based efficacy projections without human data, or analyst estimates without disclosed methodology."
+    },
+    "minimumEvidence": "All clinical efficacy claims require ClinicalTrials.gov registration and posted results or peer-reviewed publication. Pipeline stage designations require ClinicalTrials.gov confirmation or regulatory filing reference. PTRS estimates must cite methodology source. Patent claims require USPTO or EPO database verification.",
+    "validationRules": [
+      "Verify all clinical trial data against ClinicalTrials.gov registration and confirm current trial status.",
+      "Confirm drug approval status from FDA Purple Book, Orange Book, or EMA EPAR — not company press releases alone.",
+      "Distinguish clearly between preclinical (in-vitro, animal model) and clinical (human) data at all times.",
+      "Validate patent claims against USPTO or EPO databases and note expiry dates and any challenge proceedings.",
+      "Cross-check pipeline stage data across at least 2 independent sources (e.g., ClinicalTrials.gov + SEC filing).",
+      "Flag bioRxiv preprints as not yet peer-reviewed and note submission/posting date.",
+      "Assess PTRS estimates against published historical success rate benchmarks by indication and phase.",
+      "Identify manufacturing modality (small molecule, mAb, ADC, cell therapy, gene therapy, mRNA) and note modality-specific CMC and scalability risks.",
+      "Verify competitive landscape completeness against Evaluate Pharma or Citeline pipeline databases."
+    ],
+    "citationStandard": "APA 7th Edition format with biomedical extensions. Inline numbered references [1] with full bibliography including author(s), title, journal, year, volume, pages, DOI, and PubMed ID (PMID) where available. Clinical trials cited with ClinicalTrials.gov NCT number. Regulatory documents cited with submission type, approval date, and FDA/EMA document ID. Patents cited with patent number, filing date, and assignee.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "3-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "all-confidence-levels"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Scientific Background",
+      "Technology Platform Assessment",
+      "Drug Pipeline Analysis",
+      "Clinical Development Status",
+      "Regulatory Pathway",
+      "Competitive Landscape",
+      "IP & Patent Position",
+      "Manufacturing & CMC Considerations",
+      "Commercial Opportunity",
+      "Investment Thesis",
+      "Risk Assessment",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_biotech_analysis.md",
+    "specialDeliverables": [
+      "pipeline-stage-chart",
+      "mechanism-of-action-summary",
+      "competitive-landscape-matrix",
+      "patent-cliff-timeline",
+      "clinical-trial-tracker"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting biotechnology research to the standard expected by biotech investors, business development teams, and scientific advisory boards. Distinguish clearly between preclinical, Phase I, Phase II, Phase III, and approved stages at all times — never conflate in-vitro results with clinical outcomes. Assess probability of technical and regulatory success (PTRS) for each development stage. Include mechanism-of-action context grounded in published science. Evaluate both scientific merit and commercial viability. Apply regulatory pathway awareness (FDA Breakthrough Therapy, Fast Track, Orphan Drug, Accelerated Approval; EMA PRIME designation) when assessing development timelines and risk.",
+    "agentOverrides": {
+      "scientific-literature-researcher": "Prioritize PubMed-indexed publications and ClinicalTrials.gov data. Always include study design, sample size, primary endpoints, and effect size when summarizing clinical data. For preclinical data, note species, model type (in-vitro, xenograft, syngeneic, transgenic), and translational limitations. Flag bioRxiv preprints as unreviewed. Identify key opinion leaders (KOLs) associated with the science. Note data recency: flag studies older than 5 years in rapidly evolving fields such as cell/gene therapy, mRNA, or immuno-oncology.",
+      "pipeline-analyst": "Track all pipeline assets with ClinicalTrials.gov NCT numbers, current phase, enrollment status, primary endpoints, and anticipated read-out dates. Compute or reference published PTRS benchmarks by indication and phase transition. Map regulatory designations (Breakthrough, Fast Track, Orphan Drug, Priority Review) and their implications for timeline and commercial exclusivity. Assess patent expiry for each key asset and identify any inter partes review (IPR) or litigation proceedings. Flag competitive assets in the same mechanism class or indication.",
+      "biotech-strategist": "Build investment-grade analyses that integrate scientific, clinical, regulatory, and commercial dimensions. Estimate peak sales potential with stated assumptions (addressable population, pricing, market penetration). Size rNPV using development-stage-appropriate discount rates (typically 10-15% for biotech) and PTRS-adjusted probability weighting. Identify partnership structures, licensing economics, and M&A comparables where relevant. Assess CMC and manufacturing scalability risks specific to the modality. Present bear/base/bull case scenarios with key binary catalysts and timeline."
+    },
+    "synthesisInstructions": "Lead with the most decision-relevant scientific and commercial insights. Organize findings by development stage — distinguish what is known from human data versus what is inferred from preclinical evidence. Quantify opportunity (peak sales, patient population, PTRS) and risk (scientific, regulatory, competitive, manufacturing) where data permits. Present a structured pipeline table and competitive landscape matrix. Identify the 3-5 key binary events (trial read-outs, regulatory decisions, partnership milestones) that will most significantly affect value. When scientific data conflicts across sources, present the full range and your assessment of which data is most reliable and why.",
+    "reportingTone": "Scientifically rigorous and analytically precise, calibrated for both scientific and investment audiences. Use standard biomedical terminology but define specialized terms on first use. Avoid promotional language from company materials. Clearly demarcate management guidance, analyst estimates, and independently sourced data. Write for readers who must make capital allocation, licensing, or strategic partnership decisions based on the analysis."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 20000,
+      "synthesis": 12000,
+      "reporting": 14000
+    }
+  }
+}

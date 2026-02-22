@@ -1,0 +1,246 @@
+{
+  "presetName": "Government & Public Policy",
+  "presetDescription": "Pre-configured for public policy research including legislative tracking, regulatory analysis, government program evaluation, lobbying disclosure, campaign finance, and policy impact assessment. Covers federal, state/provincial, and municipal levels across North American jurisdictions.",
+  "keywords": ["government", "public-policy", "legislation", "regulation", "lobbying", "campaign-finance", "policy-analysis"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Government Records",
+        "sources": [
+          "Federal Register (federalregister.gov — U.S. rulemaking and executive orders)",
+          "Canada Gazette (gazette.gc.ca — Canadian regulations and official notices)",
+          "Congressional Record (congress.gov — U.S. legislative proceedings and debates)",
+          "Hansard (parlvu.parl.gc.ca — Canadian parliamentary debates)",
+          "GovInfo.gov (U.S. Government Publishing Office — statutes, regulations, reports)",
+          "LEGISinfo (parl.ca — Canadian federal bills and legislative history)",
+          "State and provincial legislature databases (individual state/province portals)",
+          "Municipal bylaw and council proceeding databases",
+          "Government of Canada open data (open.canada.ca)",
+          "data.gov (U.S. federal open data portal)",
+          "Congressional Budget Office reports (cbo.gov)",
+          "Parliamentary Budget Office reports (pbo-dpb.ca)",
+          "Government Accountability Office reports (gao.gov)",
+          "Office of the Auditor General of Canada reports (oag-bvg.gc.ca)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Research & Disclosure",
+        "sources": [
+          "Congressional Research Service reports (crsreports.congress.gov)",
+          "Library of Parliament research publications (lop.parl.ca)",
+          "Brookings Institution policy research (brookings.edu)",
+          "RAND Corporation policy reports (rand.org)",
+          "Urban Institute research (urban.org)",
+          "Fraser Institute research (fraserinstitute.org)",
+          "C.D. Howe Institute research (cdhowe.org)",
+          "Institute for Research on Public Policy (irpp.org)",
+          "Lobbying Disclosure Act filings (lda.senate.gov — U.S. federal)",
+          "Office of the Commissioner of Lobbying Canada (lobbycanada.gc.ca)",
+          "Federal Election Commission filings (fec.gov)",
+          "Elections Canada financial disclosures (elections.ca)",
+          "State lobbying and campaign finance registries"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Policy Commentary",
+        "sources": [
+          "Heritage Foundation policy papers (heritage.org)",
+          "Cato Institute research (cato.org)",
+          "Center for American Progress reports (americanprogress.org)",
+          "Canadian Centre for Policy Alternatives research (policyalternatives.ca)",
+          "University public policy research centers (Kennedy School, SPP Calgary, Munk School)",
+          "OECD policy briefs and governance reports (oecd.org)",
+          "Policy Options (policyoptions.irpp.org)",
+          "Public Administration Review (academic journal)",
+          "American Political Science Review (academic journal)",
+          "Journal of Policy Analysis and Management"
+        ]
+      },
+      "tier4": {
+        "name": "Policy News & Government Affairs",
+        "sources": [
+          "Politico (politico.com — U.S. policy and legislative coverage)",
+          "The Hill (thehill.com — U.S. congressional and regulatory news)",
+          "Hill Times (hilltimes.com — Canadian parliamentary coverage)",
+          "iPolitics (ipolitics.ca — Canadian political and policy news)",
+          "Policy newsletters and government affairs firm analyses",
+          "Major newspaper coverage of legislation and regulation"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Partisan advocacy organizations without disclosed funding sources",
+          "Unverified social media policy claims and political commentary",
+          "Anonymous political blogs and commentary sites",
+          "AI-generated policy analysis without source verification",
+          "Advocacy materials presenting contested interpretations as settled law"
+        ]
+      }
+    },
+    "preferredSites": [
+      "federalregister.gov",
+      "gazette.gc.ca",
+      "congress.gov",
+      "parl.ca",
+      "govinfo.gov",
+      "open.canada.ca",
+      "data.gov",
+      "cbo.gov",
+      "pbo-dpb.ca",
+      "gao.gov",
+      "oag-bvg.gc.ca",
+      "crsreports.congress.gov",
+      "lda.senate.gov",
+      "fec.gov",
+      "brookings.edu",
+      "rand.org",
+      "urban.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "legislative-tracking",
+        "pattern": "\"{bill_name}\" OR \"{bill_number}\" {legislative_body} {session_year} site:{preferred_site}"
+      },
+      {
+        "name": "regulatory-search",
+        "pattern": "\"{agency}\" rulemaking \"{topic}\" {year} site:federalregister.gov OR site:gazette.gc.ca"
+      },
+      {
+        "name": "lobbying-disclosure",
+        "pattern": "\"{organization}\" lobbying disclosure {topic} {year} site:lda.senate.gov OR site:lobbycanada.gc.ca"
+      },
+      {
+        "name": "budget-fiscal-impact",
+        "pattern": "\"{program}\" OR \"{policy}\" cost estimate fiscal impact {year} site:cbo.gov OR site:pbo-dpb.ca"
+      },
+      {
+        "name": "policy-research",
+        "pattern": "\"{policy_topic}\" analysis {jurisdiction} {year_range} site:{preferred_site}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["legislative-researcher"]
+      },
+      "standard": {
+        "agents": ["legislative-researcher", "policy-analyst"]
+      },
+      "deep": {
+        "agents": ["legislative-researcher", "policy-analyst", "stakeholder-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["legislative-researcher", "policy-analyst", "stakeholder-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "legislative-researcher",
+        "role": "Legislative Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Tracks and documents legislative and regulatory activity across federal, state/provincial, and municipal jurisdictions. Retrieves primary source documents including bill texts, committee reports, Hansard/Congressional Record excerpts, regulatory filings, and official government data releases. Establishes the factual legislative record by mapping bill status, amendment history, vote tallies, and regulatory comment periods.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "policy-analyst",
+        "role": "Policy Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Evaluates policy design, implementation feasibility, and projected impacts using structured analytical frameworks including logic models, cost-benefit analysis, and comparative policy assessment. Distinguishes between enacted law, proposed legislation, and regulatory guidance. Identifies partisan dynamics, coalition structures, and political feasibility constraints. Draws on non-partisan research institutions, CBO/PBO scoring, and academic literature to assess policy effectiveness and unintended consequences.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "stakeholder-mapper",
+        "role": "Stakeholder Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Maps the full stakeholder ecosystem around policy issues by analyzing lobbying disclosures, campaign finance records, public consultation submissions, and organizational position statements. Identifies principal actors, their interests, influence mechanisms, and coalition alignments. Traces funding relationships between advocacy organizations, think tanks, and political campaigns. Produces structured influence maps and stakeholder matrices that reveal power dynamics and potential pressure points in the policy process.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official legislative or regulatory records (Federal Register, Canada Gazette, GovInfo, LEGISinfo, or equivalent) and corroborated by at least one government publication (CBO/PBO score, GAO/OAG report, or official government data release).",
+      "MEDIUM": "Supported by a recognized non-partisan research institution (Brookings, RAND, Urban Institute, Fraser Institute, C.D. Howe) plus at least one official government source. Minor interpretive gaps identified and disclosed.",
+      "LOW": "Based on a single think tank or advocacy organization source without official government corroboration. May reflect a particular ideological perspective or represent a contested interpretation of legislative intent.",
+      "SPECULATIVE": "Proposed legislation not yet formally tabled, or policy impact projections derived from modeling without disclosed methodology. Includes scenario analysis and political feasibility assessments dependent on unresolved variables."
+    },
+    "minimumEvidence": "All legislative status claims require direct reference to official government legislative portals (congress.gov, parl.ca, or equivalent state/provincial sources). Regulatory claims must cite the relevant Federal Register or Canada Gazette entry with volume, page, and date. Lobbying and campaign finance claims must trace to official disclosure registries (LDA, FEC, Elections Canada, or equivalent).",
+    "validationRules": [
+      "Verify bill status and text directly against official legislative portals — do not rely on secondary reporting for bill status.",
+      "Distinguish explicitly between enacted law, signed regulations in force, proposed rules in comment period, and legislation not yet tabled.",
+      "Cross-check lobbying disclosures against at least 2 filing periods to identify sustained versus episodic influence activity.",
+      "Flag any regulatory interpretation that diverges from agency guidance or official explanatory memoranda.",
+      "Identify and disclose the ideological or funding orientation of all think tank and advocacy sources cited.",
+      "Validate fiscal cost estimates against CBO, PBO, or equivalent official scoring bodies — reject unverified industry cost projections presented as authoritative.",
+      "Note when policy comparisons across jurisdictions involve materially different constitutional, legal, or administrative frameworks."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Legislative documents cited with bill number, session, jurisdiction, and official portal URL. Regulatory citations include Federal Register or Canada Gazette volume, issue number, page, and date.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Legislative Landscape",
+      "Regulatory Framework",
+      "Policy Analysis",
+      "Stakeholder Map",
+      "Lobbying & Influence Analysis",
+      "Budget & Fiscal Impact",
+      "Implementation Assessment",
+      "Jurisdictional Comparison",
+      "Political Risk Assessment",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_policy_analysis.md",
+    "specialDeliverables": [
+      "legislative-tracker",
+      "stakeholder-influence-map",
+      "regulatory-timeline",
+      "jurisdictional-comparison-matrix",
+      "policy-impact-scorecard"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting public policy research to the standard expected by government relations professionals, policy advisors, and public affairs teams at major organizations. Every legislative and regulatory claim must be traceable to official government sources. Distinguish clearly between enacted legislation, proposed bills, and regulatory guidance. Identify partisan dynamics and coalition structures that shape policy outcomes. Include jurisdictional comparison where relevant to illustrate how other governments have addressed the same policy challenge. Maintain strict non-partisan analytical objectivity — present ideological perspectives as data points about stakeholder positions, not as analytical conclusions.",
+    "agentOverrides": {
+      "legislative-researcher": "Prioritize primary legislative and regulatory documents: bill texts from official portals, regulatory filings from the Federal Register or Canada Gazette, official government datasets, and CBO/PBO scoring reports. When bill status is ambiguous or rapidly evolving, note the as-of date of your verification. Map the full legislative history including committee referrals, amendment stages, and vote records rather than relying on news summaries.",
+      "policy-analyst": "Apply structured policy evaluation frameworks including logic models, cost-benefit analysis, and implementation feasibility assessment. Always distinguish between the stated policy objective, the intervention mechanism, and the projected outcome — these are frequently conflated in advocacy materials. When analyzing partisan dynamics, identify specific caucus positions, whip counts where available, and historical voting patterns on analogous legislation. Quantify fiscal and economic impacts using official estimates where available.",
+      "stakeholder-mapper": "Build comprehensive stakeholder profiles using lobbying disclosures (LDA, Lobbying Act filings), campaign finance records (FEC, Elections Canada), and public consultation submissions. Identify funding relationships between advocacy organizations and their principal donors. Map coalition structures including formal coalitions, informal alliances, and latent adversarial groupings. Distinguish between organizational positions (official) and member/constituent positions (which may diverge). Assess each stakeholder's influence mechanisms: direct lobbying, grassroots mobilization, litigation, media, or coalition building."
+    },
+    "synthesisInstructions": "Lead with the most actionable intelligence for government relations and public affairs decision-making. Clearly separate factual legislative and regulatory status from analytical assessment and political forecast. Present stakeholder dynamics as a system, not as isolated actor profiles — identify where coalitions are stable versus fragile. When jurisdictional comparisons are included, extract transferable lessons and note where legal or constitutional differences limit applicability. Flag political risk factors that could materially alter the policy trajectory within the reporting horizon.",
+    "reportingTone": "Professional and analytical, suitable for government relations committees, senior policy advisors, and C-suite public affairs briefings. Precise on legal and legislative terminology — define terms of art on first use. Politically neutral in framing but clear-eyed about partisan realities. Structured for decision-makers who need to respond to policy developments, anticipate regulatory changes, and manage stakeholder relationships."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

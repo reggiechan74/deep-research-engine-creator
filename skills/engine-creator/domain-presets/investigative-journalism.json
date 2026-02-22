@@ -1,0 +1,227 @@
+{
+  "presetName": "Investigative Journalism",
+  "presetDescription": "Pre-configured for investigative research including public records analysis, corporate structure investigation, campaign finance tracking, FOI/FOIA document analysis, and accountability journalism. Optimized for multi-source corroboration with chain-of-evidence documentation.",
+  "keywords": ["investigative", "journalism", "public-records", "foi", "corporate-registry", "campaign-finance", "accountability"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Public Records",
+        "sources": [
+          "Corporate registries (state Secretaries of State, Companies House UK, SEDAR+ Canada)",
+          "Court records (PACER federal courts, CanLII, state and provincial court portals)",
+          "Property records (county assessors, land title registries, deed databases)",
+          "Campaign finance databases (FEC.gov, Elections Canada, state campaign finance portals)",
+          "FOI/FOIA released documents (MuckRock, government FOIA reading rooms)",
+          "SEC EDGAR filings (sec.gov — 10-K, 10-Q, 8-K, proxy statements, beneficial ownership)",
+          "Lobbying disclosures (LDA Senate filings, OpenSecrets, federal Lobbying Registry Canada)",
+          "Government audit and inspector general reports (GAO, OAG, agency OIG offices)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Investigative Databases",
+        "sources": [
+          "ICIJ Offshore Leaks database (offshoreleaks.icij.org — Panama Papers, Pandora Papers)",
+          "OpenCorporates global company database (opencorporates.com)",
+          "LittleSis power network mapping (littlesis.org)",
+          "GuideStar/Candid nonprofit data and Form 990 filings (candid.org)",
+          "OSHA inspection records and enforcement data (osha.gov)",
+          "EPA enforcement and compliance data (echo.epa.gov)",
+          "FCC filings and broadcast ownership records (fcc.gov)",
+          "Municipal procurement records and contract databases",
+          "Beneficial ownership registries (FinCEN BOI, UK PSC Register)"
+        ]
+      },
+      "tier3": {
+        "name": "Established Investigative Organizations",
+        "sources": [
+          "ICIJ investigative reports (icij.org)",
+          "OCCRP organized crime and corruption reporting (occrp.org)",
+          "ProPublica investigative journalism database (propublica.org)",
+          "Global Investigative Journalism Network (gijn.org)",
+          "Bellingcat open-source investigation methodology guides (bellingcat.com)",
+          "Academic journalism and media law research (peer-reviewed)",
+          "Nieman Foundation for Journalism reports (niemanlab.org)"
+        ]
+      },
+      "tier4": {
+        "name": "Verified News Investigative Reporting",
+        "sources": [
+          "Major newspaper investigative series (New York Times, Washington Post, Globe and Mail, Toronto Star)",
+          "Local news investigative teams with documented editorial standards",
+          "Tip-line sourced leads (verified and corroborated against official records only)"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable or Unverified",
+        "sources": [
+          "Anonymous tips without independent corroboration",
+          "Social media accusations and unverified allegations",
+          "Single-source claims without documentary support",
+          "Unverified leaked documents (authentication not established)",
+          "Rumor-based reporting and unattributed speculation"
+        ]
+      }
+    },
+    "preferredSites": [
+      "sec.gov",
+      "pacer.gov",
+      "fec.gov",
+      "sedarplus.ca",
+      "opencorporates.com",
+      "offshoreleaks.icij.org",
+      "littlesis.org",
+      "candid.org",
+      "echo.epa.gov",
+      "osha.gov",
+      "muckrock.com",
+      "propublica.org",
+      "occrp.org",
+      "icij.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "corporate-registry-search",
+        "pattern": "\"{entity_name}\" registered agent officers directors site:{state_sos_domain} OR site:opencorporates.com"
+      },
+      {
+        "name": "campaign-finance-search",
+        "pattern": "\"{person_or_entity}\" contributions donations {election_cycle} site:fec.gov OR site:opensecrets.org"
+      },
+      {
+        "name": "court-records-search",
+        "pattern": "\"{party_name}\" lawsuit litigation judgment {jurisdiction} site:pacer.gov OR site:courtlistener.com"
+      },
+      {
+        "name": "sec-beneficial-ownership",
+        "pattern": "\"{company}\" beneficial owner Schedule 13D OR 13G OR proxy site:sec.gov"
+      },
+      {
+        "name": "foia-document-search",
+        "pattern": "\"{agency}\" FOIA released documents \"{topic}\" site:muckrock.com OR site:foia.state.gov"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["public-records-researcher"]
+      },
+      "standard": {
+        "agents": ["public-records-researcher", "corporate-investigator"]
+      },
+      "deep": {
+        "agents": ["public-records-researcher", "corporate-investigator", "narrative-synthesizer"]
+      },
+      "comprehensive": {
+        "agents": ["public-records-researcher", "corporate-investigator", "narrative-synthesizer"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "public-records-researcher",
+        "role": "Public Records Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Systematically retrieves and catalogs official public records including court filings, regulatory submissions, government disclosures, and FOI/FOIA-released documents. Skilled at navigating PACER, SEC EDGAR, state corporate registries, campaign finance portals, and municipal procurement databases. Maintains strict chain-of-custody documentation for all records gathered, tracking source, retrieval date, and document authenticity indicators.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "corporate-investigator",
+        "role": "Corporate Investigator",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Investigates corporate structures, beneficial ownership, and financial flows using official registries, SEC filings, offshore leak databases, and power-mapping tools. Traces shell company networks, identifies ultimate beneficial owners, maps board interlocks and related-party transactions, and follows money through corporate hierarchies. Applies structured investigative methodology to expose hidden connections between entities, individuals, and financial interests. Flags potential legal risks in findings.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "narrative-synthesizer",
+        "role": "Narrative Synthesizer",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes fragmented public records, corporate investigation findings, and documentary evidence into a coherent investigative narrative suitable for editorial review. Constructs evidence chains linking facts to primary sources, distinguishes between proven findings and suggested patterns, and identifies gaps requiring further investigation. Applies two-source minimum standards, documents FOI request status, and structures findings for fact-checking teams. Ensures all assertions of wrongdoing meet the evidentiary bar for publication.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against 2+ independent official records (corporate registry, court records, or regulatory filings) with consistent findings across sources.",
+      "MEDIUM": "Supported by 1 official public record plus 1 independent corroborating source (authoritative database, verified news reporting, or secondary official record).",
+      "LOW": "Based on a single public record without independent corroboration, or reliant on tier-3/tier-4 sources without primary documentary support.",
+      "SPECULATIVE": "Pattern-based inferences from circumstantial evidence, or connections implied by proximity or timing without direct documentation establishing causation or intent."
+    },
+    "minimumEvidence": "All assertions of wrongdoing or misconduct require a minimum of 2 independent sources. Corporate ownership claims must reference official registry filings or regulatory disclosures. Financial flow assertions require documentary evidence from official records (SEC filings, court exhibits, audit reports). FOI/FOIA document analysis must note the originating request, releasing agency, and document authentication status.",
+    "validationRules": [
+      "Apply two-source minimum rule for all assertions of wrongdoing or misconduct — never publish from a single source alone.",
+      "Verify corporate identity claims against official registry filings; cross-check registered agents and officers across multiple jurisdictions if applicable.",
+      "Authenticate all leaked or obtained documents by cross-referencing details against independent official records before relying on them.",
+      "Document the status of all FOI/FOIA requests made during research — submitted date, agency, tracking number, and response received or pending.",
+      "Flag all findings that carry potential legal risk (defamation, privacy violations, court injunctions) for editorial and legal review.",
+      "Distinguish clearly between what is proven by documentary evidence, what is suggested by circumstantial evidence, and what remains an open question requiring further investigation.",
+      "Trace corporate ownership to ultimate beneficial owners where possible; note when beneficial ownership is obscured by offshore structures or nominee arrangements.",
+      "Validate timeline reconstructions against contemporaneous documentary evidence; do not rely solely on retrospective accounts."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, document date, publisher or agency, URL, and retrieval date. Court records cited with case name, docket number, court, filing date, and document type. Regulatory filings cited with entity name, filing type, date, and accession number where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Investigation Summary",
+      "Key Findings",
+      "Evidence Chain",
+      "Corporate Structure & Ownership",
+      "Financial Trail",
+      "Public Records Analysis",
+      "Timeline of Events",
+      "Source Assessment",
+      "Gaps & Unanswered Questions",
+      "Methodology",
+      "Source Index"
+    ],
+    "fileNaming": "{date}_{topic_slug}_investigation.md",
+    "specialDeliverables": [
+      "corporate-structure-chart",
+      "financial-flow-diagram",
+      "evidence-chain-timeline",
+      "source-reliability-matrix",
+      "connection-map"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting investigative research to the standard expected by investigative editors and fact-checking teams. Write for investigative editors and fact-checking teams. Apply two-source minimum rule for all assertions of wrongdoing. Document chain of evidence meticulously. Distinguish between what is proven, what is suggested, and what requires further investigation. Note all FOI requests made and their status. Flag any potential legal risks (defamation, privacy) in findings.",
+    "agentOverrides": {
+      "public-records-researcher": "Prioritize official primary records: court filings from PACER or CanLII, SEC EDGAR regulatory disclosures, state corporate registry documents, FEC campaign finance records, and FOI/FOIA-released government documents. For every document retrieved, log the source portal, retrieval date, and any document identifiers (docket number, accession number, case number). Do not substitute news accounts for primary records — go to the source.",
+      "corporate-investigator": "Map corporate ownership structures from official registries outward, identifying registered agents, officers, directors, and beneficial owners at each layer. Use ICIJ Offshore Leaks, OpenCorporates, and LittleSis to surface connections not apparent from a single jurisdiction. Cross-reference related-party transactions and board interlocks against SEC proxy statements and beneficial ownership filings. Explicitly flag when ownership is obscured by nominee arrangements or opacity structures, and note which jurisdictions are involved.",
+      "narrative-synthesizer": "Build the investigative narrative from the evidence chain upward — start with what the documents prove, then layer in what they suggest, then identify what gaps remain. Apply the two-source minimum standard at every factual assertion of wrongdoing. Structure findings so that each claim can be traced directly to its supporting documentary evidence. Flag any section where the evidentiary standard is not yet met and specify what additional records or corroboration would satisfy the standard."
+    },
+    "synthesisInstructions": "Lead with the most significant and best-documented findings. Present the evidence chain in logical sequence, linking each conclusion to its supporting primary records. Clearly separate proven facts from circumstantial patterns and open questions. For every major finding, state the evidence standard met (HIGH/MEDIUM/LOW/SPECULATIVE) and what would elevate it. Include a dedicated section on gaps and what further investigation is required. Flag all potential legal risks for editorial review.",
+    "reportingTone": "Precise and measured, suitable for editorial review before publication. Fact-based with direct citation to primary sources. Avoid speculation or editorializing; let the documentary evidence carry the findings. Write in plain language accessible to a general readership without sacrificing accuracy. Define legal, regulatory, or technical terms on first use. Maintain the distinction between alleged and proven throughout."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 18000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

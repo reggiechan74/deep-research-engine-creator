@@ -1,0 +1,234 @@
+{
+  "presetName": "Supply Chain & Logistics",
+  "presetDescription": "Pre-configured for supply chain research including trade flow analysis, logistics optimization, supplier risk assessment, tariff/customs analysis, inventory management, and supply chain resilience planning. Optimized for multi-source trade data with disruption monitoring.",
+  "keywords": ["supply-chain", "logistics", "trade", "customs", "tariff", "procurement", "resilience"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Trade & Government Data",
+        "sources": [
+          "WTO trade statistics (wto.org)",
+          "UN Comtrade international trade database (comtrade.un.org)",
+          "US International Trade Commission (usitc.gov)",
+          "Canada Border Services Agency / CBSA customs databases",
+          "Bureau of Labor Statistics import/export price indices (bls.gov)",
+          "Census Bureau international trade data (census.gov)",
+          "Transport Canada (tc.canada.ca)",
+          "US Department of Transportation Bureau of Transportation Statistics (bts.gov)",
+          "Port authority data (Port of Los Angeles, Port of Vancouver, etc.)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Industry & Market Data",
+        "sources": [
+          "Freightos Baltic Index (fbx.freightos.com)",
+          "Drewry shipping and container market data (drewry.co.uk)",
+          "IHS Markit / S&P Global supply chain intelligence",
+          "Gartner Supply Chain research and Magic Quadrants",
+          "McKinsey Global Institute supply chain reports",
+          "Dun & Bradstreet supplier risk and financial data (dnb.com)",
+          "Flexport market data and logistics analytics"
+        ]
+      },
+      "tier3": {
+        "name": "Professional & Academic Research",
+        "sources": [
+          "Council of Supply Chain Management Professionals (CSCMP) research (cscmp.org)",
+          "APICS / ASCM research and standards (ascm.org)",
+          "Logistics industry peer-reviewed journals (International Journal of Logistics, Journal of Supply Chain Management)",
+          "World Economic Forum supply chain and trade reports (weforum.org)",
+          "Trade and logistics association publications"
+        ]
+      },
+      "tier4": {
+        "name": "Industry News & Trade Press",
+        "sources": [
+          "Supply Chain Dive (supplychaindive.com)",
+          "FreightWaves (freightwaves.com)",
+          "Journal of Commerce (joc.com)",
+          "Lloyd's List (lloydslist.com)",
+          "General logistics industry news and reporting"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Unverified supplier claims and vendor self-reported data",
+          "Anonymous trade forum posts and sourcing community speculation",
+          "AI-generated logistics predictions without disclosed methodology",
+          "Social media supply chain commentary without data attribution"
+        ]
+      }
+    },
+    "preferredSites": [
+      "wto.org",
+      "comtrade.un.org",
+      "usitc.gov",
+      "bls.gov",
+      "census.gov",
+      "bts.gov",
+      "tc.canada.ca",
+      "drewry.co.uk",
+      "freightos.com",
+      "dnb.com",
+      "cscmp.org",
+      "ascm.org",
+      "weforum.org",
+      "mckinsey.com",
+      "gartner.com"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "trade-flow-lookup",
+        "pattern": "HS code \"{hs_code}\" trade flow {origin} {destination} {year} site:{preferred_site}"
+      },
+      {
+        "name": "tariff-analysis",
+        "pattern": "\"{product}\" tariff rate duty classification {country} {year} site:{preferred_site}"
+      },
+      {
+        "name": "supplier-risk",
+        "pattern": "\"{supplier_name}\" OR \"{country_of_origin}\" supply chain risk disruption {industry} {year}"
+      },
+      {
+        "name": "freight-rates",
+        "pattern": "\"{trade_lane}\" freight rates container shipping cost index {year_range}"
+      },
+      {
+        "name": "logistics-optimization",
+        "pattern": "\"{mode_of_transport}\" logistics cost optimization {geography} {year} site:{preferred_site}"
+      },
+      {
+        "name": "customs-compliance",
+        "pattern": "\"{product}\" customs compliance import requirements {country} {year}"
+      },
+      {
+        "name": "disruption-monitoring",
+        "pattern": "supply chain disruption \"{region}\" OR \"{industry}\" resilience impact {year}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["trade-data-researcher"]
+      },
+      "standard": {
+        "agents": ["trade-data-researcher", "logistics-analyst"]
+      },
+      "deep": {
+        "agents": ["trade-data-researcher", "logistics-analyst", "supply-chain-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["trade-data-researcher", "logistics-analyst", "supply-chain-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "trade-data-researcher",
+        "role": "Trade Data Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative trade flow data from official sources including UN Comtrade, WTO statistics, USITC, and Census Bureau trade databases. Extracts HS code classifications, import/export volumes, values, and origin/destination country data. Reconciles trade figures across databases and identifies data discrepancies. Tracks tariff schedules, customs regulations, and freight rate indices.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "logistics-analyst",
+        "role": "Logistics Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes logistics networks, freight markets, and transportation cost structures using frameworks such as total landed cost modeling, network optimization, and mode selection analysis. Assesses port congestion, carrier capacity, and freight rate trends across ocean, air, rail, and road. Identifies logistics cost reduction opportunities and evaluates trade-off between cost, speed, and reliability for different supply chain configurations.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "supply-chain-strategist",
+        "role": "Supply Chain Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes trade, logistics, and supplier intelligence into strategic supply chain assessments. Maps supplier landscapes and concentration risks, builds disruption scenario matrices, and develops resilience strategies. Evaluates nearshoring, friendshoring, and dual-sourcing options. Produces risk-ranked recommendations covering supplier diversification, inventory buffering, and contingency routing. Assesses geopolitical and regulatory exposure across supply chain tiers.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official customs/trade databases and government statistics (UN Comtrade, WTO, USITC, Census Bureau). Trade flow figures cross-referenced across 2+ official sources with consistent values.",
+      "MEDIUM": "Supported by a recognized logistics data provider (Drewry, Freightos, IHS Markit) corroborated by at least 1 official trade source. Minor discrepancies between sources have been identified and explained.",
+      "LOW": "Based on a single industry report without official trade data corroboration. Freight rates or trade volumes from a single provider without cross-validation.",
+      "SPECULATIVE": "Projected trade flows or supply chain disruption scenarios without quantitative modeling. Directional estimates derived from analogical reasoning or expert opinion without primary data support."
+    },
+    "minimumEvidence": "All trade flow and volume claims require 2+ independent data sources. Tariff classifications must reference official customs schedules or USITC/CBSA rulings. Freight rate benchmarks require at least 1 recognized index (Freightos Baltic Index, Drewry World Container Index, or equivalent).",
+    "validationRules": [
+      "Cross-check trade volume and value figures across at least 2 independent official databases and note material discrepancies.",
+      "Validate HS code classifications against official harmonized tariff schedules and confirm 6-digit or 10-digit specificity as appropriate.",
+      "Confirm tariff rates from official government sources (USITC, CBSA, WTO tariff database) and note the applicable trade agreement or MFN status.",
+      "Flag any trade data older than 2 years as potentially outdated and note the vintage.",
+      "Distinguish between landed cost components: product cost, freight, insurance, customs duties, brokerage fees, and last-mile delivery.",
+      "Verify supplier financial health claims against Dun & Bradstreet or equivalent credit data rather than self-reported information.",
+      "Identify and disclose tier-1, tier-2, and tier-3 supplier exposure where concentration risk is material."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Trade statistics cited with source database, reporter country, HS code, trade flow direction, and reference period. Tariff rulings cited with ruling number, issuing authority, and date.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Trade Flow Analysis",
+      "Supplier Landscape",
+      "Logistics Network Assessment",
+      "Tariff & Customs Analysis",
+      "Inventory & Demand Analysis",
+      "Supply Chain Risk Assessment",
+      "Disruption Scenarios",
+      "Resilience Strategy",
+      "Cost Optimization Opportunities",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_supply_chain.md",
+    "specialDeliverables": [
+      "trade-flow-map",
+      "supplier-risk-matrix",
+      "logistics-cost-breakdown",
+      "tariff-impact-table",
+      "disruption-scenario-matrix"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting supply chain and logistics research to the standard expected by supply chain executives, procurement officers, and trade compliance teams. Write for decision-makers who must act on the intelligence to reduce cost, manage risk, and ensure continuity. Quantify trade flows with HS codes and values. Distinguish between landed cost components. Include tariff classification analysis where applicable. Assess both single-source and systemic supply chain risks. Acknowledge geopolitical and regulatory factors that may alter supply chain economics.",
+    "agentOverrides": {
+      "trade-data-researcher": "Prioritize official trade databases: UN Comtrade for international flows, Census Bureau for US trade, USITC for tariff and import injury data. Always specify HS code level of analysis (6-digit international, 8-digit harmonized, or 10-digit US statistical). When trade figures vary between sources, reconcile explicitly by noting reporter/partner country discrepancies (mirror statistics) and methodology differences. Flag data vintage and note any reclassification or revision notices from source databases.",
+      "logistics-analyst": "Apply total landed cost methodology when evaluating logistics options. Distinguish between ocean LCL, FCL, and bulk freight economics. Include carrier reliability and port congestion data alongside rate data. When analyzing freight markets, reference recognized indices (Freightos Baltic Index, Drewry WCI, Xeneta) rather than spot quotes. Identify modal shift opportunities and quantify trade-offs between speed, cost, and carbon footprint.",
+      "supply-chain-strategist": "Build structured risk matrices that classify suppliers by spend tier, geographic concentration, single-source status, and financial health. Develop disruption scenarios using historical precedents (COVID-19 port shutdowns, Suez Canal blockage, trade war tariff escalation) as calibration anchors. Evaluate resilience levers including dual-sourcing, safety stock levels, nearshoring, and supplier financial support programs. Quantify resilience investment costs against expected disruption loss exposure."
+    },
+    "synthesisInstructions": "Lead with the most operationally critical findings — supply chain risks and cost optimization opportunities that require near-term action. Quantify trade flows, tariff impacts, and logistics costs using data from the research phase. Present a balanced view of resilience options with cost/benefit framing. When trade data conflicts across sources, present the range and explain mirror statistic discrepancies. Include a clear 'so what' for each major finding targeted at procurement and operations decision-makers.",
+    "reportingTone": "Professional and operational, suitable for supply chain executives, procurement leaders, and trade compliance officers. Data-driven with quantified trade flows and cost figures. Define trade and logistics terminology on first use. Avoid generic supply chain language — be specific about modes, lanes, HS codes, and tariff classifications. Write for people who need to make sourcing, routing, and inventory decisions based on the analysis."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

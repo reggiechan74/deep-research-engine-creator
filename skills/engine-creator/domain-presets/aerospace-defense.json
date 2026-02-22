@@ -1,0 +1,229 @@
+{
+  "presetName": "Aerospace & Defense",
+  "presetDescription": "Pre-configured for aerospace and defense research including defense procurement analysis, military capability assessment, aviation safety, space industry evaluation, and defense technology trends. Optimized for OSINT-enriched analysis with export control awareness (ITAR/EAR).",
+  "keywords": ["aerospace", "defense", "military", "procurement", "aviation", "space", "itar"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Government & Authoritative Defense Data",
+        "sources": [
+          "DSCA (Defense Security Cooperation Agency) notifications (dsca.mil)",
+          "SAM.gov contract awards and procurement data",
+          "DoD budget documents (comptroller.defense.gov — President's Budget, FYDP)",
+          "FAA databases (faa.gov — airworthiness directives, accident reports, certification data)",
+          "ICAO safety data and Standards (icao.int)",
+          "NASA technical reports (ntrs.nasa.gov)",
+          "CSIS defense budget analysis (csis.org)",
+          "DND (Canada) procurement and defence policy (canada.ca/en/department-national-defence)",
+          "SIPRI arms transfer database (sipri.org)",
+          "Jane's by IHS Markit (janes.com — subscription required)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Defense Analysis",
+        "sources": [
+          "Aviation Week Intelligence Network (aviationweek.com)",
+          "FlightGlobal (flightglobal.com)",
+          "Defense One (defenseone.com)",
+          "RAND Corporation defense studies (rand.org)",
+          "CBO defense analyses (cbo.gov)",
+          "Defense contractor SEC filings and 10-K annual reports (sec.gov)",
+          "Teal Group aerospace and defense market analysis",
+          "Forecast International defense market research (forecastinternational.com)"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Defense Commentary",
+        "sources": [
+          "AIAA publications (aiaa.org)",
+          "Defense technology journals and peer-reviewed aerospace research",
+          "Military think tank reports (CSBA, Hudson Institute, RUSI)",
+          "NATO research publications (nato.int and act.nato.int)",
+          "Defense conference proceedings (AUSA, Paris Air Show, Farnborough International Airshow)"
+        ]
+      },
+      "tier4": {
+        "name": "General Defense News",
+        "sources": [
+          "Defense News (defensenews.com)",
+          "Breaking Defense (breakingdefense.com)",
+          "SpaceNews (spacenews.com)",
+          "The War Zone (thedrive.com/the-war-zone)",
+          "C4ISRNET (c4isrnet.com)",
+          "Defense analyst commentary from established practitioners"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable / Unverified",
+        "sources": [
+          "Unverified military capability claims without official sourcing",
+          "Social media OSINT without corroboration from established defense sources",
+          "Defense marketing materials without contract or budget backing",
+          "Anonymous forum posts about classified or sensitive programs",
+          "Speculative capability reporting without independent technical verification"
+        ]
+      }
+    },
+    "preferredSites": [
+      "dsca.mil",
+      "sam.gov",
+      "comptroller.defense.gov",
+      "faa.gov",
+      "icao.int",
+      "ntrs.nasa.gov",
+      "sipri.org",
+      "rand.org",
+      "cbo.gov",
+      "sec.gov",
+      "aviationweek.com",
+      "flightglobal.com",
+      "csis.org",
+      "aiaa.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "procurement-award",
+        "pattern": "\"{contractor}\" OR \"{program}\" contract award \"{agency}\" {year} site:sam.gov OR site:dsca.mil"
+      },
+      {
+        "name": "defense-budget-search",
+        "pattern": "\"{program}\" OR \"{capability}\" budget request {fiscal_year} site:comptroller.defense.gov"
+      },
+      {
+        "name": "capability-assessment",
+        "pattern": "\"{system}\" OR \"{platform}\" capability performance specifications {year} site:rand.org OR site:csis.org"
+      },
+      {
+        "name": "aviation-safety",
+        "pattern": "\"{aircraft_type}\" OR \"{operator}\" safety airworthiness {issue} site:faa.gov OR site:icao.int"
+      },
+      {
+        "name": "arms-transfer",
+        "pattern": "\"{country}\" defense export \"{equipment_type}\" {year_range} site:sipri.org OR site:dsca.mil"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["defense-procurement-researcher"]
+      },
+      "standard": {
+        "agents": ["defense-procurement-researcher", "capability-analyst"]
+      },
+      "deep": {
+        "agents": ["defense-procurement-researcher", "capability-analyst", "strategic-defense-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["defense-procurement-researcher", "capability-analyst", "strategic-defense-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "defense-procurement-researcher",
+        "role": "Defense Procurement Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative defense procurement data from primary government sources including DSCA notifications, SAM.gov contract awards, DoD budget documents, and contractor SEC filings. Excels at tracking program funding through the FYDP, identifying contract vehicles and award structures, and reconciling budget request figures with actual obligations across fiscal years.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "capability-analyst",
+        "role": "Capability Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Assesses military capability and technology readiness using TRL frameworks, DOTMLPF-P analysis, and open-source technical indicators. Analyzes platform performance specifications, system integration requirements, and operational suitability data from official test and evaluation reports. Distinguishes between funded programs of record, unfunded requirements, and conceptual studies. Identifies technology gaps and modernization vectors using RAND, CSBA, and official programmatic sources.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "strategic-defense-mapper",
+        "role": "Strategic Defense Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Maps the defense industrial base, international cooperation frameworks, and export control landscape. Builds competitive profiles of prime contractors and tier-1 suppliers, assesses foreign military sales pipelines, and evaluates ITAR/EAR compliance implications. Synthesizes SIPRI arms transfer data, DSCA notifications, and alliance posture assessments into strategic opportunity maps and geopolitical risk frameworks relevant to aerospace and defense investment and business development.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official government procurement records or budget documents (SAM.gov, DSCA, comptroller.defense.gov) AND corroborated by a recognized defense intelligence provider (Jane's, RAND, SIPRI, or equivalent). Program funding confirmed in at least one enacted appropriations bill or FYDP.",
+      "MEDIUM": "Supported by an established defense publication (Aviation Week, FlightGlobal, Defense One) plus at least one official government source. Minor discrepancies between sources identified and explained.",
+      "LOW": "Based on a single defense analyst report without government source corroboration, or data drawn exclusively from tier-3 or tier-4 sources. May involve extrapolation from adjacent programs or historical spending patterns.",
+      "SPECULATIVE": "Projected military capability based on open-source indicators, unconfirmed program existence, or budget line extrapolation. Includes analysis of unfunded requirements, conceptual studies, or capability gaps inferred from doctrine without programmatic confirmation."
+    },
+    "minimumEvidence": "All procurement figures require citation of at least one official government source (SAM.gov, DSCA, DoD budget). Capability claims require TRL designation and reference to an official or recognized technical authority. Export and ITAR/EAR assessments must cite the applicable USML category or EAR ECCN and relevant regulatory guidance.",
+    "validationRules": [
+      "Cross-check all contract award values against SAM.gov or DSCA records and note discrepancies with published defense news figures.",
+      "Validate budget figures against the most recent enacted appropriations or President's Budget Request, specifying fiscal year and appropriation account.",
+      "Flag any program data referencing a cancelled or restructured program and note the current program status.",
+      "Distinguish explicitly between a program of record (funded, on contract), an unfunded requirement, and a conceptual or pre-decisional study.",
+      "Assign a TRL rating to all technology claims and cite the source of that assessment.",
+      "Note ITAR/EAR restrictions on any technical information that may affect information sharing or publication.",
+      "For foreign military sales, verify DSCA notification and Congressional notification status before reporting as approved."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Government documents cited with agency, document title, fiscal year or publication date, and document number or accession where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Program Overview",
+      "Defense Budget Analysis",
+      "Procurement & Contract Landscape",
+      "Capability Assessment",
+      "Technology Readiness",
+      "Industrial Base Analysis",
+      "International Cooperation & Export",
+      "Regulatory & Compliance (ITAR/EAR)",
+      "Competitive Analysis",
+      "Strategic Implications",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_defense_analysis.md",
+    "specialDeliverables": [
+      "procurement-pipeline-tracker",
+      "capability-comparison-matrix",
+      "defense-budget-breakdown",
+      "technology-readiness-assessment",
+      "export-control-summary"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting aerospace and defense research to the standard expected by defense industry executives, procurement officers, and defense investment analysts. Write for audiences with technical and policy fluency. Reference Technology Readiness Levels (TRL) when assessing system maturity. Distinguish explicitly between funded programs of record, unfunded requirements, and conceptual studies. Note ITAR/EAR restrictions on information sharing where applicable. Assess industrial base health and supply chain dependencies as integral parts of any program or capability assessment. Every procurement figure must be traceable to an official government source.",
+    "agentOverrides": {
+      "defense-procurement-researcher": "Prioritize primary government procurement data: SAM.gov contract awards, DSCA notifications, DoD budget justification documents, and enacted appropriations. When citing contractor financials, reference SEC 10-K filings directly. Reconcile discrepancies between reported contract values and official award records explicitly rather than choosing one silently. Always specify fiscal year and appropriation account for budget figures.",
+      "capability-analyst": "Apply structured frameworks including DOTMLPF-P and TRL assessments. Identify the 3-5 most significant capability gaps or modernization vectors for the subject area over the next 5-10 years. Quantify capability parameters where technically possible using open-source specifications. Clearly flag any capability claim that cannot be verified through official or recognized technical sources and label it SPECULATIVE.",
+      "strategic-defense-mapper": "Build detailed competitive profiles of prime contractors and key suppliers including revenue scale from defense segments, program win rates, backlog, and strategic moves (M&A, teaming agreements, international partnerships). Map the foreign military sales pipeline using DSCA and SIPRI data. Identify market white spaces, sole-source dependencies, and consolidation risks in the industrial base. Assess ITAR/EAR implications for international cooperation opportunities."
+    },
+    "synthesisInstructions": "Lead with the most actionable procurement and strategic insights. Quantify program values, TRL levels, and industrial base risks using data from the research phase. Present a balanced view acknowledging both near-term opportunities (funded programs on contract) and longer-horizon uncertainties (unfunded requirements, budget risk). Include a clear 'so what' for each major finding oriented to defense industry or investment decision-making. When budget or capability data conflicts, present the range and your assessment of which figure is most authoritative and why.",
+    "reportingTone": "Professional and analytically rigorous, suitable for defense executives, program managers, and institutional investors with aerospace and defense exposure. Data-driven with clear sourcing for all quantitative claims. Define acronyms on first use. Write for decision-makers who need to act on the intelligence — whether making a bid/no-bid decision, evaluating a defense investment, or assessing a foreign military sales opportunity."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

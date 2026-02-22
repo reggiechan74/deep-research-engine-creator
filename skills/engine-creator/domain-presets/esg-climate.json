@@ -1,0 +1,236 @@
+{
+  "presetName": "ESG & Climate Risk",
+  "presetDescription": "Pre-configured for ESG research including climate risk assessment, sustainability reporting analysis, carbon accounting, green finance, corporate governance evaluation, and regulatory compliance with emerging ESG disclosure requirements. Optimized for TCFD/ISSB framework alignment.",
+  "keywords": ["esg", "climate-risk", "sustainability", "tcfd", "carbon", "governance", "green-finance"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary ESG & Regulatory Data",
+        "sources": [
+          "CDP (cdp.net — corporate disclosure data, climate scores)",
+          "IPCC reports (ipcc.ch — climate science assessments)",
+          "UNFCCC submissions (unfccc.int — nationally determined contributions, GHG inventories)",
+          "SEC climate disclosure rules (sec.gov — proposed and final climate-related disclosure rules)",
+          "ISSB/IFRS sustainability standards (ifrs.org/groups/international-sustainability-standards-board/)",
+          "TCFD recommendations (fsb-tcfd.org — Task Force on Climate-related Financial Disclosures)",
+          "GRI Standards database (globalreporting.org)",
+          "SASB Standards (sasb.org — industry-specific sustainability accounting standards)",
+          "EU CSRD and EU Taxonomy (ec.europa.eu — Corporate Sustainability Reporting Directive)",
+          "National GHG inventories (UNFCCC data portal — country-level emissions data)",
+          "EPA GHG Reporting Program (ghgdata.epa.gov — GHGRP facility-level emissions)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative ESG Analysis",
+        "sources": [
+          "MSCI ESG ratings (msci.com/our-solutions/esg-investing)",
+          "Sustainalytics ESG risk ratings (sustainalytics.com)",
+          "ISS ESG (issgovernance.com/esg/)",
+          "Bloomberg ESG data (bloomberg.com/professional/solution/esg-data/)",
+          "S&P Global ESG scores (spglobal.com/esg/)",
+          "Corporate sustainability reports (audited, with third-party assurance statements)",
+          "Green bond frameworks verified by ICMA (icmagroup.org — Green Bond Principles)",
+          "PRI signatory reports (unpri.org — Principles for Responsible Investment)",
+          "Climate Action 100+ company assessments (climateaction100.org)"
+        ]
+      },
+      "tier3": {
+        "name": "Informed ESG Commentary",
+        "sources": [
+          "World Resources Institute publications (wri.org)",
+          "WBCSD reports (wbcsd.org — World Business Council for Sustainable Development)",
+          "Ceres reports (ceres.org — investor sustainability network)",
+          "Carbon Tracker Initiative analysis (carbontracker.org)",
+          "Rocky Mountain Institute research (rmi.org)",
+          "Academic ESG research journals (Journal of Sustainable Finance & Investment, Business Strategy and the Environment)",
+          "Science Based Targets initiative (sciencebasedtargets.org — SBTi target validation reports)",
+          "TNFD recommendations (tnfd.global — Task Force on Nature-related Financial Disclosures)"
+        ]
+      },
+      "tier4": {
+        "name": "General ESG Coverage",
+        "sources": [
+          "Responsible Investor (responsible-investor.com)",
+          "ESG Today (esgtoday.com)",
+          "GreenBiz (greenbiz.com)",
+          "ESG analyst commentary and opinion pieces",
+          "Sustainability conference proceedings and keynotes"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Greenwashing marketing materials and promotional sustainability content",
+          "Unverified carbon offset claims without third-party registry validation",
+          "Self-reported ESG metrics without third-party assurance or auditor review",
+          "Social media sustainability advocacy and influencer environmental content"
+        ]
+      }
+    },
+    "preferredSites": [
+      "cdp.net",
+      "ipcc.ch",
+      "unfccc.int",
+      "sec.gov",
+      "ifrs.org",
+      "fsb-tcfd.org",
+      "globalreporting.org",
+      "sasb.org",
+      "ec.europa.eu",
+      "ghgdata.epa.gov",
+      "msci.com",
+      "sustainalytics.com",
+      "unpri.org",
+      "climateaction100.org",
+      "sciencebasedtargets.org",
+      "wri.org",
+      "carbontracker.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "esg-rating-search",
+        "pattern": "\"{company}\" ESG rating score {rating_provider} {year} sustainability"
+      },
+      {
+        "name": "tcfd-disclosure-search",
+        "pattern": "\"{company}\" TCFD climate disclosure report {year} site:{preferred_site}"
+      },
+      {
+        "name": "emissions-data-search",
+        "pattern": "\"{company}\" Scope 1 Scope 2 Scope 3 emissions {year} GHG inventory"
+      },
+      {
+        "name": "regulatory-compliance-search",
+        "pattern": "\"{company}\" OR \"{industry}\" CSRD ISSB SEC climate disclosure compliance {year}"
+      },
+      {
+        "name": "cdp-disclosure-search",
+        "pattern": "\"{company}\" CDP climate water forest score {year} site:cdp.net"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["esg-data-researcher"]
+      },
+      "standard": {
+        "agents": ["esg-data-researcher", "climate-risk-analyst"]
+      },
+      "deep": {
+        "agents": ["esg-data-researcher", "climate-risk-analyst", "governance-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["esg-data-researcher", "climate-risk-analyst", "governance-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "esg-data-researcher",
+        "role": "ESG Data Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative ESG data from primary sources including CDP disclosures, regulatory filings, audited sustainability reports, and recognized ESG rating providers. Excels at extracting emissions figures (Scope 1, 2, and 3), sustainability targets, ESG scores, and framework alignment metrics. Reconciles data points across multiple rating providers and disclosure frameworks to establish reliable baselines.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "climate-risk-analyst",
+        "role": "Climate Risk Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes physical and transition climate risks using TCFD and ISSB frameworks. Assesses physical risk exposure (acute and chronic), transition risk vectors (policy, technology, market, reputational), and climate-related opportunities. Maps emissions trajectories against science-based targets and net-zero pathways. Evaluates carbon accounting methodologies, offset quality, and alignment with Paris Agreement temperature goals. Identifies greenwashing indicators and flags unsubstantiated climate claims.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "governance-strategist",
+        "role": "Governance Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Evaluates corporate governance quality, board ESG oversight structures, executive compensation alignment with sustainability targets, and shareholder engagement practices. Assesses compliance posture against emerging ESG disclosure mandates (SEC, CSRD, ISSB). Benchmarks governance practices against peers and investor expectations. Maps green finance structures including green bonds, sustainability-linked loans, and ESG-linked covenants. Synthesizes ESG governance intelligence into actionable risk and opportunity frameworks for institutional investors and sustainability officers.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against audited sustainability reports or regulatory filings and corroborated by at least one recognized ESG data provider (MSCI, Sustainalytics, CDP, S&P Global ESG). Emissions data references a third-party assured GHG inventory.",
+      "MEDIUM": "Supported by a recognized ESG rating agency assessment corroborated by company sustainability disclosure. Minor discrepancies between sources have been identified and explained.",
+      "LOW": "Based on a single ESG data source without regulatory filing or audited report corroboration. Data may reference unassured self-reported metrics or be older than 2 years.",
+      "SPECULATIVE": "Projected emissions reductions or net-zero targets without a verified baseline, published methodology, or interim milestone validation."
+    },
+    "minimumEvidence": "All emissions figures require a verifiable GHG inventory reference (company-disclosed, CDP, or GHGRP). ESG scores must cite the specific rating provider and methodology vintage. Regulatory compliance assessments must reference the applicable rule text or standard. Climate risk assessments must distinguish between physical and transition risk categories per TCFD recommendations.",
+    "validationRules": [
+      "Distinguish clearly between Scope 1, Scope 2 (market-based and location-based), and Scope 3 emissions in all carbon accounting analysis.",
+      "Cross-check ESG ratings across at least 2 independent rating providers and note material divergences and their likely drivers.",
+      "Validate TCFD alignment claims against all four TCFD pillars: Governance, Strategy, Risk Management, and Metrics & Targets.",
+      "Flag any sustainability target lacking a published baseline year, interim milestones, or verified methodology as SPECULATIVE.",
+      "Assess third-party assurance level for all reported emissions: limited assurance, reasonable assurance, or unassured.",
+      "Identify and flag potential greenwashing indicators: vague claims, lack of absolute targets, reliance on unregistered offsets, or omission of material Scope 3 categories.",
+      "Verify carbon offset quality against recognized registries (Gold Standard, Verra VCS, ACR) before treating offsets as credible emissions reductions.",
+      "Note the applicable regulatory jurisdiction for all compliance assessments (SEC, EU CSRD, ISSB IFRS S1/S2) and the effective date."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Regulatory documents cited with rule number, effective date, and issuing authority. ESG ratings cited with provider name, rating date, and methodology version where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "ESG Framework Assessment",
+      "Climate Risk Analysis (Physical & Transition)",
+      "Carbon Footprint & Emissions",
+      "Governance & Board Assessment",
+      "Social Impact Analysis",
+      "Regulatory Compliance Status",
+      "Peer Benchmarking",
+      "Green Finance & Sustainable Investment",
+      "Risk & Opportunity Matrix",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_esg_assessment.md",
+    "specialDeliverables": [
+      "esg-scorecard",
+      "emissions-trajectory-chart",
+      "tcfd-alignment-matrix",
+      "governance-dashboard",
+      "peer-benchmark-table"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting ESG and climate risk research to the standard expected by ESG analysts, sustainability officers, and institutional investors integrating ESG factors into investment decisions. Apply the TCFD framework consistently across all climate-related analysis. Distinguish between Scope 1, Scope 2, and Scope 3 emissions in all carbon accounting discussions. Assess both physical climate risks (acute and chronic) and transition climate risks (policy, technology, market, reputational). Flag potential greenwashing indicators wherever claims lack third-party assurance, verified baselines, or registered offset validation.",
+    "agentOverrides": {
+      "esg-data-researcher": "Prioritize primary quantitative ESG data: CDP disclosure scores, EPA GHGRP facility-level emissions, UNFCCC national inventories, and audited corporate sustainability reports with third-party assurance statements. When using ESG rating agency data, always note the provider, rating date, and any known methodology differences versus peers. Reconcile conflicting emissions figures across sources explicitly, noting assurance levels.",
+      "climate-risk-analyst": "Apply TCFD and ISSB frameworks as the primary analytical structure. For physical risk, assess both acute events (extreme weather, flooding) and chronic shifts (temperature, sea level). For transition risk, evaluate policy exposure, technology disruption, and stranded asset risk. Map emissions trajectories against 1.5°C and 2°C pathways using IEA or IPCC scenarios. Identify Scope 3 category omissions and assess their materiality.",
+      "governance-strategist": "Evaluate board-level ESG oversight: dedicated sustainability committee, climate expertise among directors, and ESG-linked executive compensation. Assess shareholder engagement quality and activist investor pressure. Map compliance requirements by jurisdiction (SEC climate rules, EU CSRD, ISSB IFRS S1/S2) with effective dates and current readiness gaps. Analyze green finance instruments for structural robustness: use-of-proceeds restrictions, reporting covenants, and step-up penalty provisions."
+    },
+    "synthesisInstructions": "Lead with the most material ESG risks and opportunities relative to the subject's sector and capital structure. Quantify emissions exposures and reduction trajectories where data permits. Present TCFD alignment gaps with specificity — identify which pillars and sub-recommendations are met, partially met, or absent. When ESG ratings diverge across providers, present the range and assess which reflects the more material risk view. Include a clear 'so what' for each major finding framed for investment or operational decision-making.",
+    "reportingTone": "Professional and analytical, suitable for institutional investor ESG teams, corporate sustainability officers, and board-level audiences. Data-driven with clear references to applicable frameworks (TCFD, ISSB, GRI, SASB). Define ESG-specific acronyms on first use. Avoid advocacy language; maintain objective analytical framing. Write for decision-makers who need to act on ESG intelligence, not merely acknowledge it."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

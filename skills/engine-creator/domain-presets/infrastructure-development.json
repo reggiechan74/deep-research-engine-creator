@@ -1,0 +1,230 @@
+{
+  "presetName": "Infrastructure & Development",
+  "presetDescription": "Pre-configured for infrastructure research including linear infrastructure (transmission, pipelines, highways), municipal planning, environmental assessments, land use approvals, construction project analysis, and public-private partnerships. Optimized for regulatory and permitting workflows with multi-stakeholder analysis.",
+  "keywords": ["infrastructure", "construction", "linear-infrastructure", "municipal-planning", "environmental-assessment", "land-use", "p3"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Regulatory & Government Records",
+        "sources": [
+          "Municipal official plans and zoning bylaws (municipal planning portals)",
+          "Provincial/state infrastructure plans and corridor studies",
+          "Environmental assessment registries (IAAC iaac-aeic.gc.ca, EPA NEPA nepaweb.net)",
+          "Land registry records (provincial land title offices, county recorder databases)",
+          "Utility corridor databases (provincial OEB, FERC, NEB/CER)",
+          "Infrastructure Canada (infrastructure.gc.ca)",
+          "USDOT Federal Highway Administration (fhwa.dot.gov)",
+          "Transmission system plans (IESO ieso.ca, regional ISOs: MISO, PJM, CAISO, SPP)",
+          "National Energy Board / Canada Energy Regulator (cer-rec.gc.ca)",
+          "Federal and provincial Crown land records and disposition registers"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Technical & Financial Analysis",
+        "sources": [
+          "Engineering consulting reports (WSP, AECOM, Stantec, HDR — published or disclosed documents)",
+          "MPAC and county assessor property data (mpac.ca)",
+          "Construction cost databases (RSMeans, Turner & Townsend cost indices)",
+          "P3 project databases (PPP Canada, FHWA P3 toolkit fhwa.dot.gov/ipd/p3)",
+          "Canadian Infrastructure Bank (cib-bic.ca)",
+          "Municipal capital budgets and 10-year capital plans",
+          "Infrastructure Ontario project disclosures (infrastructureontario.ca)",
+          "US Army Corps of Engineers project reports",
+          "Major development proponent environmental impact statements"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Technical Commentary",
+        "sources": [
+          "Professional association publications (PEO, OSPE, ASCE, APEGA)",
+          "Infrastructure industry reports (CCA, RCCAO, Canadian Construction Association)",
+          "Urban planning and land use journals (Journal of Planning Education and Research)",
+          "Conference proceedings (TAC — Transportation Association of Canada, CSCE — Canadian Society for Civil Engineering)",
+          "Peer-reviewed environmental and infrastructure journals",
+          "Municipal finance and planning academic publications"
+        ]
+      },
+      "tier4": {
+        "name": "General Infrastructure News & Public Record",
+        "sources": [
+          "Infrastructure news outlets (ReNew Canada renewcanada.net, Daily Commercial News dcnonl.com, ENR enr.com)",
+          "Municipal council meeting minutes and staff reports",
+          "Community consultation reports and public hearing transcripts",
+          "Regional planning board meeting records",
+          "General business press coverage of infrastructure projects"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "NIMBY advocacy sites without technical or regulatory backing",
+          "Unverified cost estimates without engineering basis or source attribution",
+          "Social media infrastructure commentary and speculation",
+          "Developer marketing materials for unapproved or conceptual projects",
+          "Anonymous forum posts about permit status or project timelines"
+        ]
+      }
+    },
+    "preferredSites": [
+      "infrastructure.gc.ca",
+      "iaac-aeic.gc.ca",
+      "cer-rec.gc.ca",
+      "fhwa.dot.gov",
+      "ieso.ca",
+      "cib-bic.ca",
+      "infrastructureontario.ca",
+      "mpac.ca",
+      "oeb.ca",
+      "dcnonl.com",
+      "renewcanada.net",
+      "enr.com",
+      "pppcanda.ca"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com",
+      "reddit.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "ea-registry-search",
+        "pattern": "\"{project_name}\" OR \"{proponent}\" environmental assessment {province_state} site:{preferred_site}"
+      },
+      {
+        "name": "zoning-official-plan",
+        "pattern": "\"{municipality}\" official plan zoning {land_use_category} amendment {year}"
+      },
+      {
+        "name": "corridor-route-search",
+        "pattern": "\"{infrastructure_type}\" corridor route {geography} approval permitting {year_range}"
+      },
+      {
+        "name": "p3-procurement-search",
+        "pattern": "\"{project_type}\" public-private partnership P3 RFP RFQ procurement {geography} {year}"
+      },
+      {
+        "name": "construction-cost-benchmark",
+        "pattern": "\"{infrastructure_type}\" construction cost estimate {unit} {geography} {year} site:{preferred_site}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["infrastructure-researcher"]
+      },
+      "standard": {
+        "agents": ["infrastructure-researcher", "land-use-analyst"]
+      },
+      "deep": {
+        "agents": ["infrastructure-researcher", "land-use-analyst", "project-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["infrastructure-researcher", "land-use-analyst", "project-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "infrastructure-researcher",
+        "role": "Infrastructure Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches regulatory databases, environmental assessment registries, municipal records, and utility corridor databases to gather primary-source documentation on infrastructure projects. Retrieves EA filings, federal and provincial approvals, transmission system plans, land registry records, and capital budget disclosures. Excels at locating official project documentation across multiple jurisdictions and reconciling project status across government sources.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "land-use-analyst",
+        "role": "Land Use Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes zoning designations, official plans, environmental constraints, and permitting pathways to assess land use feasibility and regulatory risk. Interprets planning policy, environmental protection overlays, agricultural land designations, and Indigenous territory considerations. Identifies key approval gates (OPA, ZBA, EA triggers, IBA requirements), maps stakeholder impacts, and evaluates the probability and timeline of regulatory approvals across federal, provincial, and municipal jurisdictions.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "project-strategist",
+        "role": "Project Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Synthesizes regulatory, environmental, land use, and financial intelligence into project feasibility assessments, risk matrices, stakeholder maps, and procurement strategy recommendations. Evaluates P3 structuring options, assesses construction cost and schedule risk, identifies critical path permitting dependencies, and benchmarks projects against comparable delivered infrastructure. Produces structured deliverables including corridor comparison tables, risk registers, and permitting timelines suitable for capital allocation decisions.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official regulatory filings, environmental assessment documents, or municipal records (official plan, zoning bylaw, council resolution). Data is confirmed by at least one government or regulatory body source.",
+      "MEDIUM": "Supported by a recognized engineering firm report (WSP, AECOM, Stantec, HDR, or equivalent) corroborated by at least one official record (capital budget, proponent disclosure, EA screening). Minor discrepancies between sources identified and explained.",
+      "LOW": "Based on a single industry source without official corroboration, or on news coverage without reference to underlying documentation. May involve extrapolation from comparable projects.",
+      "SPECULATIVE": "Proposed projects not yet approved or entered into the EA process, cost estimates without detailed engineering basis, or route/corridor options under internal evaluation but not publicly disclosed."
+    },
+    "minimumEvidence": "All regulatory status claims require direct reference to an official government registry or published EA document. Cost estimates must reference a recognized construction cost database or engineering firm report. Permitting timelines must be grounded in the applicable statutory process (e.g., Ontario EA Act, CEAA/IAA, NEPA) rather than proponent projections alone.",
+    "validationRules": [
+      "Verify project approval status directly against the applicable regulatory registry (IAAC, provincial EA portal, municipal planning system) — do not rely solely on proponent communications.",
+      "Distinguish clearly between approved, under review, proposed, and conceptual project stages in all references.",
+      "Cross-check construction cost estimates against at least one independent benchmark source (RSMeans, Turner, comparable project disclosure).",
+      "Flag any Indigenous consultation status that cannot be confirmed through public registry or proponent disclosure.",
+      "Note the applicable statutory framework (federal, provincial, municipal) for each regulatory step and cite the governing legislation.",
+      "Identify whether land is Crown, municipal, private, or Treaty territory, as this materially affects permitting pathway.",
+      "Flag data older than 3 years for infrastructure cost benchmarks and 2 years for regulatory status, as both change materially over time."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, document title, date published or accessed, publisher/issuing body, and URL. Regulatory filings cited with project name, file/docket number, issuing authority, and date. Municipal documents cited with municipality, document type, by-law or resolution number, and date of adoption.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "3-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Project Context",
+      "Regulatory & Permitting Framework",
+      "Environmental Assessment",
+      "Land Use & Zoning Analysis",
+      "Corridor/Route Analysis",
+      "Stakeholder Mapping",
+      "Cost & Schedule Assessment",
+      "Risk Matrix",
+      "Procurement Strategy",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_infrastructure_analysis.md",
+    "specialDeliverables": [
+      "regulatory-pathway-map",
+      "stakeholder-matrix",
+      "corridor-comparison-table",
+      "risk-register",
+      "permitting-timeline"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting infrastructure and development research to the standard expected by infrastructure developers, municipal planners, and utility companies. Write with reference to applicable regulatory frameworks including the Impact Assessment Act (IAA), Ontario Environmental Assessment Act, Planning Act, Municipal Act, and equivalent provincial/state statutes. Include Indigenous consultation requirements (duty to consult, UNDRIP, Impact Benefit Agreements) where the project or corridor intersects with Treaty lands or Indigenous communities. Distinguish clearly and consistently between approved, under review, proposed, and conceptual projects — this distinction is material to capital allocation and procurement decisions.",
+    "agentOverrides": {
+      "infrastructure-researcher": "Prioritize primary government sources: environmental assessment registries (IAAC, provincial portals), municipal planning approval systems, utility regulatory filings (OEB, NEB/CER, FERC), and land registry databases. Document the statutory basis for each approval stage. When project status is unclear, note the most recent confirmed action (filing date, hearing date, approval date) rather than inferring current status from secondary sources.",
+      "land-use-analyst": "Apply structured land use analysis: identify the governing official plan designation, applicable zoning category, and any site-specific overlays (floodplain, Greenbelt, agricultural, protected natural heritage). Map the full approval pathway including pre-consultation, official plan amendment, zoning bylaw amendment, site plan approval, and any EA triggers. Quantify approval timeline risk based on municipal track record and political context. Flag any conflicts between existing designations and proposed infrastructure use.",
+      "project-strategist": "Structure deliverables for capital allocation decisions: risk register with probability and impact ratings, corridor comparison table with regulatory, environmental, cost, and schedule dimensions, and a permitting timeline anchored to statutory deadlines. Where P3 procurement is relevant, assess the appropriate model (DBFM, DBFO, availability payment vs. revenue risk) based on project type and public sector risk appetite. Benchmark cost and schedule against 3+ comparable delivered projects."
+    },
+    "synthesisInstructions": "Lead with regulatory and permitting risk — this is the primary value driver in infrastructure research. Quantify timeline and cost implications of each approval gate. Present a balanced view of opportunities and constraints, with explicit 'so what' statements for each major finding. When regulatory interpretation is uncertain, present the range of outcomes and identify the decision or precedent that will resolve the ambiguity. Flag any findings that require legal or technical specialist review before action.",
+    "reportingTone": "Professional and analytical, suitable for infrastructure developers, utility executives, municipal planning directors, and institutional investors in infrastructure assets. Data-driven with clear regulatory grounding. Define acronyms and regulatory terms on first use (EA, OPA, ZBA, IBA, IAA, P3, DBFM). Write for decision-makers who need to assess project viability and allocate capital, not just understand the landscape."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

@@ -1,0 +1,230 @@
+{
+  "presetName": "Insurance & Actuarial",
+  "presetDescription": "Pre-configured for insurance research including underwriting analysis, claims data assessment, catastrophe modeling, actuarial reserve analysis, regulatory solvency requirements, and insurtech evaluation. Optimized for statistical rigor with loss ratio and combined ratio benchmarking.",
+  "keywords": ["insurance", "actuarial", "underwriting", "claims", "catastrophe", "solvency", "reinsurance"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Statutory & Regulatory Filings",
+        "sources": [
+          "NAIC (naic.org) statutory filings and financial data",
+          "AM Best ratings and insurance company reports",
+          "State insurance department filings and examination reports",
+          "Lloyd's of London market reports and syndicate data",
+          "OSFI (Canada) regulatory filings and capital guidelines",
+          "Insurance Bureau of Canada (IBC) statistical reports",
+          "III (Insurance Information Institute) fact books and data",
+          "Catastrophe model outputs (AIR Worldwide, RMS, CoreLogic)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Industry Analytics",
+        "sources": [
+          "Swiss Re sigma reports and economic research",
+          "Munich Re NatCat Service data and annual reports",
+          "Guy Carpenter reinsurance market reports",
+          "Aon Benfield analytics and reinsurance market outlook",
+          "S&P Global insurance ratings and sector research",
+          "Moody's insurance sector research and rating reports",
+          "Conning research and insurance industry studies",
+          "SNL Financial/S&P Market Intelligence insurance data"
+        ]
+      },
+      "tier3": {
+        "name": "Actuarial & Academic Research",
+        "sources": [
+          "Casualty Actuarial Society (CAS) publications and research papers",
+          "Society of Actuaries (SOA) research and experience studies",
+          "ASTIN Bulletin (actuarial studies in non-life insurance)",
+          "Variance journal (casualty actuarial research)",
+          "Actuarial conference proceedings (CAS, SOA, IAA)",
+          "Geneva Association insurance research reports"
+        ]
+      },
+      "tier4": {
+        "name": "Industry Trade Media",
+        "sources": [
+          "Insurance Journal news and analysis",
+          "Business Insurance reporting",
+          "Reinsurance News coverage",
+          "Artemis (insurance-linked securities and cat bond reporting)",
+          "InsurTech news and innovation coverage"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Unverified loss estimates without model or source attribution",
+          "Social media claims about insurance events or payouts",
+          "Marketing materials from InsurTech startups without demonstrated track record",
+          "Unattributed combined ratio or loss ratio benchmarks",
+          "Anonymous broker commentary without supporting data"
+        ]
+      }
+    },
+    "preferredSites": [
+      "naic.org",
+      "ambest.com",
+      "lloyds.com",
+      "osfi-bsif.gc.ca",
+      "ibc.ca",
+      "iii.org",
+      "swissre.com",
+      "munichre.com",
+      "guycarpenter.com",
+      "aon.com",
+      "spglobal.com",
+      "moodys.com",
+      "casact.org",
+      "soa.org",
+      "artemis.bm"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "statutory-filing-search",
+        "pattern": "\"{company}\" statutory filing annual statement {year} site:naic.org OR site:ambest.com"
+      },
+      {
+        "name": "loss-ratio-benchmarking",
+        "pattern": "\"{line_of_business}\" loss ratio combined ratio {geography} {year} industry benchmark"
+      },
+      {
+        "name": "catastrophe-exposure",
+        "pattern": "\"{peril}\" catastrophe loss estimate {geography} {year} site:{preferred_site}"
+      },
+      {
+        "name": "reserve-adequacy",
+        "pattern": "\"{company}\" OR \"{segment}\" IBNR reserve development loss triangle {year}"
+      },
+      {
+        "name": "solvency-capital",
+        "pattern": "\"{company}\" solvency ratio risk-based capital {year} site:{preferred_site}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["insurance-data-researcher"]
+      },
+      "standard": {
+        "agents": ["insurance-data-researcher", "actuarial-analyst"]
+      },
+      "deep": {
+        "agents": ["insurance-data-researcher", "actuarial-analyst", "risk-portfolio-strategist"]
+      },
+      "comprehensive": {
+        "agents": ["insurance-data-researcher", "actuarial-analyst", "risk-portfolio-strategist"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "insurance-data-researcher",
+        "role": "Insurance Data Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers quantitative insurance data from statutory filings, rating agency reports, and regulatory databases. Excels at extracting loss ratios, combined ratios, premium volume, reserve positions, and solvency metrics. Reconciles figures across NAIC statutory statements, AM Best reports, and state regulatory filings to establish reliable financial baselines.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "actuarial-analyst",
+        "role": "Actuarial Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Applies actuarial standards of practice to analyze reserve adequacy, loss development patterns, catastrophe model outputs, and pricing adequacy. Interprets loss development triangles, distinguishes between IBNR and case reserves, assesses tail risk, and evaluates underwriting cycle positioning. Translates statistical findings into reserve and capital adequacy assessments with appropriate uncertainty ranges.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "risk-portfolio-strategist",
+        "role": "Risk Portfolio Strategist",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Maps insurance portfolio risk concentrations, reinsurance program structures, and capital allocation strategies across lines of business and geographies. Evaluates catastrophe model uncertainty, aggregation risk, and reinsurance counterparty exposure. Synthesizes underwriting, actuarial, and capital data into strategic portfolio recommendations and peer benchmarking frameworks.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against regulatory statutory filings (NAIC or equivalent) with confirmation from AM Best or a recognized rating agency. Data is within the past 2 years and is internally consistent across sources.",
+      "MEDIUM": "Supported by a recognized reinsurance or analytics firm (Swiss Re, Munich Re, Aon, Guy Carpenter) corroborated by at least 1 regulatory filing. Minor discrepancies between sources have been identified and explained.",
+      "LOW": "Based on a single industry report without statutory filing corroboration, or on data older than 2 years requiring extrapolation to current conditions.",
+      "SPECULATIVE": "Projected loss ratios or premium forecasts derived from trend extrapolation, catastrophe model outputs presented without sensitivity analysis or uncertainty ranges, or InsurTech valuation claims without actuarial backing."
+    },
+    "minimumEvidence": "All loss ratio and combined ratio claims require 2+ independent data sources. Reserve positions and solvency ratios for specific carriers must reference statutory filings or AM Best reports. Industry-wide statistics require at least 1 NAIC, OSFI, or recognized reinsurance firm source.",
+    "validationRules": [
+      "Cross-check loss ratios and combined ratios across at least 2 independent sources and note any material discrepancies.",
+      "Validate that all statutory financial data references the most recent available annual statement period.",
+      "Flag any data point older than 2 years as potentially outdated and note the vintage.",
+      "Distinguish between accident year and calendar year loss ratios and specify which basis is used.",
+      "Distinguish between IBNR reserves and case reserves when reporting total reserve positions.",
+      "Ensure catastrophe model loss estimates specify the model vendor, version, return period, and whether figures are gross or net of reinsurance.",
+      "Validate solvency ratios against the applicable regulatory standard (RBC for US, MCT for Canada, Solvency II for EU).",
+      "Reject loss estimates or reserve adequacy claims sourced exclusively from company press releases or marketing materials."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Statutory filings cited with company name, filing type, statement date, and NAIC company code where available.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Market Overview",
+      "Underwriting Analysis",
+      "Claims & Loss Development",
+      "Catastrophe Risk Assessment",
+      "Reserve Adequacy",
+      "Solvency & Capital Analysis",
+      "Reinsurance Structure",
+      "Regulatory Compliance",
+      "InsurTech & Innovation",
+      "Peer Benchmarking",
+      "Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_insurance_analysis.md",
+    "specialDeliverables": [
+      "loss-ratio-trend-table",
+      "catastrophe-exposure-map",
+      "reserve-triangle-analysis",
+      "solvency-ratio-comparison",
+      "combined-ratio-benchmark"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting insurance and actuarial research to the standard expected by chief underwriting officers, actuaries, and insurance investment analysts. Apply actuarial standards of practice throughout. Every quantitative claim must be sourced and verifiable against statutory filings or rating agency reports. Distinguish clearly between IBNR and case reserves. Reference loss development triangles when assessing reserve adequacy. Include catastrophe model uncertainty ranges and specify model vendor and version. When loss ratio or combined ratio estimates vary between sources, acknowledge the range and explain the methodology or basis differences driving the variance.",
+    "agentOverrides": {
+      "insurance-data-researcher": "Prioritize primary statutory data: NAIC annual statements, AM Best company reports, state department filings, and OSFI returns for Canadian entities. When using reinsurance broker analytics or rating agency data, always note the methodology, basis (accident year vs. calendar year), and date. Reconcile conflicting loss ratio or reserve figures explicitly rather than choosing one silently.",
+      "actuarial-analyst": "Apply actuarial standards of practice (ASOP) when evaluating reserves, pricing adequacy, and catastrophe exposure. Explicitly distinguish between IBNR and case reserves. Use loss development triangle methodology where reserve adequacy is in scope. Quantify uncertainty in catastrophe model outputs by referencing return period, coefficient of variation, or sensitivity scenarios. Flag any reserve position that relies on significant actuarial judgment without corroborating data.",
+      "risk-portfolio-strategist": "Build detailed risk profiles including line-of-business concentration, geographic catastrophe aggregation, reinsurance program structure, and counterparty credit exposure. Identify underwriting cycle positioning and assess whether current combined ratios are sustainable at current reinsurance pricing. Benchmark solvency ratios against regulatory minimums and peer medians. Assess InsurTech entrants on demonstrated loss experience, not just funding or valuation."
+    },
+    "synthesisInstructions": "Lead with the most actionable actuarial and underwriting insights. Quantify reserve adequacy, solvency headroom, and catastrophe exposure in dollar terms and as ratios where possible. Present a balanced view that acknowledges both underwriting profitability and tail risk. Include a clear 'so what' for each major finding. When loss ratios or reserve estimates conflict across sources, present the range and your assessment of which figure is most reliable and why, citing the actuarial basis.",
+    "reportingTone": "Professional and analytically rigorous, suitable for actuarial review committees, chief underwriting officers, and insurance-focused investment analysts. Data-driven with clear callouts for loss development tables and ratio benchmarks. Define actuarial and regulatory terms on first use. Write for decision-makers who must act on reserve, capital, and underwriting strategy — not just those seeking to understand the market."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 3,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 16000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "presetName": "AML & Regulatory Compliance",
+  "presetDescription": "Pre-configured for anti-money laundering and regulatory compliance research including KYC/CDD enhanced due diligence, sanctions screening, PEP identification, beneficial ownership investigation, and compliance program assessment. Optimized for risk-based approach with FATF methodology alignment.",
+  "keywords": ["aml", "compliance", "kyc", "sanctions", "pep", "beneficial-ownership", "fatf"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Regulatory & Sanctions Data",
+        "sources": [
+          "FATF mutual evaluation reports and guidance (fatf-gafi.org)",
+          "FinCEN advisories and enforcement actions (fincen.gov)",
+          "OFAC SDN list and consolidated sanctions data (treasury.gov)",
+          "EU consolidated sanctions list (sanctionsmap.eu)",
+          "UN Security Council sanctions list (un.org/securitycouncil/sanctions)",
+          "OSFI/FINTRAC guidance, advisories, and penalties (fintrac-canafe.gc.ca, osfi-bsif.gc.ca)",
+          "Beneficial ownership registries (corporate registries by jurisdiction)",
+          "Egmont Group FIU reports and typologies (egmontgroup.org)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Compliance Guidance",
+        "sources": [
+          "Wolfsberg Group guidance and principles (wolfsberg-principles.com)",
+          "Basel Committee AML/CFT publications (bis.org)",
+          "Transparency International CPI and reports (transparency.org)",
+          "Global Financial Integrity (GFI) research (gfintegrity.org)",
+          "ACAMS research and white papers (acams.org)",
+          "Corporate registry databases (OpenCorporates, state Secretary of State portals)",
+          "PEP databases (World-Check, Dow Jones Risk & Compliance)",
+          "Adverse media screening platforms (LexisNexis, RefinitivWorld-Check)"
+        ]
+      },
+      "tier3": {
+        "name": "Informed Compliance Commentary",
+        "sources": [
+          "AML compliance journals and peer-reviewed publications",
+          "Banking law reviews and financial crime law commentary",
+          "Compliance conference proceedings (ACAMS, ICA)",
+          "Academic financial crime research and working papers",
+          "Law firm regulatory alerts on AML enforcement trends"
+        ]
+      },
+      "tier4": {
+        "name": "General Compliance News",
+        "sources": [
+          "MLRO.com news and practitioner commentary",
+          "Compliance Week reporting",
+          "RUSI Financial Crime research and briefings (rusi.org)",
+          "Regulatory enforcement press releases from financial regulators",
+          "AML news coverage from financial crime specialist outlets"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable / Unverified",
+        "sources": [
+          "Unverified allegations of financial crime without documented evidence",
+          "Social media accusations without corroborating official sources",
+          "Anonymous tips without independent corroboration",
+          "Outdated sanctions data not confirmed against current official lists"
+        ]
+      }
+    },
+    "preferredSites": [
+      "fatf-gafi.org",
+      "fincen.gov",
+      "treasury.gov",
+      "un.org",
+      "fintrac-canafe.gc.ca",
+      "osfi-bsif.gc.ca",
+      "egmontgroup.org",
+      "wolfsberg-principles.com",
+      "bis.org",
+      "transparency.org",
+      "gfintegrity.org",
+      "acams.org",
+      "opencorporates.com",
+      "rusi.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "sanctions-screening",
+        "pattern": "\"{subject_name}\" sanctions OFAC SDN OR \"UN list\" OR \"EU sanctions\" {year}"
+      },
+      {
+        "name": "pep-identification",
+        "pattern": "\"{subject_name}\" \"politically exposed person\" OR PEP {jurisdiction} {role}"
+      },
+      {
+        "name": "beneficial-ownership",
+        "pattern": "\"{entity_name}\" beneficial owner OR UBO OR shareholder {jurisdiction} registry"
+      },
+      {
+        "name": "fatf-jurisdiction-risk",
+        "pattern": "\"{jurisdiction}\" FATF mutual evaluation OR \"grey list\" OR \"black list\" {year}"
+      },
+      {
+        "name": "adverse-media",
+        "pattern": "\"{subject_name}\" \"money laundering\" OR \"financial crime\" OR fraud OR corruption {year_range}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["compliance-researcher"]
+      },
+      "standard": {
+        "agents": ["compliance-researcher", "risk-assessment-analyst"]
+      },
+      "deep": {
+        "agents": ["compliance-researcher", "risk-assessment-analyst", "aml-intelligence-synthesizer"]
+      },
+      "comprehensive": {
+        "agents": ["compliance-researcher", "risk-assessment-analyst", "aml-intelligence-synthesizer"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "compliance-researcher",
+        "role": "Compliance Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers primary compliance intelligence from official regulatory databases, sanctions lists, beneficial ownership registries, and government enforcement records. Conducts structured screening against OFAC SDN, UN, EU, and OSFI/FINTRAC lists. Retrieves FATF mutual evaluation reports, FinCEN advisories, and corporate registry data to establish an evidence-based factual baseline for due diligence assessments.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "risk-assessment-analyst",
+        "role": "Risk Assessment Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Applies FATF risk-based approach methodology to evaluate subject-specific, jurisdictional, and product/channel risk factors. Constructs beneficial ownership diagrams, assesses PEP exposure and source-of-wealth plausibility, and evaluates compliance program adequacy against regulatory expectations. Produces structured risk ratings using defined criteria and identifies enhanced due diligence triggers requiring escalation.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "aml-intelligence-synthesizer",
+        "role": "AML Intelligence Synthesizer",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Integrates sanctions screening results, PEP assessments, beneficial ownership findings, adverse media hits, and jurisdictional risk indicators into a cohesive financial crime risk picture. Distinguishes confirmed matches from potential matches and false positives. Produces executive-ready AML assessment reports with clear risk ratings, evidentiary standards, and actionable compliance recommendations aligned with MLRO and regulatory expectations.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official sanctions lists or regulatory databases (OFAC, UN, EU, FINTRAC) with 2+ independent sources confirming the finding. Screening date documented.",
+      "MEDIUM": "Supported by a recognized compliance data provider (World-Check, Dow Jones Risk & Compliance) corroborated by at least 1 official regulatory or government source.",
+      "LOW": "Based on a single adverse media hit without official source corroboration, or on data that cannot be cross-referenced against a primary regulatory database.",
+      "SPECULATIVE": "Risk assessments derived from geographic or industry risk indicators, typology patterns, or structural red flags without subject-specific documented evidence."
+    },
+    "minimumEvidence": "All sanctions matches require verification against the current official list at time of screening with date recorded. PEP determinations require confirmation of public function held and jurisdiction. Beneficial ownership assertions require corporate registry or equivalent documentary evidence. Adverse media findings require identification of the original source publication.",
+    "validationRules": [
+      "Document the specific sanctions list(s) checked, the database version or retrieval date, and the exact search terms used for every screening.",
+      "Distinguish explicitly between confirmed matches, potential matches requiring human review, and false positives — never conflate categories.",
+      "Verify beneficial ownership assertions against official corporate registries or documented primary sources; do not rely solely on third-party data aggregators.",
+      "Flag all PEP relationships with the specific public function, jurisdiction, and relevant time period; assess whether the function has concluded and apply applicable post-tenure risk periods.",
+      "Note jurisdictional risk ratings from current FATF mutual evaluation reports; identify whether the jurisdiction is on the FATF grey or black list.",
+      "Identify all enhanced due diligence triggers (PEP status, high-risk jurisdiction, complex ownership structure, adverse media) and flag for MLRO escalation.",
+      "Record data retention and privacy considerations applicable to the jurisdiction of the screening subject."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Sanctions list citations must include list name, issuing authority, version or retrieval date. Corporate registry citations must include registry name, jurisdiction, company number, and retrieval date.",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "1-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Subject Profile",
+      "Sanctions & Watchlist Screening",
+      "PEP Assessment",
+      "Beneficial Ownership Structure",
+      "Source of Wealth/Funds Analysis",
+      "Adverse Media Review",
+      "Jurisdictional Risk Assessment",
+      "Transaction Pattern Analysis",
+      "Compliance Program Evaluation",
+      "Risk Rating & Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_aml_assessment.md",
+    "specialDeliverables": [
+      "sanctions-screening-report",
+      "beneficial-ownership-chart",
+      "risk-scoring-matrix",
+      "adverse-media-tracker",
+      "jurisdictional-risk-heatmap"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting AML and regulatory compliance research to the standard expected by an MLRO, compliance officer, or financial crime investigation team. Write for professionals who must defend their conclusions to regulators. Apply the FATF risk-based approach throughout. Document all screening databases checked with retrieval dates. Distinguish between confirmed matches, potential matches, and false positives with explicit reasoning. Include risk-rating methodology with clear, reproducible criteria. Flag any enhanced due diligence triggers. Note data retention and privacy considerations applicable to the subject's jurisdiction.",
+    "agentOverrides": {
+      "compliance-researcher": "Prioritize primary regulatory sources: current official sanctions lists (OFAC SDN, UN, EU consolidated, FINTRAC), FATF mutual evaluation reports, FinCEN advisories, and official corporate registry data. Record the retrieval date for every database checked. When a potential name match is identified, document the basis for the match and the information used to confirm or exclude it as a false positive.",
+      "risk-assessment-analyst": "Apply the FATF risk-based approach to evaluate risk across three dimensions: subject-specific risk (PEP status, adverse media, source of wealth), jurisdictional risk (FATF ratings, correspondent banking risk), and product/channel risk. Use a defined risk-scoring matrix with explicit criteria for Low, Medium, High, and Very High ratings. Identify all enhanced due diligence triggers and specify the additional measures warranted for each.",
+      "aml-intelligence-synthesizer": "Integrate all research streams into a cohesive risk picture that an MLRO can present to a regulator or board. Lead with the overall risk rating and the top 3 factors driving it. Present findings in the order: sanctions screening result, PEP determination, beneficial ownership clarity, adverse media assessment, jurisdictional risk, and open questions requiring further investigation. Quantify risk where possible; avoid vague language like 'some concern' — specify the source, nature, and severity of each finding."
+    },
+    "synthesisInstructions": "Lead with the overall risk rating and its primary drivers. Clearly separate what is confirmed from what is assessed or inferred. For each key finding, state the evidence, its source, the confidence level, and the compliance implication. Identify any information gaps that prevent a complete assessment and specify what additional due diligence would address them. Conclude with actionable recommendations framed for an MLRO decision: approve, approve with conditions, escalate for further review, or decline.",
+    "reportingTone": "Precise, objective, and legally defensible. Write as if the report may be reviewed by a regulator or used in an enforcement proceeding. Avoid speculative language; qualify every assertion with its evidentiary basis. Define all acronyms on first use (AML, KYC, CDD, EDD, PEP, UBO, FATF, MLRO). Structure the report so a compliance officer can locate any finding and its supporting evidence quickly."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 18000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}

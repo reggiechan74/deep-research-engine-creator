@@ -1,0 +1,234 @@
+{
+  "presetName": "Geopolitical & Political Risk",
+  "presetDescription": "Pre-configured for geopolitical risk research including country risk assessment, political stability analysis, sanctions and export controls, conflict monitoring, election impact analysis, and foreign investment risk. Optimized for multi-source intelligence with calibrated confidence scoring.",
+  "keywords": ["geopolitical", "political-risk", "country-risk", "sanctions", "conflict", "election", "foreign-investment"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Official Government & Multilateral Sources",
+        "sources": [
+          "US State Department country reports (state.gov)",
+          "OFAC sanctions lists (treasury.gov/ofac)",
+          "EU sanctions database (sanctionsmap.eu)",
+          "UN Security Council resolutions and reports (un.org)",
+          "World Bank Governance Indicators (info.worldbank.org/governance/wgi)",
+          "Freedom House scores and reports (freedomhouse.org)",
+          "Transparency International Corruption Perceptions Index (transparency.org)",
+          "SIPRI arms transfers and conflict databases (sipri.org)",
+          "ICJ and ICC proceedings and judgments (icj-cij.org, icc-cpi.int)"
+        ]
+      },
+      "tier2": {
+        "name": "Authoritative Political Risk Analysis",
+        "sources": [
+          "Economist Intelligence Unit (EIU) country risk reports (eiu.com)",
+          "IHS Markit Country Risk (ihsmarkit.com)",
+          "Eurasia Group political risk assessments (eurasiagroup.net)",
+          "Control Risks country reports (controlrisks.com)",
+          "Stratfor / RANE geopolitical analysis (stratfor.com)",
+          "IISS International Institute for Strategic Studies (iiss.org)",
+          "Chatham House research papers (chathamhouse.org)",
+          "CFR Council on Foreign Relations reports (cfr.org)",
+          "CSIS Center for Strategic and International Studies (csis.org)"
+        ]
+      },
+      "tier3": {
+        "name": "Academic & Specialized Research",
+        "sources": [
+          "Foreign affairs journals (Foreign Affairs, Foreign Policy)",
+          "Area studies academic research and peer-reviewed journals",
+          "International Crisis Group reports (crisisgroup.org)",
+          "ACLED Armed Conflict Location and Event Data (acleddata.com)",
+          "Diplomatic cable archives (e.g., WikiLeaks, National Security Archive)",
+          "Regional think tanks with established credibility"
+        ]
+      },
+      "tier4": {
+        "name": "General News & Specialized Media",
+        "sources": [
+          "Reuters wire service for conflict and political reporting",
+          "AP (Associated Press) wire service",
+          "AFP (Agence France-Presse) wire service",
+          "Specialized regional media with editorial standards",
+          "Political risk newsletters and subscription briefings"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable",
+        "sources": [
+          "Propaganda outlets without disclosed state affiliation",
+          "Anonymous geopolitical predictions without sourcing",
+          "Social media political commentary and rumor",
+          "Unverified conflict claims without photographic or documentary evidence"
+        ]
+      }
+    },
+    "preferredSites": [
+      "state.gov",
+      "treasury.gov",
+      "sanctionsmap.eu",
+      "un.org",
+      "info.worldbank.org",
+      "freedomhouse.org",
+      "transparency.org",
+      "sipri.org",
+      "icc-cpi.int",
+      "eiu.com",
+      "eurasiagroup.net",
+      "cfr.org",
+      "csis.org",
+      "chathamhouse.org",
+      "crisisgroup.org",
+      "acleddata.com",
+      "iiss.org"
+    ],
+    "excludedSources": [
+      "medium.com",
+      "quora.com",
+      "rt.com",
+      "sputniknews.com",
+      "globalresearch.ca"
+    ],
+    "searchTemplates": [
+      {
+        "name": "country-risk-profile",
+        "pattern": "\"{country}\" political risk stability governance {year} site:{preferred_site}"
+      },
+      {
+        "name": "sanctions-search",
+        "pattern": "\"{country}\" OR \"{entity}\" sanctions OFAC SDN {year} site:treasury.gov"
+      },
+      {
+        "name": "conflict-monitoring",
+        "pattern": "\"{country}\" OR \"{region}\" conflict violence security incidents {year} site:{preferred_site}"
+      },
+      {
+        "name": "election-impact",
+        "pattern": "\"{country}\" election {year} political risk business investment impact"
+      },
+      {
+        "name": "foreign-investment-risk",
+        "pattern": "\"{country}\" foreign direct investment risk expropriation regulatory {year_range}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["geopolitical-researcher"]
+      },
+      "standard": {
+        "agents": ["geopolitical-researcher", "risk-analyst"]
+      },
+      "deep": {
+        "agents": ["geopolitical-researcher", "risk-analyst", "strategic-forecaster"]
+      },
+      "comprehensive": {
+        "agents": ["geopolitical-researcher", "risk-analyst", "strategic-forecaster"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "geopolitical-researcher",
+        "role": "Geopolitical Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Gathers primary intelligence from official government and multilateral sources including State Department reports, OFAC sanctions data, UN resolutions, Freedom House scores, and conflict databases. Establishes verified factual baselines on political conditions, governance indicators, and security events. Excels at reconciling official data with on-the-ground reporting from wire services and regional media.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "risk-analyst",
+        "role": "Political Risk Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes political stability, governance quality, and institutional resilience using structured frameworks. Assesses sanctions exposure, export control compliance risk, and regulatory change trajectories. Applies Analysis of Competing Hypotheses (ACH) to distinguish high-probability from tail-risk scenarios. Translates raw political intelligence into quantified risk ratings and investor-relevant assessments of country and counterparty risk.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "strategic-forecaster",
+        "role": "Strategic Forecaster",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Builds scenario frameworks and probability-weighted forecasts for geopolitical developments including election outcomes, conflict escalation, regime transitions, and multilateral negotiations. Applies scenario planning and red-team techniques to stress-test base cases. Synthesizes structural factors (demographic, economic, historical) with near-term triggers to produce calibrated, time-bounded assessments for strategic decision-making.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official government or multilateral sources (State Department, OFAC, UN, World Bank) plus 2 independent political risk assessment providers with consistent findings.",
+      "MEDIUM": "Supported by a recognized political risk firm (Eurasia Group, EIU, Control Risks, IISS) corroborated by at least 1 official government or multilateral source.",
+      "LOW": "Based on a single analytical source without official corroboration, or on regional media and academic sources without verification against primary official data.",
+      "SPECULATIVE": "Scenario-based projections, election outcome predictions, or conflict escalation assessments derived from pattern analysis and expert judgment without confirmed ground-truth data."
+    },
+    "minimumEvidence": "All country risk ratings require at least 1 official government or multilateral source plus 1 recognized political risk firm. Sanctions status claims must reference OFAC SDN list or EU sanctions database directly. Conflict casualty or territory claims require ACLED, SIPRI, or UN verification.",
+    "validationRules": [
+      "Verify sanctions status against OFAC SDN list or EU sanctions database before any counterparty assessment.",
+      "Cross-check governance and stability indicators across Freedom House, World Bank Governance Indicators, and Transparency International CPI.",
+      "Flag all conflict casualty or territorial control claims as requiring ACLED or UN verification before reporting as confirmed.",
+      "Distinguish between de jure legal status (sanctions designations, treaty obligations) and de facto conditions on the ground.",
+      "Clearly label election outcome assessments and conflict escalation forecasts as SPECULATIVE with explicit probability ranges.",
+      "Note data vintage for all governance indicators — many are published annually with a 1-2 year lag.",
+      "Identify and disclose potential state-affiliated bias in any media or analytical source used.",
+      "Apply ACH (Analysis of Competing Hypotheses) when evidence supports multiple materially different risk conclusions."
+    ],
+    "citationStandard": "APA 7th Edition format. Inline numbered references [1] with full bibliography including author/organization, title, date published, publisher, and URL. Government reports cited with issuing agency, report title, date, and direct URL. UN documents cited with document symbol (e.g., S/RES/2254).",
+    "citationManagement": {
+      "verificationMode": "spot-check",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": false,
+      "sourceFreshnessThreshold": "2-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Geopolitical Context",
+      "Country/Region Risk Profile",
+      "Political Stability Assessment",
+      "Sanctions & Export Controls",
+      "Conflict & Security Analysis",
+      "Economic Impact Assessment",
+      "Foreign Investment Risk",
+      "Scenario Analysis",
+      "Strategic Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_geopolitical_risk.md",
+    "specialDeliverables": [
+      "country-risk-scorecard",
+      "sanctions-exposure-map",
+      "political-stability-index",
+      "scenario-probability-matrix",
+      "stakeholder-power-map"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting geopolitical and political risk research to the standard expected by corporate strategy teams, foreign investment committees, and government affairs professionals assessing cross-border risk. Apply structured analytical techniques including Analysis of Competing Hypotheses (ACH) and scenario planning. Distinguish rigorously between verified facts and analytical judgments — label each explicitly. Calibrate probability language carefully (use quantified ranges where possible rather than vague qualifiers). Consider both immediate triggers and underlying structural factors. Disclose source bias or state affiliation where relevant.",
+    "agentOverrides": {
+      "geopolitical-researcher": "Prioritize primary official sources: State Department country reports, OFAC sanctions lists, UN Security Council documents, World Bank Governance Indicators, Freedom House scores, and SIPRI databases. When using news wire sources (Reuters, AP, AFP), treat as corroborating rather than primary. Flag any source with potential state-affiliated bias or undisclosed funding. Reconcile conflicting accounts explicitly rather than selecting one silently.",
+      "risk-analyst": "Apply structured risk frameworks when analyzing political stability and sanctions exposure. Quantify governance risk using Freedom House, World Bank WGI, and Transparency International CPI scores where available. When assessing sanctions exposure, distinguish between primary sanctions (US persons), secondary sanctions risk, and sectoral restrictions. Assess both legal compliance risk and operational disruption risk separately.",
+      "strategic-forecaster": "Build explicit scenario frameworks with at least 3 scenarios (base case, optimistic, adverse) for any forward-looking assessment. Assign calibrated probability ranges to each scenario (ensure they sum to 100%). Identify the key signposts or trigger events that would shift probability weight between scenarios. Apply red-team analysis to stress-test the base case. Distinguish between structural factors (operating on multi-year timescales) and near-term triggers (operating on months-to-quarters timescales)."
+    },
+    "synthesisInstructions": "Lead with the most decision-relevant risk findings. Distinguish clearly between near-term (0-12 month) and medium-term (1-3 year) risk horizons. Present a balanced assessment that acknowledges both upside and downside scenarios with explicit probability weighting. Include a clear 'so what' for each major risk finding relevant to the investment or operational decision at hand. When analytical sources conflict on risk ratings, present the range and your assessment of which is most reliable and why.",
+    "reportingTone": "Professional and analytically rigorous, suitable for senior executives, investment committees, and government affairs teams. Precise and calibrated — avoid overconfident language on uncertain outcomes. Define geopolitical and legal terms on first use. Write for decision-makers who must act on the intelligence, not merely understand it. Maintain objectivity and avoid editorializing on the politics themselves."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "tokenBudgets": {
+      "planning": 2000,
+      "research": 18000,
+      "synthesis": 10000,
+      "reporting": 12000
+    }
+  }
+}
