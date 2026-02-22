@@ -5,7 +5,7 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-blueviolet?logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=)](https://github.com/reggiechan74/deep-research-engine-creator)
 [![GitHub last commit](https://img.shields.io/github/last-commit/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/commits/main)
 [![GitHub stars](https://img.shields.io/github/stars/reggiechan74/deep-research-engine-creator)](https://github.com/reggiechan74/deep-research-engine-creator/stargazers)
-[![Domain Presets](https://img.shields.io/badge/Domain_Presets-20-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/skills/engine-creator/domain-presets)
+[![Domain Presets](https://img.shields.io/badge/Domain_Presets-21-blue)](https://github.com/reggiechan74/deep-research-engine-creator/tree/main/skills/engine-creator/domain-presets)
 
 Create domain-specialized deep-research engines as standalone Claude Code plugins.
 
@@ -32,7 +32,7 @@ The general-purpose deep research tools opened the door. This walks through it.
 | **Report structure** | Fixed format | Fixed (with export to MD/PDF/Word) | Fixed (with Canvas/Audio) | Fixed | **Fully customizable sections, deliverables, and naming per domain** |
 | **Reproducibility** | Ephemeral | Ephemeral | Ephemeral | Ephemeral | **Versionable `engine-config.json` -- same config = same pipeline** |
 | **Transparency** | Closed source | Closed source | Closed source | Closed source | **Fully open source -- every prompt, rule, and template is readable and editable** |
-| **Domain presets** | -- | -- | -- | -- | **20 presets (Legal, OSINT, CRE, AML, Biotech, etc.) + custom from scratch** |
+| **Domain presets** | -- | -- | -- | -- | **21 presets (Legal, OSINT, CRE, AML, AI/Agentic, etc.) + custom from scratch** |
 | **Ownership** | SaaS | SaaS | SaaS | SaaS | **Self-contained plugins you own, version-control, and share** |
 | **Setup required** | None | None | None | None | Claude Code + plugin install + wizard |
 | **Built-in search index** | Proprietary crawler | Bing | Google | Web search | Relies on Claude Code tools |
@@ -108,6 +108,7 @@ Presets pre-fill the wizard with domain-specific defaults for source hierarchies
 | `--preset defense` | Aerospace & Defense | DSCA, SAM.gov procurement, TRL, ITAR/EAR compliance |
 | `--preset investigate` | Investigative Journalism | Public records, corporate registries, FOI, evidence chains |
 | `--preset aml` | AML & Regulatory Compliance | FATF, FinCEN, sanctions screening, PEP, beneficial ownership |
+| `--preset ai` | AI & Agentic Engineering | LLM benchmarks, agent frameworks, MCP/tool use, model landscape, RAG |
 
 Or choose **Custom** during the wizard to build a configuration from scratch.
 
@@ -399,9 +400,10 @@ deep-research-engine-creator/
 │   └── list-engines.md                                 # /list-engines directory scanner
 ├── skills/engine-creator/
 │   ├── SKILL.md                                        # Core wizard + generation logic
-│   ├── domain-presets/                                    # 20 domain presets
+│   ├── domain-presets/                                    # 21 domain presets
 │   │   ├── academic-research.json
 │   │   ├── aerospace-defense.json
+│   │   ├── ai-agentic-engineering.json
 │   │   ├── aml-compliance.json
 │   │   ├── biotechnology.json
 │   │   ├── cybersecurity-threat-intel.json

@@ -1,0 +1,271 @@
+{
+  "presetName": "Artificial Intelligence & Agentic Engineering",
+  "presetDescription": "Pre-configured for AI research including LLM capabilities analysis, agentic system architecture, multi-agent orchestration, tool use patterns, RAG systems, fine-tuning strategies, prompt engineering, AI safety and alignment, inference infrastructure, and competitive model landscape mapping. Optimized for the fast-moving AI/ML ecosystem with aggressive source freshness requirements and benchmark-grounded evidence standards.",
+  "keywords": ["artificial-intelligence", "agentic-engineering", "llm", "multi-agent", "machine-learning", "rag", "tool-use", "prompt-engineering", "ai-safety", "fine-tuning"],
+  "sourceStrategy": {
+    "credibilityTiers": {
+      "tier1": {
+        "name": "Primary Technical Documentation & Benchmark Papers",
+        "sources": [
+          "Anthropic technical documentation and model cards (docs.anthropic.com)",
+          "OpenAI API documentation and technical reports (platform.openai.com/docs)",
+          "Google DeepMind research papers and technical reports (deepmind.google/research)",
+          "Meta AI / FAIR research papers (ai.meta.com/research)",
+          "arXiv preprints with peer-reviewed conference acceptance (NeurIPS, ICML, ICLR, ACL, EMNLP)",
+          "Official model benchmarks: MMLU, HumanEval, GPQA, SWE-bench, Aider polyglot, LMSYS Chatbot Arena",
+          "Hugging Face model cards and official leaderboards (huggingface.co/spaces/open-llm-leaderboard)",
+          "MLCommons benchmark results (mlcommons.org)",
+          "NIST AI Risk Management Framework (nist.gov/artificial-intelligence)"
+        ]
+      },
+      "tier2": {
+        "name": "Research Institutions & Industry Labs",
+        "sources": [
+          "Anthropic research blog and safety publications (anthropic.com/research)",
+          "OpenAI research publications (openai.com/research)",
+          "Google AI research blog (blog.research.google)",
+          "Microsoft Research AI publications (microsoft.com/en-us/research/research-area/artificial-intelligence)",
+          "Allen Institute for AI (AI2) publications (allenai.org)",
+          "Stanford HAI reports and policy briefs (hai.stanford.edu)",
+          "MIT CSAIL AI research (csail.mit.edu)",
+          "EleutherAI open research (eleuther.ai)",
+          "Cohere research (cohere.com/research)",
+          "Mistral AI technical reports (mistral.ai)"
+        ]
+      },
+      "tier3": {
+        "name": "Technical Analysis & Expert Commentary",
+        "sources": [
+          "Simon Willison's blog (simonwillison.net)",
+          "Lilian Weng's technical blog (lilianweng.github.io)",
+          "Sebastian Raschka's AI research newsletter (magazine.sebastianraschka.com)",
+          "The Gradient (thegradient.pub)",
+          "Chip Huyen's engineering blog (huyenchip.com)",
+          "Eugene Yan's applied ML writing (eugeneyan.com)",
+          "LangChain blog and documentation (blog.langchain.dev)",
+          "LlamaIndex documentation and technical guides (docs.llamaindex.ai)",
+          "Conference proceedings: NeurIPS, ICML, ICLR, ACL, EMNLP workshops",
+          "Distill.pub interactive research articles"
+        ]
+      },
+      "tier4": {
+        "name": "Community & Practitioner Resources",
+        "sources": [
+          "Hacker News AI/ML discussions (news.ycombinator.com)",
+          "Reddit r/MachineLearning, r/LocalLLaMA, r/ClaudeAI",
+          "GitHub repositories: agent frameworks, RAG implementations, benchmarks",
+          "Stack Overflow machine-learning and LLM tags",
+          "YouTube technical channels: Andrej Karpathy, 3Blue1Brown, Yannic Kilcher",
+          "Twitter/X AI research community threads",
+          "Discord communities: Hugging Face, LangChain, Anthropic"
+        ]
+      },
+      "tier5": {
+        "name": "Unreliable / Marketing-Heavy",
+        "sources": [
+          "Vendor marketing claims without benchmark data or methodology",
+          "AI hype articles without technical substantiation",
+          "Self-reported benchmarks from model providers without independent replication",
+          "Social media hot takes without evidence or citations",
+          "AI-generated summaries of research without primary source verification",
+          "Outdated comparisons (pre-dating most recent model releases)"
+        ]
+      }
+    },
+    "preferredSites": [
+      "docs.anthropic.com",
+      "platform.openai.com",
+      "arxiv.org",
+      "huggingface.co",
+      "deepmind.google",
+      "ai.meta.com",
+      "simonwillison.net",
+      "lilianweng.github.io",
+      "hai.stanford.edu",
+      "github.com"
+    ],
+    "excludedSources": [
+      "wikipedia.org",
+      "quora.com",
+      "medium.com articles without author verification",
+      "yahoo-answers.com"
+    ],
+    "searchTemplates": [
+      {
+        "name": "model-capabilities",
+        "pattern": "\"{model_name}\" capabilities benchmark performance MMLU HumanEval {year} site:{preferred_site}"
+      },
+      {
+        "name": "agent-architecture",
+        "pattern": "\"{framework}\" agentic architecture tool-use multi-agent orchestration {year}"
+      },
+      {
+        "name": "rag-implementation",
+        "pattern": "RAG retrieval-augmented generation \"{technique}\" implementation evaluation {year}"
+      },
+      {
+        "name": "benchmark-comparison",
+        "pattern": "\"{model_a}\" vs \"{model_b}\" benchmark comparison {benchmark_name} {year}"
+      },
+      {
+        "name": "fine-tuning-technique",
+        "pattern": "\"{technique}\" fine-tuning LLM training {year} site:{preferred_site}"
+      },
+      {
+        "name": "safety-alignment",
+        "pattern": "AI safety alignment \"{topic}\" constitutional RLHF evaluation {year}"
+      },
+      {
+        "name": "tool-use-patterns",
+        "pattern": "LLM tool use function calling \"{pattern}\" MCP protocol {year}"
+      },
+      {
+        "name": "inference-infrastructure",
+        "pattern": "\"{technology}\" LLM inference deployment optimization latency throughput {year}"
+      }
+    ],
+    "languageFilters": ["en"]
+  },
+  "agentPipeline": {
+    "tiers": {
+      "quick": {
+        "agents": ["ai-model-researcher"]
+      },
+      "standard": {
+        "agents": ["ai-model-researcher", "agent-architecture-analyst"]
+      },
+      "deep": {
+        "agents": ["ai-model-researcher", "agent-architecture-analyst", "ai-systems-mapper"]
+      },
+      "comprehensive": {
+        "agents": ["ai-model-researcher", "agent-architecture-analyst", "ai-systems-mapper"],
+        "followUpRound": true
+      }
+    },
+    "agents": [
+      {
+        "id": "ai-model-researcher",
+        "role": "AI Model Researcher",
+        "subagentType": "general-purpose",
+        "model": "sonnet",
+        "specialization": "Searches model documentation, technical reports, and benchmark databases to assess LLM capabilities, limitations, and performance characteristics. Tracks model releases, architecture innovations (attention mechanisms, MoE, state-space models), training methodologies (RLHF, DPO, constitutional AI), and context window evolution. Evaluates claims against standardized benchmarks (MMLU, HumanEval, GPQA, SWE-bench, Chatbot Arena ELO). Identifies capability frontiers and regression patterns across model families.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "agent-architecture-analyst",
+        "role": "Agent Architecture Analyst",
+        "subagentType": "expert-instructor",
+        "model": "sonnet",
+        "specialization": "Analyzes agentic system design patterns including tool use protocols (MCP, function calling, code execution), multi-agent orchestration frameworks (LangGraph, CrewAI, AutoGen, Claude Code teams), memory architectures (RAG, vector stores, conversation memory, persistent state), planning strategies (ReAct, chain-of-thought, tree-of-thought, reflexion), and human-in-the-loop patterns. Evaluates framework maturity, adoption, and production readiness. Assesses agent reliability, error recovery, and safety guardrails.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      },
+      {
+        "id": "ai-systems-mapper",
+        "role": "AI Systems Mapper",
+        "subagentType": "intelligence-analyst",
+        "model": "sonnet",
+        "specialization": "Maps the competitive AI landscape including model provider positioning, pricing economics, inference infrastructure (GPU availability, serverless vs dedicated, edge deployment), API feature parity, and ecosystem lock-in dynamics. Builds capability matrices comparing models across dimensions (reasoning, coding, multimodal, tool use, context length, cost per token). Identifies market gaps, integration patterns, and strategic dependencies. Tracks regulatory developments (EU AI Act, executive orders, safety standards) and their impact on deployment choices.",
+        "tools": ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"]
+      }
+    ]
+  },
+  "qualityFramework": {
+    "confidenceScoring": {
+      "HIGH": "Verified against official model documentation, published benchmark results with methodology, or peer-reviewed research papers. Performance claims supported by independent replication or standardized evaluation (LMSYS Arena, MMLU, SWE-bench). Multiple authoritative sources confirm.",
+      "MEDIUM": "Supported by recognized research labs or established technical analysts, corroborated by at least 1 official source. Benchmark claims from reputable third-party evaluators. Framework assessments based on documented production deployments.",
+      "LOW": "Based on single practitioner report, community discussion, or preliminary results without independent verification. Capability claims from beta/preview features. Self-reported benchmarks without methodology disclosure.",
+      "SPECULATIVE": "Based on roadmap announcements without released features, extrapolation from current trajectories, unverified leaks, or theoretical analysis without empirical backing. Predictions about future model capabilities."
+    },
+    "minimumEvidence": "All model capability claims require benchmark data or official documentation. Architecture comparisons require at least 2 independent technical assessments. Framework evaluations must cite version numbers and test dates given rapid release cycles. Cost comparisons must include pricing date (API prices change frequently).",
+    "validationRules": [
+      "Verify benchmark scores against official leaderboards and confirm test methodology and dataset version.",
+      "Cross-reference model capabilities against official documentation and release notes for the specific model version cited.",
+      "Confirm framework features exist in the cited version -- do not attribute capabilities from unreleased or beta versions without flagging.",
+      "Validate pricing claims against current API pricing pages and note the date of verification.",
+      "Flag any comparison between models tested on different benchmark versions or evaluation protocols.",
+      "Distinguish between demo/preview capabilities and generally available production features.",
+      "Verify open-source model claims against actual license terms (e.g., Llama license restrictions).",
+      "Cross-check agent framework claims against GitHub repository activity, issue trackers, and actual release history."
+    ],
+    "citationStandard": "APA 7th Edition with AI/ML extensions. Models cited with full name, version/date, and provider (e.g., Claude Opus 4.6, Anthropic, Feb 2026). Benchmarks cited with dataset version and evaluation date. API references include endpoint version. GitHub repositories cited with commit hash or release tag. arXiv papers cited with arXiv ID and conference acceptance status if applicable.",
+    "citationManagement": {
+      "verificationMode": "comprehensive",
+      "urlLivenessCheck": true,
+      "contentClaimMatching": true,
+      "sourceFreshnessThreshold": "1-year",
+      "deadLinkHandling": "archive-fallback",
+      "probeOnDiscovery": true,
+      "verificationReport": {
+        "enabled": true,
+        "scope": "high-confidence-only"
+      }
+    },
+    "vvc": {
+      "enabled": true,
+      "claimTypes": [
+        {"tag": "VC", "label": "Verifiable Claim", "description": "Factual assertion with a cited source that can be independently verified (benchmark scores, release dates, pricing, feature availability)", "requiresVerification": true},
+        {"tag": "PO", "label": "Professional Opinion", "description": "Expert interpretation or analytical judgment derived from evidence (architecture assessments, framework recommendations, strategic analysis)", "requiresVerification": false},
+        {"tag": "IE", "label": "Inferred/Extrapolated", "description": "Logical inference or extrapolation from available data (capability projections, market trajectory estimates, scaling law extrapolations)", "requiresVerification": false},
+        {"tag": "BM", "label": "Benchmark Data", "description": "Quantitative performance measurement from a standardized or reproducible evaluation. Requires benchmark name, version, and score.", "requiresVerification": true}
+      ],
+      "verificationScope": {
+        "HIGH": 100,
+        "MEDIUM": 100,
+        "LOW": 25,
+        "SPECULATIVE": 0
+      },
+      "tierBehavior": {
+        "quick": "none",
+        "standard": "verify-only",
+        "deep": "full",
+        "comprehensive": "full"
+      }
+    }
+  },
+  "outputStructure": {
+    "reportSections": [
+      "Executive Summary",
+      "Technology Landscape Overview",
+      "Model Capabilities Assessment",
+      "Agentic Architecture Analysis",
+      "Benchmark Comparison Matrix",
+      "Framework and Tooling Evaluation",
+      "Infrastructure and Deployment Considerations",
+      "Safety, Alignment, and Governance",
+      "Cost and Pricing Analysis",
+      "Strategic Recommendations",
+      "Methodology",
+      "Bibliography"
+    ],
+    "fileNaming": "{date}_{topic_slug}_ai_research.md",
+    "specialDeliverables": [
+      "model-capability-matrix",
+      "benchmark-comparison-table",
+      "framework-feature-parity-matrix",
+      "pricing-comparison-table",
+      "agent-architecture-diagram",
+      "technology-radar"
+    ]
+  },
+  "prompts": {
+    "globalPreamble": "You are conducting AI and agentic engineering research to the standard expected by a CTO, ML engineering lead, or AI strategy advisor making build-vs-buy and model selection decisions. This field moves extremely fast: always verify that cited capabilities, benchmarks, and pricing reflect the most current model versions and API offerings. Distinguish between generally available features and preview/beta capabilities. Benchmark comparisons must use the same evaluation methodology and dataset version. Be skeptical of marketing claims -- anchor assessments in reproducible benchmarks, documented production deployments, and peer-reviewed research. When evaluating agentic systems, assess both capability and reliability: a framework that demos well but fails in production is not a recommendation.",
+    "agentOverrides": {
+      "ai-model-researcher": "Always cite the specific model version and release date for capability claims. Verify benchmark scores against official leaderboards (LMSYS Arena, OpenLLM Leaderboard, SWE-bench). Track the distinction between base models and instruction-tuned variants. Note context window sizes, multimodal capabilities, and tool use support for each model. Flag when a benchmark score comes from the model provider vs independent evaluation. Include cost-per-token metrics alongside capability assessments.",
+      "agent-architecture-analyst": "Evaluate frameworks against production criteria: error handling, retry logic, observability, cost control, and human-in-the-loop patterns. Document framework versions explicitly -- agentic tooling changes rapidly. Assess vendor lock-in risk for each framework choice. Compare orchestration patterns (sequential, parallel, hierarchical, swarm) with concrete use case tradeoffs. Note the distinction between stateless tool calling and stateful agent loops. Evaluate MCP (Model Context Protocol) adoption and integration patterns.",
+      "ai-systems-mapper": "Build capability matrices with clear evaluation dates. Map the full provider ecosystem: model providers, inference platforms, fine-tuning services, evaluation tools, and observability platforms. Assess total cost of ownership including API costs, infrastructure, engineering time, and switching costs. Track regulatory landscape developments and their implications for model selection and deployment architecture. Identify strategic risks: single-provider dependency, model discontinuation, API deprecation, and pricing changes."
+    },
+    "synthesisInstructions": "Lead with actionable decision frameworks for model selection and architecture choices. Quantify comparisons with benchmark data and pricing. Map tradeoffs explicitly: capability vs cost, flexibility vs lock-in, cutting-edge vs stability. Flag areas of rapid change where recommendations may have short shelf life. Provide tiered recommendations: safe conservative choice, best current option, and emerging bet.",
+    "reportingTone": "Technical and precise for engineering audiences. Data-driven with benchmark tables and cost comparisons. Opinionated where evidence supports it -- do not hedge when the data is clear. Flag uncertainty explicitly rather than averaging conflicting assessments. Avoid hype language: describe what works, what does not, and what is unproven."
+  },
+  "advanced": {
+    "maxIterationsPerQuestion": 4,
+    "explorationDepth": 7,
+    "tokenBudgets": {
+      "planning": 2500,
+      "research": 20000,
+      "synthesis": 12000,
+      "reporting": 14000,
+      "vvc": 10000
+    }
+  }
+}

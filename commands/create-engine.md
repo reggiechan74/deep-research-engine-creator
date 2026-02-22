@@ -19,6 +19,7 @@ Check `$ARGUMENTS` for a `--preset` flag. Map short names to preset files:
 | `academic` | `academic-research.json` |
 | `osint` | `osint-investigation.json` |
 | `techdd` | `technical-due-diligence.json` |
+| `ai` | `ai-agentic-engineering.json` |
 
 If a preset is specified, read it from:
 `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/domain-presets/{preset-file}`
