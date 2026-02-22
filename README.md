@@ -4,6 +4,16 @@ Create domain-specialized deep-research engines as standalone Claude Code plugin
 
 This meta-plugin interviews you about your research domain, then generates a complete Claude Code plugin with a custom multi-agent research pipeline, domain-specific source hierarchies, quality frameworks, and output templates. You describe what you research; it builds the tooling.
 
+## Why I Built This
+
+I've used deep research features across ChatGPT, Claude, and Gemini extensively. They're impressive -- and they all hit the same ceiling. They don't know which sources matter in your field. They can't tell the difference between a tier-1 regulatory filing and a blog post summarizing it. They apply the same generic quality bar to patent analysis, AML compliance, and biotech pipeline reviews as if those were the same discipline. They're not.
+
+The phrase "all-purpose deep research engine" is, to me, an oxymoron. Real research depth requires domain knowledge -- knowing which databases to check first, what evidence thresholds apply, which citation standards your audience expects, and how to weigh conflicting sources against each other. A tool that researches everything "deeply" is really researching everything at the same shallow-expert level.
+
+So I built this. Not a single domain engine, but a **factory that generates them**. You describe your research domain -- the sources you trust, the agents you need, the quality standards your work demands, the report structure your audience expects -- and it produces a fully self-contained research plugin tailored to that domain. A patent attorney gets patent-grade research tooling. A compliance officer gets AML-grade screening. An investigative journalist gets evidence-chain documentation. Each engine knows its own field because you taught it yours.
+
+The general-purpose deep research tools opened the door. This walks through it.
+
 ## Installation
 
 Install directly from GitHub:
