@@ -63,6 +63,12 @@ When deployed for verification:
    - Analyze alignment between the claim and the source content
    - Classify: CONFIRMED | PARAPHRASED | OVERSTATED | UNDERSTATED | DISPUTED | UNSUPPORTED | SOURCE_UNAVAILABLE
    - Recommend: KEEP | REVISE | DOWNGRADE | REMOVE | REPLACE_SOURCE
+   - Write corrected text per recommendation:
+     - KEEP: "---"
+     - REVISE: Rewritten claim reflecting accurate source content
+     - DOWNGRADE: Claim with qualifying language and lowered confidence tier
+     - REMOVE: "[REMOVE]"
+     - REPLACE_SOURCE: Corrected claim text + search for and provide replacement source URL
 6. **Output:** `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
 
 ### Verification Report Structure
@@ -82,8 +88,8 @@ When deployed for verification:
 - SOURCE_UNAVAILABLE: N (%)
 
 ### Per-Claim Verification Table
-| # | Claim Text (truncated) | Source | Confidence | Classification | Recommendation | Notes |
-|---|------------------------|--------|------------|----------------|----------------|-------|
+| # | Claim Text (truncated) | Source | Confidence | Classification | Recommendation | Corrected Text | New Source | Notes |
+|---|------------------------|--------|------------|----------------|----------------|----------------|------------|-------|
 
 ### Issues Found
 [List of claims requiring correction with details]
@@ -98,11 +104,12 @@ When deployed for correction (second pass, "full" tier behavior only):
 
 1. **Read** the verification report at `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
 2. **Read** the draft report at `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
-3. **Implement corrections** for all REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE recommendations:
-   - REVISE: Rewrite claim to accurately reflect the source content
-   - DOWNGRADE: Lower the confidence tier and add qualifying language
-   - REMOVE: Delete the claim and adjust surrounding narrative
-   - REPLACE_SOURCE: Find and cite a more accurate source for the claim
+3. **Apply corrections mechanically** from the Phase 5 verification table's Corrected Text column:
+   - REVISE: Substitute the Corrected Text verbatim
+   - DOWNGRADE: Substitute the Corrected Text verbatim (includes qualifying language and lowered confidence tier)
+   - REMOVE: Delete the claim and adjust surrounding narrative for coherence
+   - REPLACE_SOURCE: Substitute the Corrected Text and update bibliography with the New Source URL
+   - Do NOT independently rewrite claims or search for sources — all corrections are pre-written in the verification report
 4. **Add Verification Statement** appendix to the final report
 5. **Output:**
    - `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md` (final corrected report)

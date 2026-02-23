@@ -490,6 +490,12 @@ After the draft report is complete, deploy the **vvc-specialist** with instructi
   3. Analyze alignment between the claim text and the source content
   4. Classify alignment: CONFIRMED | PARAPHRASED | OVERSTATED | UNDERSTATED | DISPUTED | UNSUPPORTED | SOURCE_UNAVAILABLE
   5. Recommend action: KEEP | REVISE | DOWNGRADE | REMOVE | REPLACE_SOURCE
+  6. Write corrected text per recommendation:
+     - **KEEP:** "---" (no change needed)
+     - **REVISE:** Rewrite the claim to accurately reflect the source content
+     - **DOWNGRADE:** Rewrite the claim with qualifying language (e.g., "approximately", "reportedly") and lower the confidence tier
+     - **REMOVE:** "[REMOVE]"
+     - **REPLACE_SOURCE:** Rewrite the claim with accurate content, search for and provide a replacement source URL in the New Source column
 - **Output:** Save verification report to `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
 
 #### Verification Report Structure
@@ -509,8 +515,8 @@ After the draft report is complete, deploy the **vvc-specialist** with instructi
 - SOURCE_UNAVAILABLE: N (%)
 
 ### Per-Claim Verification Table
-| # | Claim Text (truncated) | Source | Confidence | Classification | Recommendation | Notes |
-|---|------------------------|--------|------------|----------------|----------------|-------|
+| # | Claim Text (truncated) | Source | Confidence | Classification | Recommendation | Corrected Text | New Source | Notes |
+|---|------------------------|--------|------------|----------------|----------------|----------------|------------|-------|
 
 ### Issues Found
 [List of claims requiring correction with details]
@@ -533,11 +539,12 @@ After verification is complete, deploy the **vvc-specialist** (second pass) with
 
 - **FIRST ACTION**: Read the verification report at `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
 - Read the draft report at `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
-- **Implement corrections** for all REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE recommendations:
-  - **REVISE:** Rewrite the claim to accurately reflect the source content
-  - **DOWNGRADE:** Lower the confidence tier and add qualifying language
+- **Apply corrections mechanically** from the Phase 5 verification table's Corrected Text column:
+  - **REVISE:** Substitute the Corrected Text from the verification table verbatim
+  - **DOWNGRADE:** Substitute the Corrected Text from the verification table verbatim (includes qualifying language and lowered confidence tier)
   - **REMOVE:** Delete the claim and adjust surrounding narrative for coherence
-  - **REPLACE_SOURCE:** Find and cite a more accurate source for the claim
+  - **REPLACE_SOURCE:** Substitute the Corrected Text from the verification table and update the bibliography with the New Source URL
+- **Do NOT** independently rewrite claims or search for sources — all corrections are pre-written in the verification report
 - **Preserve** all KEEP and CONFIRMED claims unchanged
 - **Add Verification Statement** appendix to the final report documenting the VVC process
 - **Output:**
