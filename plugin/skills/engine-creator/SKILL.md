@@ -5,7 +5,7 @@ description: >-
   "build a research plugin", "customize deep research", "make a domain-specific
   research tool", "design a research pipeline", "create engine", or wants to
   create specialized deep-research engines as standalone Claude Code plugins.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Engine Creator

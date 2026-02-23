@@ -111,6 +111,30 @@ claude --plugin-dir ./deep-research-engine-creator
 | `/list-engines [dir]` | Scan a directory for generated engines and display a summary table |
 | `/install-local-plugin <path>` | Register a generated engine as an installed Claude Code plugin |
 
+## Installing Generated Engines
+
+After generating an engine, you have two options for loading it:
+
+**Option A: Permanent install (recommended)**
+
+```bash
+/install-local-plugin ./generated-engines/your-engine/
+# Restart Claude Code
+/your-engine:research "your topic"
+```
+
+This creates a temporary marketplace, registers it with Claude Code's plugin system, and installs the engine permanently. The plugin persists across sessions, projects, and restarts — no flags needed.
+
+**Option B: Quick test (ephemeral)**
+
+```bash
+claude --plugin-dir ./generated-engines/your-engine/
+```
+
+Loads the engine for the current session only. Useful for quick testing before committing to a permanent install.
+
+The `/create-engine` wizard automatically copies the install command to your project's `.claude/commands/` directory after generation, so it's available immediately.
+
 ## Domain Presets
 
 Presets pre-fill the wizard with domain-specific defaults for source hierarchies, agent configurations, quality rules, and output structure. You can accept them as-is or customize any section.

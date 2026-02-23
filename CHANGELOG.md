@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-02-22
+
+### Added
+- **`/install-local-plugin` command** -- registers a generated engine as a permanently installed Claude Code plugin. Creates a temporary marketplace, registers it, and installs via `claude plugin marketplace add` + `claude plugin install`. The installed plugin persists across sessions and projects without needing `--plugin-dir` flags
+- **Automatic install command deployment** -- post-generation step now copies `install-local-plugin.md` to the user's `.claude/commands/` directory so it's immediately available after engine creation
+- `AskUserQuestion` added to `install-local-plugin` allowed tools (used for reinstall confirmation)
+
+### Changed
+- Post-generation workflow updated in both `create-engine.md` and `SKILL.md` to suggest `/install-local-plugin` as the primary installation path (with `--plugin-dir` as a quick-test alternative)
+- Quick Start in README updated to 5-step flow: create → validate → install → restart → use
+- Commands table updated with `/install-local-plugin` entry
+- File Reference updated with `install-local-plugin.md` in commands listing
+
 ## [1.2.0] - 2026-02-22
 
 ### Added
