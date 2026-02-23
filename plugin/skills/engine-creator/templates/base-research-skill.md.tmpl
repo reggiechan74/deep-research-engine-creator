@@ -234,8 +234,10 @@ The {{engineDisplayName}} research system uses these available sub-agents:
 {{subAgentList}}
 
 Each sub-agent type provides different capabilities matched to its pipeline role. The
-planning, synthesis, and reporting specialists are fixed pipeline roles; research agents
-are domain-specialized instances configured for this engine's specific focus areas.
+planning, synthesis, and reporting specialists are fixed pipeline roles (built-in Claude Code agent types).
+Research agents are domain-specialized instances defined in this plugin's `agents/` directory
+and MUST be referenced by their fully qualified name (`{{engineName}}:[agentId]`) when
+deploying via the Task tool.
 {{vvcSubAgentNote}}
 
 ---

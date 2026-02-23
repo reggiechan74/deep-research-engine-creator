@@ -40,10 +40,10 @@ This engine implements a **seven-phase research system** with tier-based depth r
 
 | Tier | Planning | Research Agents | Synthesis | Report | VVC | User Gate |
 |------|----------|----------------|-----------|--------|-----|-----------|
-| Quick | No | patent-search-specialist | No | Inline | None | No |
-| Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Draft | Verify-only | --approve only |
-| Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Draft | Full | --approve only |
-| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Draft | Full | Always |
+| Quick | No | patent-intelligence-engine:patent-search-specialist | No | Inline | None | No |
+| Standard | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst | Yes | Draft | Verify-only | --approve only |
+| Deep | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper | Yes | Draft | Full | --approve only |
+| Comprehensive | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper + follow-up round | Yes | Draft | Full | Always |
 
 ---
 
@@ -280,21 +280,23 @@ The Patent Intelligence Engine research system uses these available sub-agents:
 - research-planning-specialist
 - synthesis-specialist
 - research-reporting-specialist
-- patent-search-specialist (Patent Search Specialist)
-- prior-art-analyst (Prior Art Analyst)
-- ip-landscape-mapper (IP Landscape Mapper)
+- patent-intelligence-engine:patent-search-specialist (Patent Search Specialist)
+- patent-intelligence-engine:prior-art-analyst (Prior Art Analyst)
+- patent-intelligence-engine:ip-landscape-mapper (IP Landscape Mapper)
 - vvc-specialist (Verification, Validation & Correction Specialist)
 
 Each sub-agent type provides different capabilities matched to its pipeline role. The
-planning, synthesis, and reporting specialists are fixed pipeline roles; research agents
-are domain-specialized instances configured for this engine's specific focus areas.
+planning, synthesis, and reporting specialists are fixed pipeline roles (built-in Claude Code agent types).
+Research agents are domain-specialized instances defined in this plugin's `agents/` directory
+and MUST be referenced by their fully qualified name (`patent-intelligence-engine:[agentId]`) when
+deploying via the Task tool.
 The vvc-specialist is a pipeline agent that runs in Phases 5-6 (post-reporting). It does NOT participate in Phase 2 research.
 
 ---
 
 ## Execution Strategy -- Quick Tier
 
-If `--quick` detected, deploy a SINGLE agent (**patent-search-specialist**) with the following
+If `--quick` detected, deploy a SINGLE agent (**patent-intelligence-engine:patent-search-specialist**) with the following
 instructions:
 
 **Domain:** Intellectual property and patent landscape analysis
@@ -351,7 +353,7 @@ independently but coordinates through Shared_Sources.md.
 
 #### Agent: Patent Search Specialist
 
-Deploy **patent-search-specialist** (model: sonnet, type: general-purpose) with specialization:
+Deploy **patent-intelligence-engine:patent-search-specialist** (model: sonnet, type: patent-intelligence-engine:patent-search-specialist) with specialization:
 
 Conducts comprehensive patent searches across major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO) using classification codes (CPC, IPC), keyword strategies, and assignee tracking. Identifies relevant patent families, prosecution histories, and citation networks. Assesses patent claim scope, priority dates, and geographic coverage to map intellectual property positions. Extracts key data points: patent numbers, filing dates, grant dates, assignees, inventors, claim counts, and citation metrics.
 
@@ -359,7 +361,7 @@ Search across all major patent offices (USPTO, EPO, WIPO, JPO, KIPO, CNIPA, CIPO
 
 #### Agent: Prior Art Analyst
 
-Deploy **prior-art-analyst** (model: sonnet, type: expert-instructor) with specialization:
+Deploy **patent-intelligence-engine:prior-art-analyst** (model: sonnet, type: patent-intelligence-engine:prior-art-analyst) with specialization:
 
 Analyzes patent claims for novelty and non-obviousness against the prior art landscape. Applies the Teaching-Suggestion-Motivation (TSM) test and KSR obviousness framework to evaluate patentability. Reviews prosecution histories to understand claim scope evolution and examiner objections. Identifies relevant prior art references including patents, published applications, technical papers, conference proceedings, and commercial products. Assesses claim construction and identifies potential invalidity arguments.
 
@@ -367,7 +369,7 @@ For each technology area under investigation, build a comprehensive prior art ma
 
 #### Agent: IP Landscape Mapper
 
-Deploy **ip-landscape-mapper** (model: sonnet, type: intelligence-analyst) with specialization:
+Deploy **patent-intelligence-engine:ip-landscape-mapper** (model: sonnet, type: patent-intelligence-engine:ip-landscape-mapper) with specialization:
 
 Synthesizes patent data into comprehensive IP landscape assessments. Maps patent portfolios by assignee, filing trends over time, geographic distribution, and technology cluster analysis using CPC/IPC classification hierarchies. Identifies whitespace opportunities where patent protection is sparse. Builds competitive patent matrices comparing key players by portfolio size, claim breadth, geographic coverage, and remaining patent life. Assesses freedom-to-operate risks by mapping overlapping claims and identifies potential licensing opportunities or infringement risks.
 
