@@ -93,9 +93,11 @@ claude --plugin-dir ./deep-research-engine-creator
 # 3. Validate the generated engine
 /test-engine ./generated-engines/your-engine/
 
-# 4. Load and use the generated engine
-claude --plugin-dir ./generated-engines/your-engine/
-/research "your topic"
+# 4. Install the generated engine as a local plugin
+/install-local-plugin ./generated-engines/your-engine/
+
+# 5. Restart Claude Code, then use the engine
+/your-engine:research "your topic"
 ```
 
 ## Commands
@@ -107,6 +109,7 @@ claude --plugin-dir ./generated-engines/your-engine/
 | `/test-engine <path> [topic]` | Validate structure and run smoke test on a generated engine |
 | `/preview-engine <path>` | Preview what an engine config would generate (read-only) |
 | `/list-engines [dir]` | Scan a directory for generated engines and display a summary table |
+| `/install-local-plugin <path>` | Register a generated engine as an installed Claude Code plugin |
 
 ## Domain Presets
 
@@ -513,7 +516,8 @@ deep-research-engine-creator/
     │   ├── update-engine.md                            # /update-engine reconfiguration
     │   ├── test-engine.md                              # /test-engine validation suite
     │   ├── preview-engine.md                           # /preview-engine read-only preview
-    │   └── list-engines.md                             # /list-engines directory scanner
+    │   ├── list-engines.md                             # /list-engines directory scanner
+    │   └── install-local-plugin.md                     # /install-local-plugin local registration
     ├── skills/engine-creator/
     │   ├── SKILL.md                                    # Core wizard + generation logic
     │   ├── domain-presets/                             # 21 domain presets

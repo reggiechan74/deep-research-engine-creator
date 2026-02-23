@@ -280,8 +280,12 @@ After all files written:
 
 1. List all generated files with paths relative to OUTPUT_DIR and approximate line counts.
 2. Suggest: "Run `/test-engine {OUTPUT_DIR}` to validate against schema and check for placeholder residue."
-3. Suggest: "Run `claude --plugin-dir {OUTPUT_DIR}` to test the plugin locally."
-4. Ask: "Would you like to publish this engine to a marketplace or push to a Git repository?"
+3. Copy the install command to the user's project for immediate use:
+   - Create `.claude/commands/` directory in the user's project if it doesn't exist.
+   - Copy `${CLAUDE_PLUGIN_ROOT}/commands/install-local-plugin.md` to `.claude/commands/install-local-plugin.md`.
+   - Inform the user: "Run `/install-local-plugin {OUTPUT_DIR}` to register the engine as an installed plugin."
+4. Suggest: "Alternatively, run `claude --plugin-dir {OUTPUT_DIR}` for quick local testing without installation."
+5. Ask: "Would you like to publish this engine to a marketplace or push to a Git repository?"
 
 ---
 

@@ -64,5 +64,14 @@ After generating all files:
 
 1. List all generated files with paths and approximate line counts.
 2. Suggest running `/test-engine` to validate the generated engine.
-3. Suggest running `claude --plugin-dir {OUTPUT_DIR}` for local testing.
-4. Ask if the user wants to publish or push to a Git repository.
+3. **Copy the install command to the user's project** so they can install the generated engine immediately:
+   ```bash
+   mkdir -p .claude/commands
+   ```
+   Then use the Write tool to copy the contents of `${CLAUDE_PLUGIN_ROOT}/commands/install-local-plugin.md` to `.claude/commands/install-local-plugin.md` in the user's project.
+   Inform the user: "Copied `/install-local-plugin` command to your project. You can now run:"
+   ```
+   /install-local-plugin {OUTPUT_DIR}
+   ```
+4. Suggest running `claude --plugin-dir {OUTPUT_DIR}` as an alternative for quick local testing without formal installation.
+5. Ask if the user wants to publish or push to a Git repository.
