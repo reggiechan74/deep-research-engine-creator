@@ -1,6 +1,6 @@
 ---
 description: "Launch {{engineDisplayName}} for domain-specialized deep research"
-argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--outline-only]"
+argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--no-approve] [--outline-only] [--extend]"
 allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep"]
 ---
 
@@ -16,8 +16,10 @@ This engine specializes in {{domain}} research for {{audience}}.
 - `/research [topic] --quick` -- Quick tier: fast factual lookup
 - `/research [topic] --deep` -- Deep tier: full multi-agent pipeline
 - `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds
-- `/research [topic] --approve` -- Pause for user approval after planning phase
+- `/research [topic] --approve` -- Pause for user approval after planning phase (default for Standard+ tiers)
+- `/research [topic] --no-approve` -- Skip outline approval gate (for automation or fast iteration)
 - `/research [topic] --outline-only` -- Stop after planning phase (outline only)
+- `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
 
 ## Phase 0: Tier Detection & Configuration
 
@@ -28,6 +30,9 @@ Parse tier from `$ARGUMENTS`:
 - If `--comprehensive` is present, set tier to Comprehensive
 - If `--outline-only` is present, set tier to Standard but stop after Phase 1
 - If `--approve` is present, pause after planning phase for user approval
+- If `--no-approve` is present, skip outline approval gate
+- If `--extend` is present, set CONTEXT_MODE to **extend** (project-aware)
+- Otherwise, set CONTEXT_MODE to **standalone** (default)
 - Otherwise, default to Standard tier
 - Strip flag tokens from `$ARGUMENTS` to derive the research topic
 

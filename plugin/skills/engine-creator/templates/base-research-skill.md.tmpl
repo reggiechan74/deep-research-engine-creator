@@ -20,7 +20,9 @@ agent definitions, quality standards, and output specifications are defined in t
 - `/research [topic] --deep` -- Deep tier: {{deepTierDescription}}
 - `/research [topic] --comprehensive` -- Comprehensive tier: {{comprehensiveTierDescription}}
 - `/research [topic] --outline-only` -- Planning phase only (produces outline, then stops)
-- `/research [topic] --approve` -- Pause for user approval after Phase 1 before proceeding
+- `/research [topic] --approve` -- Pause for user approval after Phase 1 (default for Standard+ tiers)
+- `/research [topic] --no-approve` -- Skip outline approval gate (for automation or fast iteration)
+- `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
 
 ---
 
@@ -53,6 +55,9 @@ Parse tier from `$ARGUMENTS`:
 - If `--comprehensive` is present, set tier to **Comprehensive**
 - If `--outline-only` is present, set tier to Standard but stop after Phase 1
 - If `--approve` is present, pause after Phase 1 for user approval
+- If `--no-approve` is present, skip outline approval gate
+- If `--extend` is present, set CONTEXT_MODE to **extend** (project-aware)
+- Otherwise, set CONTEXT_MODE to **standalone** (default)
 - Otherwise, default to **Standard** tier
 - Strip flag tokens from `$ARGUMENTS` to derive the research topic
 - If topic starts with `http://` or `https://`, treat it as a URL seed
@@ -269,6 +274,8 @@ After deploying the quick agent, skip all remaining phases.
 
 Deploy **research-planning-specialist** with instructions to:
 
+{{scopeDisciplineBlock}}
+
 - Analyze {{domain}} research topic complexity, scope, and domain requirements
 - Create systematic research framework mapping key investigation areas
 - Build scope grid:
@@ -290,7 +297,9 @@ Deploy **research-planning-specialist** with instructions to:
 
 **User Gates:**
 - If `--outline-only`: Stop here. Present outline summary and exit.
-- If `--comprehensive` OR `--approve`: Present outline to user for approval before proceeding to Phase 2.
+- If `--quick`: No approval gate — proceed directly to execution.
+- If `--no-approve`: Skip approval gate — proceed directly to Phase 2.
+- Otherwise (Standard/Deep/Comprehensive): Present outline to user for approval before proceeding to Phase 2.
 
 ---
 
@@ -681,6 +690,9 @@ engine configuration (engine-config.json).
 - `{{vvcFeatureBullets}}` -- Key Workflow Features bullets for VVC. Lead bullet must distinguish claim verification from simple citations: citations can still hallucinate, verified claims can't. (Empty when VVC disabled)
 - `{{vvcBudgetLine}}` -- Token budget line for VVC phase (empty when VVC disabled)
 - `{{vvcSubAgentNote}}` -- Note about VVC specialist in sub-agent list (empty when VVC disabled)
+
+### Scope & Context Isolation
+- `{{scopeDisciplineBlock}}` -- conditional scope discipline instructions for Phase 1 planning agent, varies by CONTEXT_MODE (standalone vs. extend)
 
 ### Operational
 - `{{operationalLessons}}` -- accumulated post-mortem findings from past research runs
