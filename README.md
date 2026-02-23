@@ -174,7 +174,7 @@ your-engine-name/
 ├── .claude-plugin/plugin.json     # Plugin manifest
 ├── engine-config.json             # Full configuration (editable, re-processable)
 ├── commands/
-│   ├── research.md                # /research <topic> [--quick|--deep|--comprehensive]
+│   ├── research.md                # /research <topic> [--quick|--deep|--comprehensive] [--extend] [--no-approve]
 │   └── sources.md                 # /sources — view configured source hierarchy
 ├── agents/
 │   ├── agent-1.md                 # Domain-specialized research agent
@@ -193,6 +193,7 @@ Every generated engine includes:
 - Domain-specialized agents with their own search strategies and citation prefixes
 - A quality framework with confidence scoring, evidence thresholds, and validation rules
 - **Claim verification (VVC)** -- not just citations. Every factual claim is extracted, the cited source is re-fetched, and both source credibility and accurate representation are verified. Citations can still hallucinate. Verified claims can't.
+- **Context isolation** -- engines default to standalone mode, scoping research strictly to the user's topic. Project context (CLAUDE.md, prior research files, observation history) is ignored unless the user explicitly passes `--extend`. An approval gate (default ON for Standard+ tiers) lets users review the outline before research agents execute.
 - Structured report output with configurable sections
 
 ## Two Output Modes
@@ -359,6 +360,8 @@ flowchart TD
         PLAN["Strategic framework<br/>and agent task design"]
     end
 
+    GATE{"User approves<br/>outline?<br/>(Standard+ default)"}
+
     subgraph P2["Phase 2: Parallel Research"]
         direction LR
         A1["Agent 1<br/>Domain Specialist"]
@@ -388,7 +391,9 @@ flowchart TD
 
     TOPIC --> P0
     P0 --> P1
-    P1 --> P2
+    P1 --> GATE
+    GATE -->|"yes"| P2
+    GATE -->|"revise"| P1
     SOURCES -.->|"governs<br/>credibility"| P2
     P2 --> P3
     P3 --> P4
@@ -408,9 +413,12 @@ flowchart TD
     class A1,A2,A3 agent
     class DRAFT phase
     class VER,COR vvc
+    classDef gate fill:#fefcbf,stroke:#d69e2e,color:#744210
+
     class TOPIC input
     class SOURCES,QUALITY support
     class REPORT output
+    class GATE gate
 
     style P0 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
     style P1 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d

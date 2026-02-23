@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] - 2026-02-23
+
+### Added
+- **Context isolation (`--extend` flag)** -- research engines now default to standalone mode, scoping research strictly to the user's stated topic. Prior behavior (inheriting ambient project context from CLAUDE.md, observation history, and prior research files) caused Phase 1 planning agents to expand scope beyond the stated topic. Users who want to build on prior research must now explicitly opt in with `--extend`
+- **`--no-approve` flag** -- skip the outline approval gate for automation or fast iteration
+- **Scope discipline block** -- new `{{scopeDisciplineBlock}}` placeholder injects conditional instructions into Phase 1 planning agent prompts, with standalone and extend variants
+- **Context contamination issue documentation** -- `ISSUE_context-contamination.md` with root cause analysis, evidence trail, and resolution
+
+### Changed
+- **Approval gate now defaults to ON for Standard/Deep/Comprehensive tiers** -- previously only `--comprehensive` and explicit `--approve` paused for user review. Now all non-quick tiers present the outline for approval before Phase 2 agents execute. This catches scope bloat before spending tokens on research
+- `--approve` flag annotation updated to note it is the default behavior for Standard+ tiers
+- Command template `argument-hint` updated with new flags
+
 ## [1.3.0] - 2026-02-22
 
 ### Added
