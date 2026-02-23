@@ -245,6 +245,7 @@ There is **no limit on the number of agents** -- add as many specialized roles a
 - Set dead link handling, freshness thresholds, and verification reporting
 
 **Section 7: Output Structure** -- Design report format:
+- Choose where research reports are saved (default: `./research-reports`, customizable to any project path)
 - Define, reorder, add, or remove report sections
 - Set file naming templates with variables (`{date}`, `{topic_slug}`)
 - Specify special deliverables (competitive matrices, risk heatmaps, timelines, etc.)

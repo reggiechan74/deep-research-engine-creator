@@ -34,7 +34,7 @@ Parse tier from `$ARGUMENTS`:
 Derive configuration:
 - `TOPIC_SLUG` from topic: lowercase, hyphenate spaces, strip punctuation
 - `RUN_TS` as `YYYY-MM-DD_HHMMSS_ET` (Eastern Time via bash: `TZ='America/New_York' date '+%Y-%m-%d_%H%M%S_ET'`)
-- `BASE_DIR="02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}"`
+- `BASE_DIR="./research-reports/${RUN_TS}_${TOPIC_SLUG}"`
 - All files and directories live under `BASE_DIR`
 
 ## Tier Configuration

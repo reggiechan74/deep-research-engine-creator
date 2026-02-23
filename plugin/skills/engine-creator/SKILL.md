@@ -144,9 +144,10 @@ If customizing per tier: for each of Standard, Deep, Comprehensive, ask: none / 
 
 ### Section 7: Output Structure
 
-1. **Report sections** -- Show ordered list. AskUserQuestion: Accept, Add, Remove, Reorder.
-2. **File naming** -- Show template (e.g. `{date}_{topic_slug}_research_report.md`). Accept or customize.
-3. **Special deliverables** -- "Any special artifacts? (e.g., competitive matrix, patent family tree)" Free text or "None".
+1. **Report output directory** -- AskUserQuestion: "Where should research reports be saved? Each run creates a timestamped subdirectory under this path." Default: `./research-reports`. Common alternatives: `./output/reports`, `docs/research`, or a project-specific path. Accept or customize.
+2. **Report sections** -- Show ordered list. AskUserQuestion: Accept, Add, Remove, Reorder.
+3. **File naming** -- Show template (e.g. `{date}_{topic_slug}_research_report.md`). Accept or customize.
+4. **Special deliverables** -- "Any special artifacts? (e.g., competitive matrix, patent family tree)" Free text or "None".
 
 ### Section 8: Advanced Configuration
 

@@ -558,6 +558,12 @@
             ]
           ]
         },
+        "reportOutputDir": {
+          "type": "string",
+          "description": "Root directory where research reports are saved. Each research run creates a timestamped subdirectory under this path. Relative paths are resolved from the user's working directory.",
+          "default": "./research-reports",
+          "examples": ["./research-reports", "02_KNOWLEDGE/5_RESEARCH_REPORTS", "./output/reports"]
+        },
         "fileNaming": {
           "type": "string",
           "description": "Template for naming generated report files. Supports {placeholders} for date, topic, tier, etc.",

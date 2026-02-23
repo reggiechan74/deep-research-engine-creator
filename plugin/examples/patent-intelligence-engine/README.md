@@ -83,7 +83,7 @@ Every research tool cites sources -- but a citation is just a URL. It doesn't me
 Research reports are saved to a timestamped directory using the engine's configured file naming convention (`{date}_{topic_slug}_patent_intelligence.md`).
 
 ```
-02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}/
+./research-reports/${RUN_TS}_${TOPIC_SLUG}/
 ├── [TOPIC_SLUG]_Research_Outline.md
 ├── [TOPIC_SLUG]_Shared_Sources.md
 ├── [TOPIC_SLUG]_Claims_patent-search-specialist.md

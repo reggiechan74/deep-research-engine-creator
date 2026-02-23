@@ -70,7 +70,7 @@ Parse tier from `$ARGUMENTS`:
 ```
 TOPIC_SLUG  = lowercase topic, hyphenate spaces, strip punctuation
 RUN_TS      = YYYY-MM-DD_HHMMSS_ET (Eastern Time via bash: TZ='America/New_York' date '+%Y-%m-%d_%H%M%S_ET')
-BASE_DIR    = "02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}"
+BASE_DIR    = "./research-reports/${RUN_TS}_${TOPIC_SLUG}"
 ENGINE_ID   = "patent-intelligence-engine"
 ```
 
@@ -570,7 +570,7 @@ Now executing research deployment...
 Research reports will be saved to:
 
 ```
-02_KNOWLEDGE/5_RESEARCH_REPORTS/${RUN_TS}_${TOPIC_SLUG}/
+./research-reports/${RUN_TS}_${TOPIC_SLUG}/
 ├── [TOPIC_SLUG]_Research_Outline.md
 ├── [TOPIC_SLUG]_Shared_Sources.md
 ├── [TOPIC_SLUG]_Claims_patent-search-specialist.md

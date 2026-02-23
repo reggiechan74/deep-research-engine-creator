@@ -264,6 +264,7 @@
       "Methodology",
       "Bibliography"
     ],
+    "reportOutputDir": "./research-reports",
     "fileNaming": "{date}_{topic_slug}_patent_intelligence.md",
     "specialDeliverables": [
       "patent-family-tree",
