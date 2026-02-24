@@ -63,7 +63,7 @@ A growing number of benchmarks now evaluate deep research agents. The results pa
 - **Source credibility ranking.** No benchmark evaluates whether the system distinguishes tier-1 regulatory filings from tier-5 blog posts. The 5-tier credibility hierarchy (configured per engine) addresses this.
 - **Self-correction capability.** No benchmark measures whether a system can fix its own citation errors when detected. VVC Phase 6 auto-corrects or flags failed claims.
 
-**An honest caveat:** This is an engine *factory*, not a single engine. A generated engine's quality depends on how it's configured -- source hierarchies, verification scope, agent specialization. The default configuration is designed to address the gaps these benchmarks expose: VVC enabled, 100% HIGH-confidence verification, 75% MEDIUM, 5-tier source hierarchies, and multi-agent parallel research. But a user who disables VVC and configures a minimal pipeline will get minimal results. The tool provides the structural advantage. The configuration determines whether you use it.
+**An honest caveat:** This is an engine *factory*, not a single engine. A generated engine's quality depends on how it's configured -- source hierarchies, verification scope, agent specialization. The default configuration is designed to address the gaps these benchmarks expose: VVC enabled, 100% verification across all confidence levels (HIGH, MEDIUM, LOW, and SPECULATIVE), 5-tier source hierarchies, and multi-agent parallel research. But a user who disables VVC and configures a minimal pipeline will get minimal results. The tool provides the structural advantage. The configuration determines whether you use it.
 
 ## Installation
 
@@ -502,7 +502,7 @@ The most valuable test you can run is comparing the same engine with and without
 
 | Run | How | What It Shows |
 |-----|-----|---------------|
-| **A: VVC enabled** | Default config (VVC on, 100% HIGH, 75% MEDIUM) | Baseline with verification |
+| **A: VVC enabled** | Default config (VVC on, 100% all levels) | Baseline with verification |
 | **B: VVC disabled** | Edit `engine-config.json`, set `vvc.enabled: false` | Baseline without verification |
 | **A - B** | Compare scores | The measurable value VVC adds to citation accuracy and factual correctness |
 

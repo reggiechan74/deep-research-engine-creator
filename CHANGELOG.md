@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] - 2026-02-24
+
+### Changed
+- **All VVC verification scope defaults set to 100%** -- HIGH, MEDIUM, LOW, and SPECULATIVE confidence levels now all default to 100% verification. Previously HIGH was fixed at 100%, MEDIUM defaulted to 75%, LOW to 0%, and SPECULATIVE was fixed at 0%. Every verifiable claim is now checked by default regardless of confidence tier
+- **All confidence levels are now configurable** -- removed `const` constraints on HIGH and SPECULATIVE. All four levels accept any value from 0-100, giving users full control over the verification depth-vs-cost tradeoff
+- **All 21 domain presets updated** -- every preset now defaults to 100% verification across all confidence levels (previously varied: e.g., Legal had 100/100/25/0, Market Intelligence had 100/75/0/0)
+- **Wizard prompts updated** -- MEDIUM, LOW, and SPECULATIVE now recommend 100% as the default option. SPECULATIVE added as a separate wizard question
+- **Test validation relaxed** -- `/test-engine` check 4i no longer enforces fixed values for HIGH or SPECULATIVE
+- **Schema files updated** -- `engine-config-schema.json` and `preset-schema.json` use `default` instead of `const` for all levels
+
 ## [1.4.0] - 2026-02-23
 
 ### Added
