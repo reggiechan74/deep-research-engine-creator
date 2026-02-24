@@ -170,10 +170,10 @@
               "description": "Percentage of verifiable claims to check at each confidence level.",
               "additionalProperties": false,
               "properties": {
-                "HIGH": { "type": "integer", "const": 100 },
-                "MEDIUM": { "type": "integer", "default": 75, "minimum": 0, "maximum": 100 },
-                "LOW": { "type": "integer", "default": 0, "minimum": 0, "maximum": 100 },
-                "SPECULATIVE": { "type": "integer", "const": 0 }
+                "HIGH": { "type": "integer", "default": 100, "minimum": 0, "maximum": 100 },
+                "MEDIUM": { "type": "integer", "default": 100, "minimum": 0, "maximum": 100 },
+                "LOW": { "type": "integer", "default": 100, "minimum": 0, "maximum": 100 },
+                "SPECULATIVE": { "type": "integer", "default": 100, "minimum": 0, "maximum": 100 }
               }
             },
             "tierBehavior": {

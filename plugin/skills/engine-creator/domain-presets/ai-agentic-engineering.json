@@ -211,8 +211,8 @@
       "verificationScope": {
         "HIGH": 100,
         "MEDIUM": 100,
-        "LOW": 25,
-        "SPECULATIVE": 0
+        "LOW": 100,
+        "SPECULATIVE": 100
       },
       "tierBehavior": {
         "quick": "none",

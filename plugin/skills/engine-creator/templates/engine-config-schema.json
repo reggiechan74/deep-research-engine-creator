@@ -473,27 +473,31 @@
               "properties": {
                 "HIGH": {
                   "type": "integer",
-                  "const": 100,
-                  "description": "HIGH confidence claims are always verified (100%). This is fixed and cannot be changed."
+                  "default": 100,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage of HIGH confidence verifiable claims to check. Default: 100%."
                 },
                 "MEDIUM": {
                   "type": "integer",
-                  "default": 75,
+                  "default": 100,
                   "minimum": 0,
                   "maximum": 100,
-                  "description": "Percentage of MEDIUM confidence verifiable claims to check. Default: 75%."
+                  "description": "Percentage of MEDIUM confidence verifiable claims to check. Default: 100%."
                 },
                 "LOW": {
                   "type": "integer",
-                  "default": 0,
+                  "default": 100,
                   "minimum": 0,
                   "maximum": 100,
-                  "description": "Percentage of LOW confidence verifiable claims to check. Default: 0%."
+                  "description": "Percentage of LOW confidence verifiable claims to check. Default: 100%."
                 },
                 "SPECULATIVE": {
                   "type": "integer",
-                  "const": 0,
-                  "description": "SPECULATIVE claims are never verified (0%). This is fixed and cannot be changed."
+                  "default": 100,
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage of SPECULATIVE confidence verifiable claims to check. Default: 100%."
                 }
               }
             },

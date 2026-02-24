@@ -98,7 +98,7 @@ Perform multi-level structural validation on `engine-config.json`:
 - Verify `enabled` is a boolean
 - If `enabled` is true:
   - Verify `claimTypes` is a non-empty array where each element has `tag` (2-4 uppercase letters), `label`, `description`, and `requiresVerification` (boolean)
-  - Verify `verificationScope` exists with `HIGH` = 100, `SPECULATIVE` = 0, `MEDIUM` in 0-100, `LOW` in 0-100
+  - Verify `verificationScope` exists with `HIGH` in 0-100, `MEDIUM` in 0-100, `LOW` in 0-100, `SPECULATIVE` in 0-100
   - Verify `tierBehavior` exists with `quick` = "none" and `standard`, `deep`, `comprehensive` each one of: "none", "verify-only", "full"
   - Verify `vvc-specialist.md` exists in the `agents/` directory
   - Verify `vvc-specialist` is listed in `agentPipeline.agents[].id`

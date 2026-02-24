@@ -112,9 +112,9 @@ Every factual assertion in the draft report (Phase 4) MUST be tagged with one of
 | Confidence Level | Verification Rate | Rationale |
 |-----------------|-------------------|-----------|
 | HIGH | 100% | All HIGH confidence verifiable claims are always verified |
-| MEDIUM | 75% | Balanced depth for MEDIUM confidence claims |
-| LOW | 0% | LOW confidence claims are not verified by default |
-| SPECULATIVE | 0% | Speculative claims cannot be verified against sources |
+| MEDIUM | 100% | All MEDIUM confidence verifiable claims are verified |
+| LOW | 100% | All LOW confidence verifiable claims are verified |
+| SPECULATIVE | 100% | All SPECULATIVE confidence claims are verified |
 
 ### Source Credibility Hierarchy
 

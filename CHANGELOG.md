@@ -39,7 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   - Phase 6 (VVC-Correct): implements corrections, produces final Comprehensive Report + correction log
 - **Claim type taxonomy**: `[VC]` Verifiable Claim, `[PO]` Professional Opinion, `[IE]` Inferred/Extrapolated -- extensible via wizard
 - **Tier-aware VVC behavior**: Quick: none, Standard: verify-only, Deep: full, Comprehensive: full
-- **Configurable verification scope**: 100% HIGH (fixed), MEDIUM% (default 75), LOW% (default 0), 0% SPECULATIVE (fixed)
+- **Configurable verification scope**: HIGH% (default 100), MEDIUM% (default 100), LOW% (default 100), SPECULATIVE% (default 100)
 - **VVC specialist agent** (`vvc-specialist`) -- pipeline agent using `general-purpose` subagent type for WebFetch source verification
 - **High-accuracy presets**: Legal, OSINT, Financial DD, AML, Academic get 100% MEDIUM / 25-50% LOW verification rates
 - VVC configuration in wizard Section 6 with customizable claim types, verification scope, and per-tier behavior
