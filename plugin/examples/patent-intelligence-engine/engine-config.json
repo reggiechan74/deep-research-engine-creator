@@ -247,6 +247,15 @@
         "deep": "full",
         "comprehensive": "full"
       }
+    },
+    "provenance": {
+      "enabled": true,
+      "hashAlgorithm": "sha256",
+      "reverifiableDefault": false,
+      "auditPhase": {
+        "tiers": ["standard", "deep", "comprehensive"]
+      },
+      "chainFormat": "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]"
     }
   },
   "outputStructure": {

@@ -1,7 +1,7 @@
 ---
 description: "Launch Patent Intelligence Engine for domain-specialized deep research"
-argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--outline-only]"
-allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep"]
+argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--no-approve] [--outline-only] [--extend] [--reverifiable]"
+allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep", "Bash"]
 ---
 
 # Patent Intelligence Engine — Research Command
@@ -18,6 +18,8 @@ This engine specializes in Intellectual property and patent landscape analysis r
 - `/research [topic] --comprehensive` -- Comprehensive tier: deep + follow-up rounds
 - `/research [topic] --approve` -- Pause for user approval after planning phase
 - `/research [topic] --outline-only` -- Stop after planning phase (outline only)
+- `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
+- `/research [topic] --reverifiable` -- Store source snapshots alongside hashes for independent re-verification
 
 ## Phase 0: Tier Detection & Configuration
 
@@ -39,12 +41,12 @@ Derive configuration:
 
 ## Tier Configuration
 
-| Tier | Planning | Research Agents | Synthesis | Report | User Gate |
-|------|----------|----------------|-----------|--------|-----------|
-| Quick | No | patent-search-specialist | No | Inline | No |
-| Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Full | --approve only |
-| Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Full | --approve only |
-| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Full | Always |
+| Tier | Planning | Research Agents | Synthesis | Report | Provenance | User Gate |
+|------|----------|----------------|-----------|--------|------------|-----------|
+| Quick | No | patent-search-specialist | No | Inline | Hash-only | No |
+| Standard | Yes | patent-search-specialist, prior-art-analyst | Yes | Full | Hash + Audit | --approve only |
+| Deep | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper | Yes | Full | Hash + Audit | --approve only |
+| Comprehensive | Yes | patent-search-specialist, prior-art-analyst, ip-landscape-mapper + follow-up round | Yes | Full | Hash + Audit | Always |
 
 ## Research Engine Skill
 

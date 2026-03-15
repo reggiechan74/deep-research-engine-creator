@@ -121,6 +121,16 @@ Verification report: {{verificationReportConfig}}
 
 {{vvcExtensionOverride}}
 
+#### Provenance Configuration Override
+
+Provenance is always on. The base skill's Source Hashing Protocol applies to all agents in this extension. Phase 4.5 Provenance Audit runs on Standard/Deep/Comprehensive tiers.
+
+- Provenance enabled: true
+- Hash algorithm: sha256
+- Reverifiable default: {{reverifiableDefault}}
+- Audit tiers: {{auditTierBehavior}}
+- Chain format: `[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]`
+
 ### Output Structure Override
 
 Replace the base skill's report sections with:
@@ -256,6 +266,10 @@ with values from the engine configuration (engine-config.json).
 
 ### VVC (Verification, Validation & Correction)
 - `{{vvcExtensionOverride}}` -- VVC configuration override block (empty when VVC disabled)
+
+### Provenance
+- `{{reverifiableDefault}}` -- whether --reverifiable is the default behavior
+- `{{auditTierBehavior}}` -- tier behavior string for Phase 4.5 provenance audit
 
 ### Advanced Configuration
 - `{{maxIterations}}` -- maximum research-refine cycles per question

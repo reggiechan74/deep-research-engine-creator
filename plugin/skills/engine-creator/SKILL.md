@@ -5,7 +5,7 @@ description: >-
   "build a research plugin", "customize deep research", "make a domain-specific
   research tool", "design a research pipeline", "create engine", or wants to
   create specialized deep-research engines as standalone Claude Code plugins.
-version: 1.3.0
+version: 1.6.0
 ---
 
 # Engine Creator
@@ -149,6 +149,15 @@ Use AskUserQuestion: "VVC tier behavior?"
 
 If customizing per tier: for each of Standard, Deep, Comprehensive, ask: none / verify-only / full. Quick is always "none".
 
+#### Provenance (always on)
+
+Inform the user — this is NOT a question:
+
+- SHA-256 source hashing is enabled for all tiers
+- Phase 4.5 provenance audit runs on Standard/Deep/Comprehensive tiers
+- `--reverifiable` flag available to retain source snapshots
+- No configuration needed — provenance is baked into every generated engine
+
 ### Section 7: Output Structure
 
 1. **Report output directory** -- AskUserQuestion: "Where should research reports be saved? Each run creates a timestamped subdirectory under this path." Default: `./research-reports`. Common alternatives: `./output/reports`, `docs/research`, or a project-specific path. Accept or customize.
@@ -179,8 +188,20 @@ After all sections complete:
 3. Set `engineMeta.createdAt` using bash: `TZ='America/New_York' date '+%Y-%m-%dT%H:%M:%S%:z'`. Never hardcode timestamps.
 4. Set `engineMeta.createdBy` to `"deep-research-engine-creator/1.0.0"` and `version` to `"1.0.0"`.
 5. Derive `displayName` from engine name: kebab-case to Title Case.
-6. Fill unanswered optional fields with sensible defaults or omit.
-7. Validate all required fields. If any missing, ask user before proceeding.
+6. Always include `qualityFramework.provenance` with these defaults:
+   ```json
+   "provenance": {
+     "enabled": true,
+     "hashAlgorithm": "sha256",
+     "reverifiableDefault": false,
+     "auditPhase": {
+       "tiers": ["standard", "deep", "comprehensive"]
+     },
+     "chainFormat": "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]"
+   }
+   ```
+7. Fill unanswered optional fields with sensible defaults or omit.
+8. Validate all required fields. If any missing, ask user before proceeding.
 
 ---
 
@@ -243,7 +264,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{comprehensiveTierDescription}}` | Build from `tiers.comprehensive.agents` + followUpRound: "All [N] agents + follow-up round" |
 | `{{agentSpecialization}}` | Concatenate all agent `specialization` strings, joined by "; " |
 | `{{quickAgentId}}` | Fully qualified agent name: `{{engineName}}:[first agent ID from tiers.quick.agents]`. Example: `patent-intelligence-engine:patent-search-specialist` |
-| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), User Gate |
+| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate |
 | `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **{{engineName}}:[id]** (model: [model], type: {{engineName}}:[id]) with specialization:\n\n[specialization]\n\n[promptOverride if present]". **Important:** Custom agents defined in the plugin's `agents/` directory MUST use the fully qualified `{{engineName}}:[agentId]` format. Built-in pipeline agents (research-planning-specialist, synthesis-specialist, research-reporting-specialist) do NOT get the prefix. |
 | `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- {{engineName}}:[id] ([role])". If VVC enabled, also append: "- vvc-specialist (Verification, Validation & Correction Specialist)" |
 | `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
@@ -267,7 +288,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{vvcClaimTaxonomyBlock}}` | If VVC enabled: generate "### Claim Type Taxonomy" section listing each claimType from config (tag, label, description, requiresVerification) plus "### VVC Verification Scope" table showing HIGH/MEDIUM/LOW/SPECULATIVE percentages; otherwise: empty string |
 | `{{vvcClaimTaggingInstructions}}` | If VVC enabled: "- **CLAIM TAGGING (REQUIRED):** Tag every factual assertion with its claim type: `[VC]` for verifiable claims with cited sources, `[PO]` for professional opinions/analytical judgments, `[IE]` for inferences/extrapolations. Place tags at the end of each claim sentence before the citation. Example: 'Toyota invested $142M in solid-state battery research [VC][^3]'. This tagging is essential for the VVC verification phase."; otherwise: empty string |
 | `{{vvcVerifyPhaseBlock}}` | If VVC enabled AND tier behavior is "verify-only" or "full": generate complete Phase 5 VVC-Verify section with instructions to deploy **vvc-specialist** to: read draft report + all bibliographies, extract all [VC] claims with cited sources and confidence tiers, apply verification scope ({HIGH}% HIGH, {MEDIUM}% MEDIUM, {LOW}% LOW, {SPECULATIVE}% SPECULATIVE), per-claim protocol (locate source → extract quote → analyze alignment → classify as CONFIRMED/PARAPHRASED/OVERSTATED/UNDERSTATED/DISPUTED/UNSUPPORTED/SOURCE_UNAVAILABLE → recommend KEEP/REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE → write corrected text per recommendation rules), corrected text rules (KEEP: "---", REVISE: rewritten claim reflecting accurate source content, DOWNGRADE: claim with qualifying language and lowered confidence tier, REMOVE: "[REMOVE]", REPLACE_SOURCE: corrected claim text citing new source + replacement source URL found during verification), output `_VVC_Verification_Report.md` with summary stats + per-claim table including Corrected Text and New Source columns; otherwise: empty string |
-| `{{vvcCorrectPhaseBlock}}` | If VVC enabled AND tier behavior is "full": generate complete Phase 6 VVC-Correct section with instructions to deploy **vvc-specialist** (second pass) to: read verification report per-claim table, apply corrected text mechanically into draft report (REVISE/DOWNGRADE: substitute Corrected Text verbatim, REMOVE: delete claim and adjust surrounding narrative for coherence, REPLACE_SOURCE: substitute Corrected Text and update bibliography with New Source), preserve all KEEP/CONFIRMED claims unchanged, NO independent rewriting or source searching — all corrections come from the Phase 5 verification table, output `_Comprehensive_Report.md` (final) + `_VVC_Correction_Log.md` + Verification Statement appendix; if tier behavior is "verify-only": empty string (Phase 4 draft becomes final with verification report alongside) |
+| `{{vvcCorrectPhaseBlock}}` | If VVC enabled AND tier behavior is "full": generate complete Phase 6 VVC-Correct section with instructions to deploy **vvc-specialist** (second pass) to: read verification report per-claim table, apply corrected text mechanically into draft report (REVISE/DOWNGRADE: substitute Corrected Text verbatim, REMOVE: delete claim and adjust surrounding narrative for coherence, REPLACE_SOURCE: substitute Corrected Text and update bibliography with New Source), preserve all KEEP/CONFIRMED claims unchanged, NO independent rewriting or source searching — all corrections come from the Phase 5 verification table, output `_Comprehensive_Report.md` (final) + `_VVC_Correction_Log.md` + Verification Statement appendix + **Add Provenance Appendix** summarizing the hash chain from `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md`: chain integrity status, total events, unique domains, and independent verification instructions; if tier behavior is "verify-only": empty string (Phase 4 draft becomes final with verification report alongside) |
 | `{{vvcFileStructure}}` | If VVC enabled: "├── [TOPIC_SLUG]_Draft_Report.md\n├── [TOPIC_SLUG]_VVC_Verification_Report.md\n├── [TOPIC_SLUG]_VVC_Correction_Log.md  # When tier behavior is 'full'"; otherwise: empty string |
 | `{{vvcFeatureBullets}}` | If VVC enabled: "- **Claim verification, not just citations (VVC)** -- citations are URLs; they don't prove the AI read the source correctly. VVC extracts every [VC]-tagged claim, re-fetches the cited source, and checks: (1) Is the source credible? (2) Was it accurately represented? Failed claims are auto-corrected or flagged. Citations can hallucinate. Verified claims can't.\n- **Claim type taxonomy** -- claims tagged as [VC] (verifiable), [PO] (professional opinion), or [IE] (inferred) to focus verification effort\n- **Tier-aware VVC** -- Quick: no VVC, Standard: verify-only, Deep/Comprehensive: full verify+correct"; otherwise: empty string |
 | `{{vvcBudgetLine}}` | If VVC enabled: "VVC:            {vvcBudget} tokens output max (verification + correction combined)"; otherwise: empty string. Default vvcBudget: from `advanced.tokenBudgets.vvc` (default: 8000) |
@@ -275,6 +296,10 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{vvcExtensionOverride}}` | If VVC enabled: generate "#### VVC Configuration Override" section listing: enabled, claim types, verification scope (HIGH%, MEDIUM%, LOW%, SPECULATIVE%), tier behavior per tier; otherwise: empty string |
 | `{{vvcTierNote}}` | If VVC enabled: "**VVC:** Quick: none | Standard: verify-only | Deep: full | Comprehensive: full"; otherwise: empty string |
 | `{{vvcReadmeSection}}` | If VVC enabled: generate "## Verification, Validation & Correction (VVC)" section. Lead with the key distinction: every research tool cites sources, but a citation is just a URL -- it doesn't mean the AI read the source correctly. VVC goes further by extracting claims, re-fetching sources, and verifying both source credibility and accurate representation. Then describe claim types, verification scope, and tier behavior; otherwise: empty string |
+| `{{agentPrefix}}` | From `agentPipeline.agents[i].id`: first character, uppercased |
+| `{{auditTierBehavior}}` | From `qualityFramework.provenance.auditPhase.tiers`: generate "Standard: run \| Deep: run \| Comprehensive: run" from tier list |
+| `{{provenanceTierColumn}}` | From `qualityFramework.provenance.auditPhase.tiers`: "Hash-only" for Quick, "Hash + Audit" for tiers in audit list |
+| `{{reverifiableDefault}}` | From `qualityFramework.provenance.reverifiableDefault`: if true, invert the --reverifiable flag logic (snapshots kept by default, `--no-snapshots` to skip) |
 | `{{scopeDisciplineBlock}}` | Always generate the following conditional block (both modes included in template output): "**If CONTEXT_MODE is standalone (default -- no `--extend` flag):**\n\n### Scope Discipline\n\nYour research scope is LIMITED to the user's stated topic.\n\n- Do NOT read files outside BASE_DIR\n- Do NOT reference prior research runs, their files, or their findings\n- Do NOT incorporate project context from CLAUDE.md into research scope\n- Do NOT use observation history or session context to expand the topic\n- Generate ALL research questions strictly from the user's topic string and your domain expertise in {domain}\n- If the topic is ambiguous, interpret it as a general domain question -- do not assume it relates to any specific project or prior work\n- Every section in the outline must map directly to the stated topic. Remove any section that requires project-specific knowledge to justify.\n\n**If CONTEXT_MODE is extend (`--extend` flag present):**\n\n### Scope Discipline\n\nThis research EXTENDS prior work in this project. You may:\n\n- Read prior research files in the working directory for context\n- Reference project context from CLAUDE.md to inform research scope\n- Build on findings from previous research runs\n- Frame new research questions that deepen or broaden prior findings\n\nClearly mark which sections build on prior work vs. new investigation." |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.

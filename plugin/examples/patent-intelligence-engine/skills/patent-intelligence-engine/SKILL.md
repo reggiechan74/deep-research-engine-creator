@@ -21,6 +21,9 @@ agent definitions, quality standards, and output specifications are defined in t
 - `/research [topic] --comprehensive` -- Comprehensive tier: All 3 agents + follow-up round
 - `/research [topic] --outline-only` -- Planning phase only (produces outline, then stops)
 - `/research [topic] --approve` -- Pause for user approval after Phase 1 before proceeding
+- `/research [topic] --no-approve` -- Skip outline approval gate (for automation or fast iteration)
+- `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
+- `/research [topic] --reverifiable` -- Store source snapshots alongside hashes for independent re-verification
 
 ---
 
@@ -38,12 +41,12 @@ This engine implements a **seven-phase research system** with tier-based depth r
 
 ### Tier Configuration
 
-| Tier | Planning | Research Agents | Synthesis | Report | VVC | User Gate |
-|------|----------|----------------|-----------|--------|-----|-----------|
-| Quick | No | patent-intelligence-engine:patent-search-specialist | No | Inline | None | No |
-| Standard | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst | Yes | Draft | Verify-only | --approve only |
-| Deep | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper | Yes | Draft | Full | --approve only |
-| Comprehensive | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper + follow-up round | Yes | Draft | Full | Always |
+| Tier | Planning | Research Agents | Synthesis | Report | VVC | Provenance | User Gate |
+|------|----------|----------------|-----------|--------|-----|------------|-----------|
+| Quick | No | patent-intelligence-engine:patent-search-specialist | No | Inline | None | Hash-only | No |
+| Standard | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst | Yes | Draft | Verify-only | Hash + Audit | --approve only |
+| Deep | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper | Yes | Draft | Full | Hash + Audit | --approve only |
+| Comprehensive | Yes | patent-intelligence-engine:patent-search-specialist, patent-intelligence-engine:prior-art-analyst, patent-intelligence-engine:ip-landscape-mapper + follow-up round | Yes | Draft | Full | Hash + Audit | Always |
 
 ---
 
@@ -57,6 +60,11 @@ Parse tier from `$ARGUMENTS`:
 - If `--comprehensive` is present, set tier to **Comprehensive**
 - If `--outline-only` is present, set tier to Standard but stop after Phase 1
 - If `--approve` is present, pause after Phase 1 for user approval
+- If `--no-approve` is present, skip outline approval gate
+- If `--extend` is present, set CONTEXT_MODE to **extend** (project-aware)
+- Otherwise, set CONTEXT_MODE to **standalone** (default)
+- If `--reverifiable` is present, set REVERIFIABLE to **true** (retain source snapshots)
+- Otherwise, set REVERIFIABLE to **false** (hash-only, snapshots deleted after hashing)
 - Otherwise, default to **Standard** tier
 - Strip flag tokens from `$ARGUMENTS` to derive the research topic
 - If topic starts with `http://` or `https://`, treat it as a URL seed
@@ -77,6 +85,10 @@ ENGINE_ID   = "patent-intelligence-engine"
 All files and directories live under `BASE_DIR`. Use `patent-intelligence-engine` as prefix in
 file naming where engine identification is needed. Never restate the prompt in chat;
 write long data to files and keep chat responses concise.
+
+**Provenance setup (always on):**
+- Create `BASE_DIR/[TOPIC_SLUG]_Hash_Manifest.md` with header `| # | URL | SHA-256 | Timestamp | Agent_ID | Event_Hash | Prev_Hash |`
+- If `--reverifiable`: create `BASE_DIR/Source_Snapshots/` directory for storing fetched content
 
 ---
 
@@ -158,6 +170,27 @@ one Tier 1-3 source is required for any HIGH confidence assertion.
 - Log queries, engines, and filters to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
 - Save claims tables per agent as `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
 - Each claims table row must include: Claim | Evidence | Confidence Tier | Source IDs | Source Credibility Tier
+
+### Source Hashing Protocol
+
+Applied automatically after every WebFetch operation, ALL tiers, ALL agents.
+
+```
+After each WebFetch:
+1. Write fetched content to temp file: BASE_DIR/Source_Snapshots/[AGENT_PREFIX]-[SEQ]_[url-slug].txt
+2. Compute content hash via Bash: sha256sum "BASE_DIR/Source_Snapshots/[file]" | cut -d' ' -f1
+3. Read Hash_Manifest.md to get PREV_HASH (last row's Event_Hash, or "GENESIS" if first entry)
+4. Compute event hash via Bash: echo -n "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]" | sha256sum | cut -d' ' -f1
+5. Append row to Hash_Manifest.md: | [#] | [URL] | [SHA-256] | [Timestamp] | [Agent_ID] | [Event_Hash] | [Prev_Hash] |
+6. If --reverifiable is NOT set: rm "BASE_DIR/Source_Snapshots/[file]"
+7. If --reverifiable IS set: retain snapshot for independent re-verification
+```
+
+- `[AGENT_PREFIX]`: first letter of agent ID, uppercase (e.g., `P`, `I`)
+- `[SEQ]`: zero-padded counter per agent (e.g., `P-001`, `I-001`)
+- `[url-slug]`: domain + path slug, max 60 chars, lowercase, special chars removed
+- Hash_Manifest.md is a shared append-only file — read before first hash to get chain tail
+- If Source_Snapshots/ directory does not exist, create it via Bash: `mkdir -p`
 
 ### Context Discipline
 
@@ -390,12 +423,13 @@ Every Phase 2 research agent MUST:
 9. Save bibliography file: `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md`
 10. Save claims table: `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
 11. Log all search iterations to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
-12. Apply Global Standards and outline quality standards
-13. Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
-14. Recursive web exploration up to 5 levels deep from authoritative seed URLs and alternate seeds — follow citation chains, linked references, and related pages
-15. Document "unanswered questions" — research questions that remain open or partially answered after exhausting search iterations
-16. Document "important absences" — information you expected to find based on the domain and topic but could not locate (negative evidence is itself evidence)
-17. Run contrarian sweep: actively search for refutations, critiques, failure cases, and contradictory data for key claims found during research — do not only search for confirming evidence
+12. **PROVENANCE**: After each WebFetch, apply the Source Hashing Protocol (see Global Standards). Use agent prefix derived from agent ID's first character, uppercased (e.g., `P` for patent-search-specialist, `I` for ip-landscape-mapper)
+13. Apply Global Standards and outline quality standards
+14. Output format (450 tokens or fewer in chat): `## Focus | ## Top Findings (7 bullets or fewer, with IDs + confidence) | ## Gaps/Next | ## Files Written`
+15. Recursive web exploration up to 5 levels deep from authoritative seed URLs and alternate seeds — follow citation chains, linked references, and related pages
+16. Document "unanswered questions" — research questions that remain open or partially answered after exhausting search iterations
+17. Document "important absences" — information you expected to find based on the domain and topic but could not locate (negative evidence is itself evidence)
+18. Run contrarian sweep: actively search for refutations, critiques, failure cases, and contradictory data for key claims found during research — do not only search for confirming evidence
 
 ---
 
@@ -474,6 +508,51 @@ The draft report MUST include these sections in order:
 
 ---
 
+### Phase 4.5: Provenance Audit
+
+**Tier behavior:** Quick: skip | Standard: run | Deep: run | Comprehensive: run
+
+After citation verification, deploy a **general-purpose** provenance agent with instructions to:
+
+- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Hash_Manifest.md`
+- **Verify chain integrity**: Recompute each Event_Hash from the manifest data (`echo -n "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]" | sha256sum | cut -d' ' -f1`) and confirm it matches the recorded Event_Hash; flag any broken links
+- **Generate statistics**: Total sources hashed, unique domains, chain length, any integrity failures
+- **Cross-reference with Methodology_Log.md**: Verify every WebFetch logged in methodology has a corresponding hash entry; flag any untracked fetches
+- **If `--reverifiable`**: Verify each snapshot file in `BASE_DIR/Source_Snapshots/` exists and its SHA-256 matches the manifest entry. Run: `sha256sum "BASE_DIR/Source_Snapshots/[file]"` and compare
+- **Output**: Save to `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md`
+
+##### Provenance Log Structure
+
+```
+## Provenance Log: [TOPIC]
+
+### Chain Summary
+- Total events: N
+- Chain integrity: INTACT / BROKEN at event #N
+- Sources hashed: N unique URLs across N fetches
+- Domains covered: [list]
+- Snapshot storage: [reverifiable / hash-only]
+
+### Integrity Verification
+| # | Event_Hash | Recomputed | Match | Notes |
+|---|-----------|-----------|-------|-------|
+
+### Coverage Check
+| # | Methodology Log Entry | Hash Manifest Entry | Status |
+|---|----------------------|---------------------|--------|
+
+### Verification Instructions
+To independently verify this research provenance:
+1. Obtain the Hash_Manifest.md file
+2. For each row, recompute: echo -n "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_EVENT_HASH]" | sha256sum | cut -d' ' -f1
+3. Confirm each recomputed hash matches the Event_Hash column
+4. If reverifiable snapshots exist, confirm: sha256sum Source_Snapshots/[file] matches the SHA-256 column
+```
+
+- Output format (300 tokens or fewer in chat): `## Chain Status | ## Coverage | ## Issues | ## Files Written`
+
+---
+
 ### Phase 5: VVC-Verify
 
 **Tier behavior:** Quick: skip | Standard: run | Deep: run | Comprehensive: run
@@ -547,6 +626,7 @@ After verification is complete, deploy the **vvc-specialist** (second pass) with
 - **Do NOT** independently rewrite claims or search for sources — all corrections are pre-written in the verification report
 - **Preserve** all KEEP and CONFIRMED claims unchanged
 - **Add Verification Statement** appendix to the final report documenting the VVC process
+- **Add Provenance Appendix** summarizing the hash chain from `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md`: chain integrity status, total events, unique domains, and independent verification instructions
 - **Output:**
   - `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md` (final corrected report)
   - `BASE_DIR/[TOPIC_SLUG]_VVC_Correction_Log.md` (detailed log of all changes made)
@@ -593,6 +673,10 @@ Research reports will be saved to:
 ├── [TOPIC_SLUG]_Draft_Report.md
 ├── [TOPIC_SLUG]_VVC_Verification_Report.md
 ├── [TOPIC_SLUG]_VVC_Correction_Log.md            # When tier behavior is 'full'
+├── [TOPIC_SLUG]_Hash_Manifest.md                  # Provenance: SHA-256 hashes + event chain (always on)
+├── [TOPIC_SLUG]_Provenance_Log.md                 # Provenance: chain audit report (Standard/Deep/Comprehensive)
+├── Source_Snapshots/                               # Provenance: fetched content (--reverifiable only)
+│   └── ...                                         # Deleted after hashing unless --reverifiable
 ├── [TOPIC_SLUG]_Comprehensive_Report.md
 ├── [TOPIC_SLUG]_Citation_Verification_Report.md   # When verification enabled
 └── [TOPIC_SLUG]_Master_Bibliography.md
@@ -615,6 +699,7 @@ File naming follows the convention: {date}_{topic_slug}_patent_intelligence.md
 - **Tier-based depth routing** matches research effort to topic complexity
 - **Domain specialization** -- all agents operate within Intellectual property and patent landscape analysis context, applying field-specific knowledge and source preferences
 - **Structured output standards** ensure consistent, parseable research artifacts across all agents
+- **Cryptographic provenance (always on)** -- every WebFetch is SHA-256 hashed and logged to Hash_Manifest.md with tamper-evident event hash chaining. Phase 4.5 audits chain integrity and cross-references methodology logs. `--reverifiable` retains source snapshots for independent re-verification
 - **Verification, Validation & Correction (VVC)** -- two-pass post-reporting system that verifies [VC]-tagged claims against cited sources and auto-corrects the draft
 - **Claim type taxonomy** -- claims tagged as [VC] (verifiable), [PO] (professional opinion), or [IE] (inferred) to focus verification effort
 - **Tier-aware VVC** -- Quick: no VVC, Standard: verify-only, Deep/Comprehensive: full verify+correct
@@ -742,6 +827,7 @@ Research:       18000 tokens output max (per agent, files + chat)
 Synthesis:      12000 tokens output max
 Reporting:      12000 tokens output max
 VVC:            8000 tokens output max (verification + correction combined)
+Provenance Audit: 5K tokens output max
 ```
 
 ### Context Efficiency Rules

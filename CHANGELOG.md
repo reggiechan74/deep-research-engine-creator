@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] - 2026-03-15
+
+### Added
+- **Cryptographic provenance system** — SHA-256 hash chains for tamper-evident source audit trails
+  - Source Hashing Protocol: every WebFetch hashed and chained in Hash_Manifest.md
+  - Phase 4.5 Provenance Audit: chain integrity verification, methodology cross-reference
+  - `--reverifiable` flag: opt-in source snapshot retention for independent re-verification
+  - Always on for all tiers; audit phase runs on Standard/Deep/Comprehensive
+- New `qualityFramework.provenance` config section in engine-config schema
+- Provenance validation in `/test-engine` suite (check 4j)
+- `Bash` added to generated engine allowed-tools for sha256sum operations
+- 4 new placeholder derivation rules: `{{agentPrefix}}`, `{{auditTierBehavior}}`, `{{provenanceTierColumn}}`, `{{reverifiableDefault}}`
+
 ## [1.5.0] - 2026-02-24
 
 ### Changed

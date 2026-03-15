@@ -325,7 +325,8 @@
         "confidenceScoring",
         "minimumEvidence",
         "validationRules",
-        "citationStandard"
+        "citationStandard",
+        "provenance"
       ],
       "additionalProperties": false,
       "properties": {
@@ -530,6 +531,46 @@
                   "description": "Comprehensive tier VVC behavior. Default: full."
                 }
               }
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "description": "Cryptographic provenance configuration for tamper-evident source audit trails",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether provenance hashing is active. Always true — included for schema completeness.",
+              "default": true
+            },
+            "hashAlgorithm": {
+              "type": "string",
+              "enum": ["sha256"],
+              "default": "sha256",
+              "description": "Hash algorithm for source content and event chain"
+            },
+            "reverifiableDefault": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether --reverifiable (retain source snapshots) is the default behavior"
+            },
+            "auditPhase": {
+              "type": "object",
+              "properties": {
+                "tiers": {
+                  "type": "array",
+                  "items": { "type": "string", "enum": ["standard", "deep", "comprehensive"] },
+                  "default": ["standard", "deep", "comprehensive"],
+                  "description": "Which tiers run the Phase 4.5 provenance audit agent"
+                }
+              }
+            },
+            "chainFormat": {
+              "type": "string",
+              "default": "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]",
+              "description": "Event hash input format — concatenated fields piped to sha256sum"
             }
           }
         }

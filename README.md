@@ -28,6 +28,7 @@ The general-purpose deep research tools opened the door. This walks through it.
 | **Domain-specific source hierarchy** | 3 domain filters max | Site-restricted search | Google Search + Drive/Gmail | Web + Google Workspace | **5-tier credibility hierarchy, unlimited domains per tier, fully customizable** |
 | **Multi-agent architecture** | Single pipeline | Single pipeline | Single pipeline | Single pipeline | **Configurable multi-agent teams with per-agent specialization, model, and tools** |
 | **Post-report verification (VVC)** | Citations only (37% failure rate -- [Tow Center](https://www.niemanlab.org/2025/03/ai-search-engines-fail-to-produce-accurate-citations-in-over-60-of-tests-according-to-new-tow-center-study/)) | Citations only (89% of incorrect citations stated with confidence) | Citations only (~22% misattribution rate -- [PIES](https://arxiv.org/html/2601.22984)) | Citations only (no post-draft re-verification) | **Claim verification: extracts every factual claim, re-fetches the cited source, checks credibility AND accurate representation, auto-corrects errors. Citations can hallucinate. Verified claims can't.** |
+| **Source provenance** | None | None | None | None | **SHA-256 hash chains: every fetched source is hashed and chained in a tamper-evident manifest. Phase 4.5 audits chain integrity. `--reverifiable` retains source snapshots for independent re-verification** |
 | **Quality framework** | Generic | Generic | Generic | Generic | **Configurable confidence scoring, evidence thresholds, validation rules, citation standards** |
 | **Report structure** | Fixed format | Fixed (with export to MD/PDF/Word) | Fixed (with Canvas/Audio) | Fixed | **Fully customizable sections, deliverables, and naming per domain** |
 | **Reproducibility** | Ephemeral | Ephemeral | Ephemeral | Ephemeral | **Versionable `engine-config.json` -- same config = same pipeline** |
@@ -62,8 +63,9 @@ A growing number of benchmarks now evaluate deep research agents. The results pa
 - **Post-draft self-verification.** Every benchmark evaluates the final report as-is. No benchmark tests whether the system checks its own work. VVC (enabled by default) adds this layer.
 - **Source credibility ranking.** No benchmark evaluates whether the system distinguishes tier-1 regulatory filings from tier-5 blog posts. The 5-tier credibility hierarchy (configured per engine) addresses this.
 - **Self-correction capability.** No benchmark measures whether a system can fix its own citation errors when detected. VVC Phase 6 auto-corrects or flags failed claims.
+- **Source provenance.** No benchmark verifies whether fetched sources are tamper-evident or independently re-verifiable. The SHA-256 hash chain (always on) creates a cryptographic audit trail for every source fetched during research.
 
-**An honest caveat:** This is an engine *factory*, not a single engine. A generated engine's quality depends on how it's configured -- source hierarchies, verification scope, agent specialization. The default configuration is designed to address the gaps these benchmarks expose: VVC enabled, 100% verification across all confidence levels (HIGH, MEDIUM, LOW, and SPECULATIVE), 5-tier source hierarchies, and multi-agent parallel research. But a user who disables VVC and configures a minimal pipeline will get minimal results. The tool provides the structural advantage. The configuration determines whether you use it.
+**An honest caveat:** This is an engine *factory*, not a single engine. A generated engine's quality depends on how it's configured -- source hierarchies, verification scope, agent specialization. The default configuration is designed to address the gaps these benchmarks expose: VVC enabled, 100% verification across all confidence levels (HIGH, MEDIUM, LOW, and SPECULATIVE), 5-tier source hierarchies, cryptographic provenance (always on), and multi-agent parallel research. But a user who disables VVC and configures a minimal pipeline will get minimal results. The tool provides the structural advantage. The configuration determines whether you use it.
 
 ## Installation
 
@@ -174,7 +176,7 @@ your-engine-name/
 ├── .claude-plugin/plugin.json     # Plugin manifest
 ├── engine-config.json             # Full configuration (editable, re-processable)
 ├── commands/
-│   ├── research.md                # /research <topic> [--quick|--deep|--comprehensive] [--extend] [--no-approve]
+│   ├── research.md                # /research <topic> [--quick|--deep|--comprehensive] [--extend] [--no-approve] [--reverifiable]
 │   └── sources.md                 # /sources — view configured source hierarchy
 ├── agents/
 │   ├── agent-1.md                 # Domain-specialized research agent
@@ -194,6 +196,7 @@ Every generated engine includes:
 - A quality framework with confidence scoring, evidence thresholds, and validation rules
 - **Claim verification (VVC)** -- not just citations. Every factual claim is extracted, the cited source is re-fetched, and both source credibility and accurate representation are verified. Citations can still hallucinate. Verified claims can't.
 - **Context isolation** -- engines default to standalone mode, scoping research strictly to the user's topic. Project context (CLAUDE.md, prior research files, observation history) is ignored unless the user explicitly passes `--extend`. An approval gate (default ON for Standard+ tiers) lets users review the outline before research agents execute.
+- **Cryptographic provenance (always on)** -- every WebFetch is SHA-256 hashed and logged to `Hash_Manifest.md` with tamper-evident event hash chaining. Phase 4.5 audits chain integrity and cross-references methodology logs. `--reverifiable` retains source snapshots for independent re-verification.
 - Structured report output with configurable sections
 
 ## Two Output Modes
@@ -300,14 +303,14 @@ flowchart LR
         S3["3. Sample Questions"]
         S4["4. Source Strategy"]
         S5["5. Agent Pipeline"]
-        S6["6. Quality Framework<br/>+ VVC Config"]
+        S6["6. Quality Framework<br/>+ VVC + Provenance"]
         S7["7. Output Structure"]
         S8["8. Advanced Config"]
         S9["9. Custom Prompts"]
         S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
     end
 
-    PRESET["Domain Preset<br/>(20 available)"]
+    PRESET["Domain Preset<br/>(21 available)"]
     CONFIG["engine-config.json<br/>(source of truth)"]
 
     subgraph GEN["Plugin Generation"]
@@ -377,6 +380,10 @@ flowchart TD
         DRAFT["Draft report with<br/>claim tagging<br/>[VC] [PO] [IE]"]
     end
 
+    subgraph P45["Phase 4.5: Provenance Audit"]
+        PROV["Verify hash chain<br/>Cross-ref methodology<br/>Generate Provenance_Log"]
+    end
+
     subgraph P5["Phase 5: VVC-Verify"]
         VER["Extract claims<br/>Re-fetch sources<br/>Classify alignment"]
     end
@@ -398,7 +405,8 @@ flowchart TD
     P2 --> P3
     P3 --> P4
     QUALITY -.->|"evidence<br/>thresholds"| P4
-    P4 --> P5
+    P4 --> P45
+    P45 --> P5
     P5 --> P6
     P6 --> REPORT
 
@@ -412,6 +420,7 @@ flowchart TD
     class PARSE,PLAN,SYN phase
     class A1,A2,A3 agent
     class DRAFT phase
+    class PROV phase
     class VER,COR vvc
     classDef gate fill:#fefcbf,stroke:#d69e2e,color:#744210
 
@@ -425,6 +434,7 @@ flowchart TD
     style P2 fill:#f5f0ff,stroke:#805ad5,color:#553c9a
     style P3 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
     style P4 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P45 fill:#f0fff4,stroke:#38a169,color:#276749
     style P5 fill:#fff5f5,stroke:#e53e3e,color:#9b2c2c
     style P6 fill:#fff5f5,stroke:#e53e3e,color:#9b2c2c
 ```
@@ -487,7 +497,7 @@ huggingface-cli download perplexity-ai/draco --repo-type dataset --local-dir ./b
 claude -p "/research [benchmark query] --deep" --plugin-dir ./generated-engines/legal-research-engine
 ```
 
-Collect the output reports from the engine's output directory. Each run produces a Comprehensive Report, Bibliography, and (if VVC enabled) a VVC Verification Report and Correction Log.
+Collect the output reports from the engine's output directory. Each run produces a Comprehensive Report, Bibliography, Hash Manifest, Provenance Log, and (if VVC enabled) a VVC Verification Report and Correction Log.
 
 **4. Score the outputs:**
 

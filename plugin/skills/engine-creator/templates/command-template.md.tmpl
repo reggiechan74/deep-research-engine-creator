@@ -1,7 +1,7 @@
 ---
 description: "Launch {{engineDisplayName}} for domain-specialized deep research"
-argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--no-approve] [--outline-only] [--extend]"
-allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep"]
+argument-hint: "[research topic] [--quick|--standard|--deep|--comprehensive] [--approve] [--no-approve] [--outline-only] [--extend] [--reverifiable]"
+allowed-tools: ["Task", "WebFetch", "WebSearch", "Write", "Read", "Edit", "Glob", "Grep", "Bash"]
 ---
 
 # {{engineDisplayName}} — Research Command
@@ -20,6 +20,7 @@ This engine specializes in {{domain}} research for {{audience}}.
 - `/research [topic] --no-approve` -- Skip outline approval gate (for automation or fast iteration)
 - `/research [topic] --outline-only` -- Stop after planning phase (outline only)
 - `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
+- `/research [topic] --reverifiable` -- Store source snapshots alongside hashes for independent re-verification
 
 ## Phase 0: Tier Detection & Configuration
 

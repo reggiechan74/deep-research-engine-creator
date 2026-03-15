@@ -105,6 +105,15 @@ Perform multi-level structural validation on `engine-config.json`:
   - **CRITICAL:** Verify `vvc-specialist` does NOT appear in any tier's `agents` array (`agentPipeline.tiers.{quick,standard,deep,comprehensive}.agents`). The VVC agent is a pipeline agent (Phases 5-6), NOT a Phase 2 research agent.
   - If `advanced.tokenBudgets` exists, verify `vvc` field is present with a positive integer value
 
+**4j: Provenance configuration validation.** Verify `qualityFramework.provenance` exists and:
+- `enabled` is `true`
+- `hashAlgorithm` is `"sha256"`
+- `auditPhase.tiers` is a non-empty array of valid tier names (subset of: "standard", "deep", "comprehensive")
+- Read `skills/*/SKILL.md` and verify it contains "Source Hashing Protocol" section
+- Read `skills/*/SKILL.md` and verify it contains "Phase 4.5: Provenance Audit" section
+- Verify `Bash` is in the `commands/research.md` `allowed-tools` frontmatter
+- Read agent `.md` files and verify they contain "PROVENANCE" instruction line
+
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 
 ### Check 5: Quick Smoke Test
