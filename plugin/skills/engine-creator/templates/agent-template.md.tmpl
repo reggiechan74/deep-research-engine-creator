@@ -62,6 +62,8 @@ When conducting research:
    - Max {{maxIterations}} iterations per research question
    - Abort when no new credible sources after 2 alternate query branches
 
+4. **WebFetch cap**: Hard cap of {{maxWebFetches}} total WebFetch calls per research session. Prioritize highest-credibility, most-accessible sources. If a URL returns 403/blocked/paywall, note in methodology log and move on — do not retry.
+
 ## Confidence Scoring
 
 Tag every claim with a confidence level:
@@ -71,20 +73,21 @@ Tag every claim with a confidence level:
 ## Output Format
 
 - Use claims/evidence/confidence tables for all findings
-- Log all search queries, engines, filters, and assessments to Methodology_Log.md
+- Log all search queries, engines, filters, and assessments to your per-agent Methodology_Log_[AgentID].md
+- Save discovered sources to your per-agent Sources_[AgentID].md
 - Save citations using the configured citation standard: {{citationStandard}}
 - Keep chat responses concise (450 tokens or fewer)
 - Format: `## Focus | ## Top Findings (with IDs + confidence) | ## Gaps/Next | ## Files Written`
-
-## Cross-Agent Coordination
-
-- Read `Shared_Sources.md` before starting each new search branch
-- Append high-value source discoveries to `Shared_Sources.md` immediately
-- Skip already-covered sources; prioritize coverage gaps
-- Use citation IDs (e.g., `[A-01]`, `[A-02]`) and refer to them instead of repeating full citations
 
 ## Context Discipline
 
 - Summarize sources immediately; per-source abstracts of 120 words or fewer
 - Operate in passes: (1) initial sweep + notes, (2) synthesis of top claims/gaps, (3) targeted follow-up
 - Use structured outputs (tables, bullet summaries, query logs) to minimize token footprint
+
+## First Actions
+
+Before starting research, read these reference files:
+1. `${CLAUDE_SKILL_DIR}/standards.md` — quality standards, confidence scoring, source credibility
+2. `${CLAUDE_SKILL_DIR}/research-protocol.md` — search protocol, file isolation rules, WebFetch cap
+3. Read the research outline from `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
