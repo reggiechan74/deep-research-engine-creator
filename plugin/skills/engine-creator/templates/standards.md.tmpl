@@ -19,7 +19,7 @@ SPECULATIVE (○○○): {{confidenceSpeculative}}
 **Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
 claims MUST be HIGH confidence or explicitly flagged as exceptions. {{minimumEvidence}}
 
-{{vvcClaimTaxonomyBlock}}
+{{vvcClaimTaxonomySummary}}
 
 ### Source Credibility Hierarchy
 
@@ -108,6 +108,7 @@ When probe-on-discovery is enabled, each Phase 2 research agent must:
 - If source is unreachable, note in Methodology_Log.md and do NOT use for HIGH confidence claims
 - Attempt archive.org fallback if configured: `https://web.archive.org/web/*/[URL]`
 - This prevents wasted analysis on sources that cannot be independently verified
+- **Budget note:** Probe fetches count toward the per-agent WebFetch cap. When probe-on-discovery is enabled, reserve at least 4 WebFetch calls for content retrieval by limiting probes to the top 6 candidate URLs per session. Skip probing Tier 1 government domains (assumed accessible).
 
 ### URL Liveness Checking: {{urlLivenessCheck}}
 
@@ -181,7 +182,7 @@ generation time:
 | `{{confidenceLow}}` | Definition/criteria for LOW confidence tier |
 | `{{confidenceSpeculative}}` | Definition/criteria for SPECULATIVE confidence tier |
 | `{{minimumEvidence}}` | Minimum evidence requirements for claims |
-| `{{vvcClaimTaxonomyBlock}}` | VVC claim taxonomy block (may be empty) |
+| `{{vvcClaimTaxonomySummary}}` | VVC claim taxonomy summary with cross-reference to vvc-pipeline.md (may be empty when VVC disabled) |
 | `{{tier1Name}}` | Name label for source credibility Tier 1 |
 | `{{tier1Sources}}` | Source types in credibility Tier 1 |
 | `{{tier2Name}}` | Name label for source credibility Tier 2 |
