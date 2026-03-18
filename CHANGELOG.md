@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] - 2026-03-18
+
+### Fixed
+- **VVC specialist agent was a carbon copy of research agent** (C-1, C-2) -- VVC agent now receives verification-specific instructions, examples, and First Actions instead of inheriting research protocol content. Pre-computed placeholder blocks (`{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, `{{agentFirstActionsBlock}}`) differentiate VVC from research agents at generation time
+- **Recursive exploration exceeded WebFetch budget** (C-3) -- replaced "Recursive web exploration up to N levels deep" with "Follow-on link exploration" and budget reservation language ("Reserve at least 6 WebFetch calls for primary research queries"). Default exploration depth changed from 5 to 2
+- **`--no-vvc` missing from command argument-hint** (C-4) -- added `{{vvcArgumentHint}}` placeholder that conditionally appends `[--no-vvc]` when VVC is enabled
+- **Hardcoded research examples in VVC agent YAML** (H-1) -- replaced with `{{agentExamplesBlock}}` placeholder that generates verification-specific examples for VVC agents
+- **Probe-on-discovery lacked budget guidance** (H-2) -- added budget note: reserve 4 WebFetch calls for content retrieval, limit probes to top 6 candidate URLs, skip Tier 1 government domains
+- **Citation verification protocol unorchestrated** (H-3) -- Phase 4.5 updated to "Provenance Audit & Citation Verification" with explicit steps for URL liveness, source freshness, and dead link handling
+- **VVC WebFetch cap insufficient** (H-4) -- VVC agent now gets `{{vvcWebFetchCap}}` (default: 30, formula: `min(maxWebFetchesPerAgent * 3, 50)`) instead of sharing the research agent cap (default: 10)
+- **Comprehensive follow-up undefined** (H-5) -- added Phase 3.5: Comprehensive Follow-Up with scoped gap closure, max `{{comprehensiveFollowUpAgentCap}}` agents (default: 2), one round only
+- **Trailing "Now executing research deployment" text** (H-6) -- removed from orchestrator template
+- **Provenance budget not parameterized** (M-1) -- replaced hardcoded "5K tokens" with `{{provenanceBudget}}` (default: 5000)
+- **Token limit mismatch** (M-2) -- aligned chat response limit from 500 to 450 tokens in research-protocol template
+- **Claim taxonomy duplicated** (M-3) -- standards.md now contains a brief `### Claim Taxonomy (VVC)` cross-reference pointing to `vvc-pipeline.md` instead of duplicating the full table
+- **Redundant Domain Context section** (M-4) -- removed from agent template; domain context already provided via `{{promptOverride}}`
+
+### Added
+- **Phase 3.5: Comprehensive Follow-Up** -- post-synthesis gap closure for Comprehensive tier only. Reviews synthesis report gaps, re-deploys up to 2 agents for targeted follow-up, merges findings. One round, no recursion
+- **Split template architecture** -- monolithic `base-research-skill.md.tmpl` replaced with 5 focused templates: `orchestrator-skill.md.tmpl`, `research-protocol.md.tmpl`, `standards.md.tmpl`, `provenance.md.tmpl`, `vvc-pipeline.md.tmpl`
+- 9 new placeholder derivation rules in SKILL.md generation logic
+- `comprehensiveFollowUpAgentCap` and `tokenBudgets.provenance` fields in engine-config schema
+- `.claude/commands/` directory with `install-local-plugin.md` custom command
+
+### Changed
+- Template count increased from 6 to 11 `.tmpl` files (plus 3 JSON schemas)
+- VVC-aware Step 7 agent generation loop with `isVvcAgent` conditional logic
+- Section 8 wizard defaults updated: exploration depth 2 (was 5), provenance budget 5000, comprehensive follow-up cap 2
+- Patent Intelligence Engine example updated to match new template structure
+
 ## [1.6.0] - 2026-03-15
 
 ### Added

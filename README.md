@@ -184,7 +184,11 @@ your-engine-name/
 │   └── agent-3.md                 # Domain-specialized mapping agent
 ├── skills/
 │   └── your-domain/
-│       └── SKILL.md               # Complete research engine (~500-700 lines)
+│       ├── SKILL.md               # Research orchestrator (~300-400 lines)
+│       ├── research-protocol.md   # File isolation, WebFetch caps, token budgets
+│       ├── standards.md           # Confidence scoring, source hierarchy, citation standard
+│       ├── provenance.md          # SHA-256 hashing protocol, audit procedures
+│       └── vvc-pipeline.md        # VVC claim taxonomy, verification & correction phases
 └── README.md                      # Auto-generated documentation
 ```
 
@@ -203,7 +207,7 @@ Every generated engine includes:
 
 | Mode | Description | When to Use |
 |------|-------------|-------------|
-| **Self-contained** | Full 5-phase research pipeline embedded. No dependencies. | Sharing, portability, standalone use |
+| **Self-contained** | Full research pipeline embedded (up to 8 phases with VVC). No dependencies. | Sharing, portability, standalone use |
 | **Extension** | Overlays customizations on the base `/deep-research` skill. Lighter weight. | When you already have `/deep-research` installed |
 
 Self-contained engines include the complete research orchestration logic (planning, research, synthesis, reporting) in their SKILL.md. Extension engines inherit the base pipeline and only override domain-specific configuration (sources, agents, quality rules, output structure).
@@ -322,7 +326,7 @@ flowchart LR
         G5["README.md"]
     end
 
-    TEMPLATES["Templates<br/>(10 .tmpl files)"]
+    TEMPLATES["Templates<br/>(11 .tmpl + 3 schemas)"]
     ENGINE["Standalone<br/>Claude Code Plugin"]
 
     PRESET -.->|"pre-fills<br/>sections 4-9"| WIZARD
@@ -376,6 +380,10 @@ flowchart TD
         SYN["Multi-source integration<br/>Contradiction resolution<br/>Gap analysis"]
     end
 
+    subgraph P35["Phase 3.5: Follow-Up<br/>(Comprehensive only)"]
+        FU["Re-deploy agents for<br/>material gaps from<br/>synthesis report"]
+    end
+
     subgraph P4["Phase 4: Draft Reporting"]
         DRAFT["Draft report with<br/>claim tagging<br/>[VC] [PO] [IE]"]
     end
@@ -403,7 +411,8 @@ flowchart TD
     GATE -->|"revise"| P1
     SOURCES -.->|"governs<br/>credibility"| P2
     P2 --> P3
-    P3 --> P4
+    P3 --> P35
+    P35 --> P4
     QUALITY -.->|"evidence<br/>thresholds"| P4
     P4 --> P45
     P45 --> P5
@@ -417,7 +426,7 @@ flowchart TD
     classDef support fill:#feebc8,stroke:#dd6b20,color:#7b341e
     classDef output fill:#fef3c7,stroke:#d69e2e,color:#744210
 
-    class PARSE,PLAN,SYN phase
+    class PARSE,PLAN,SYN,FU phase
     class A1,A2,A3 agent
     class DRAFT phase
     class PROV phase
@@ -433,6 +442,7 @@ flowchart TD
     style P1 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
     style P2 fill:#f5f0ff,stroke:#805ad5,color:#553c9a
     style P3 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
+    style P35 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
     style P4 fill:#f0f9ff,stroke:#2b6cb0,color:#1a365d
     style P45 fill:#f0fff4,stroke:#38a169,color:#276749
     style P5 fill:#fff5f5,stroke:#e53e3e,color:#9b2c2c
@@ -564,7 +574,7 @@ deep-research-engine-creator/
     ├── skills/engine-creator/
     │   ├── SKILL.md                                    # Core wizard + generation logic
     │   ├── domain-presets/                             # 21 domain presets
-    │   └── templates/                                  # 10 generation templates
+    │   └── templates/                                  # 11 .tmpl templates + 3 JSON schemas
     ├── scripts/
     │   └── publish-engine.sh                           # Marketplace publishing script
     ├── examples/
