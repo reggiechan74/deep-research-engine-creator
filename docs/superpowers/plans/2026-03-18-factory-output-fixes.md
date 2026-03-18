@@ -62,8 +62,9 @@ Extract these sections from `base-research-skill.md.tmpl` into the new file:
 - Lines 6-14: Title and description — change line 13 from "All protocols, agent definitions, quality standards, and output specifications are defined in this file." to "Agent protocols, quality standards, and detailed instructions are in reference files that agents load on-demand."
 - Lines 15-27: Usage block — add `--no-vvc` flag: `- /research [topic] --no-vvc -- Skip VVC verification phases (when VVC is enabled)`
 - Lines 30-46: Research Architecture (phase overview, tier config table, unchanged)
-- Lines 49-88: Phase 0 — add `--no-vvc` flag parsing after line 63: `- If --no-vvc is present and engine has VVC enabled, set NO_VVC to true (skip Phases 5-6, Phase 4 becomes final reporting)`. Remove lines 85-87 (provenance setup — moves to provenance.md.tmpl)
-- Lines 72-83: Derive Configuration (unchanged)
+- Lines 49-64: Phase 0 flag parsing — add `--no-vvc` flag parsing after line 63: `- If --no-vvc is present and engine has VVC enabled, set NO_VVC to true (skip Phases 5-6, Phase 4 becomes final reporting)`
+- Lines 72-83: Derive Configuration (unchanged, subset of Phase 0)
+- Skip lines 85-87: Provenance setup (moves to provenance.md.tmpl — do NOT include)
 - Lines 263-274: Sub-Agent System (unchanged)
 - Lines 278-296: Quick Tier execution strategy — add instruction: "Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/standards.md`". Add WebFetch cap: "Cap total WebFetch calls at {{maxWebFetches}}."
 - Lines 299-331: Phase 1 planning (unchanged)
@@ -101,6 +102,7 @@ Run these searches against the new file:
 - Grep for "Shared_Sources" — should find 0 matches
 - Grep for "Source Hashing Protocol" — should find 0 matches
 - Grep for `--no-vvc` — should find 2+ matches (usage block + Phase 0)
+- Grep for "Professional Reporting" — should find 1+ matches (Phase 4 `--no-vvc` conditional)
 - Grep for `{{maxWebFetches}}` — should find 1+ matches
 
 - [ ] **Step 4: Commit**
@@ -360,7 +362,7 @@ to:
 
 - [ ] **Step 4: Add reference file loading note**
 
-After the "## Context Discipline" section (line 86), add:
+After the "## Context Discipline" section (ends at line 91, end of file), append:
 
 ```markdown
 
@@ -495,7 +497,7 @@ Add `maxWebFetchesPerAgent` to both schemas.
 
 - [ ] **Step 1: Update engine-config-schema.json**
 
-In the `advanced.properties` object (after `explorationDepth` ending at line 724), add:
+In the `advanced.properties` object (after `mcpServers` ending at line 729, before the closing `}` of `properties` on line 730), add:
 
 ```json
 ,
@@ -897,11 +899,15 @@ grep -q "maxWebFetches" plugin/skills/engine-creator/templates/research-protocol
 # 6. --no-vvc in orchestrator Phase 0
 grep -q "\-\-no-vvc" plugin/skills/engine-creator/templates/orchestrator-skill.md.tmpl && echo "PASS" || echo "FAIL"
 
-# 7. Phase 2.5 batch hashing
+# 7. Phase 4 --no-vvc conditional in orchestrator
+grep -q "Professional Reporting" plugin/skills/engine-creator/templates/orchestrator-skill.md.tmpl && echo "PASS: Phase 4 conditional" || echo "FAIL"
+
+# 8. Phase 2.5 batch hashing
 grep -q "general-purpose" plugin/skills/engine-creator/templates/provenance.md.tmpl && echo "PASS" || echo "FAIL"
 
-# 8. Per-agent methodology log
-grep -q "Methodology_Log_\[AgentID\]" plugin/skills/engine-creator/templates/research-protocol.md.tmpl && echo "PASS" || echo "FAIL"
+# 9. Per-agent file references use {AgentID} suffix
+grep -q "Methodology_Log_\[AgentID\]" plugin/skills/engine-creator/templates/research-protocol.md.tmpl && echo "PASS: methodology log" || echo "FAIL"
+grep -q "Sources_\[AgentID\]" plugin/skills/engine-creator/templates/research-protocol.md.tmpl && echo "PASS: sources" || echo "FAIL"
 ```
 
 - [ ] **Step 2: Schema checks**
@@ -922,6 +928,9 @@ grep -q "Step 8a" plugin/skills/engine-creator/SKILL.md && echo "PASS" || echo "
 
 # 13. Section 8 WebFetch cap
 grep -q "WebFetch calls per agent" plugin/skills/engine-creator/SKILL.md && echo "PASS" || echo "FAIL"
+
+# 14. Post-generation mentions multi-file structure
+grep -q "standards.md" plugin/skills/engine-creator/SKILL.md && echo "PASS: post-gen file list" || echo "FAIL"
 ```
 
 - [ ] **Step 4: Example engine checks**
