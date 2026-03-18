@@ -5,7 +5,7 @@
 ### Context Discipline
 
 - Summarize sources immediately; per-source abstracts of 120 words or fewer; use IDs not full citations in chat
-- Each agent chat response of 500 tokens or fewer; avoid meta narration
+- Each agent chat response of 450 tokens or fewer; avoid meta narration
 - Pass-based workflow: Pass 1 (initial sweep + notes), Pass 2 (synthesis of top claims/gaps), Pass 3 (targeted follow-up on gaps)
 - Before each pass, reload only outline + top notes to manage context window
 - Abort conditions: stop recursion when no new credible sources after 2 alternate branches or depth cap reached
@@ -121,7 +121,7 @@ Research:       {{researchBudget}} tokens output max (per agent, files + chat)
 Synthesis:      {{synthesisBudget}} tokens output max
 Reporting:      {{reportingBudget}} tokens output max
 {{vvcBudgetLine}}
-Provenance Audit: 5K tokens output max
+Provenance Audit: {{provenanceBudget}} tokens output max
 ```
 
 ### Context Efficiency Rules
@@ -159,3 +159,4 @@ All template variables used in this file:
 - `{{synthesisBudget}}` -- token budget for synthesis phase
 - `{{reportingBudget}}` -- token budget for reporting phase
 - `{{vvcBudgetLine}}` -- token budget line for VVC phase (empty when VVC disabled)
+- `{{provenanceBudget}}` -- token budget for provenance audit and citation verification phase (default: 5000)
