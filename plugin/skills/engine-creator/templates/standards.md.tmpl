@@ -1,0 +1,205 @@
+# Quality Standards Reference — {{engineDisplayName}}
+
+---
+
+## Global Standards
+
+Apply to ALL agents across ALL tiers. These standards are non-negotiable and must be
+followed by every agent in the pipeline.
+
+### Confidence Scoring Framework
+
+```
+HIGH        (●●●): {{confidenceHigh}}
+MEDIUM      (●●○): {{confidenceMedium}}
+LOW         (●○○): {{confidenceLow}}
+SPECULATIVE (○○○): {{confidenceSpeculative}}
+```
+
+**Rule:** Every claim in claims tables MUST include a confidence tier. All HIGH-impact
+claims MUST be HIGH confidence or explicitly flagged as exceptions. {{minimumEvidence}}
+
+{{vvcClaimTaxonomyBlock}}
+
+### Source Credibility Hierarchy
+
+```
+Tier 1 ({{tier1Name}}):  {{tier1Sources}}
+Tier 2 ({{tier2Name}}):  {{tier2Sources}}
+Tier 3 ({{tier3Name}}):  {{tier3Sources}}
+Tier 4 ({{tier4Name}}):  {{tier4Sources}}
+Tier 5 ({{tier5Name}}):  {{tier5Sources}}
+```
+
+**Rule:** No HIGH confidence claim can rest solely on Tier 4-5 sources. At minimum,
+one Tier 1-3 source is required for any HIGH confidence assertion.
+
+### Citation & Evidence Standards
+
+- **Citation format:** {{citationStandard}}
+- Use numbered footnotes `[^1]`, `[^2]`, etc. for inline source references
+- Use citation IDs by agent type: `[W-01]` (web), `[E-01]` (expert), `[I-01]` (intel)
+- Master bibliography maps IDs to full citations with clickable URLs
+- Do not repeat full citations in chat; use IDs and defer to bibliography files
+- **Evidence rules:** No high-impact claim without 2+ independent sources, or mark as LOW confidence
+- **Adversarial sweep:** Always look for refutations, critiques, failure cases, and contradictory data
+- Log contradictions in methodology file
+
+### Validation Rules
+
+{{validationRules}}
+
+### Structured Output Standards
+
+- Use claims/evidence/confidence tables for all findings
+- Log queries, engines, and filters to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log_[AgentID].md`
+- Save claims tables per agent as `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
+- Save source lists per agent as `BASE_DIR/[TOPIC_SLUG]_Sources_[AgentID].md`
+- Each claims table row must include: Claim | Evidence | Confidence Tier | Source IDs | Source Credibility Tier
+
+---
+
+## Bibliography & Footnote Standards
+
+### In-Text Citations
+
+- Use numbered footnotes for immediate source reference: `[^1]`, `[^2]`, etc.
+- Sequential numbering per document (not per section)
+- Place footnote markers immediately after relevant statements
+- Example: `According to the report[^1], the market grew at 15% CAGR.`
+
+### Footnote Placement
+
+- Place footnotes at the end of each major section for immediate context
+- Use {{citationStandard}} format in footnotes with clickable URLs
+- Cross-reference master bibliography when applicable
+
+### Master Bibliography
+
+- All citations follow {{citationStandard}} format with clickable URLs
+- Include complete source information with access dates
+- Organize by source type and credibility tier
+- Cross-reference footnote numbers where sources appear in reports
+- Include source attribution indicating which agent discovered each source
+
+### Bibliography Deduplication Rules
+
+- Same URL --> merge, keep earliest discovery timestamp
+- Same content, different URLs --> note both, mark canonical
+- Different editions/versions --> keep most recent unless historical context needed
+- Conflicting information from same source --> note both dates and what changed
+
+---
+
+## Source Verification Protocol
+
+Every research run must include source verification proportional to the configured
+verification mode. This protocol prevents citation rot, dead links, and claim-source
+mismatches from undermining research quality.
+
+### Verification Mode: {{verificationMode}}
+
+{{verificationModeInstructions}}
+
+### Probe on Discovery: {{probeOnDiscovery}}
+
+When probe-on-discovery is enabled, each Phase 2 research agent must:
+- Verify source URL resolves (HTTP 200) immediately when found
+- If source is unreachable, note in Methodology_Log.md and do NOT use for HIGH confidence claims
+- Attempt archive.org fallback if configured: `https://web.archive.org/web/*/[URL]`
+- This prevents wasted analysis on sources that cannot be independently verified
+
+### URL Liveness Checking: {{urlLivenessCheck}}
+
+When enabled, the reporting agent (Phase 4) or a dedicated verification pass must:
+- Check every cited URL in the master bibliography resolves
+- Record HTTP status codes for each URL
+- Flag any non-200 responses in the verification report
+
+### Source Freshness: {{sourceFreshnessThreshold}}
+
+Sources older than the freshness threshold are flagged (not automatically excluded):
+- Flag in claims tables with `[STALE: published YYYY]` marker
+- Stale sources cannot be the sole basis for HIGH confidence claims
+- Stale but still-relevant sources should note: "Historical source — verify current applicability"
+
+### Dead Link Handling: {{deadLinkHandling}}
+
+{{deadLinkInstructions}}
+
+### Content-Claim Matching: {{contentClaimMatching}}
+
+When enabled (token-expensive):
+- For each HIGH confidence claim, fetch the cited source
+- Verify the claim accurately reflects the source content
+- Flag mismatches as: CONFIRMED (exact match), PARAPHRASED (reasonable interpretation), DISPUTED (source says something different), UNSUPPORTED (claim not found in source)
+- Record results in the verification report
+
+### Citation Verification Report
+
+{{verificationReportConfig}}
+
+When verification reporting is enabled, generate:
+`BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md`
+
+Report structure:
+```
+## Citation Verification Report: [TOPIC]
+
+### Summary
+- Total citations: N
+- Verified: N (%)
+- URL alive: N (%)
+- URL dead/unreachable: N
+- Stale sources (> threshold): N
+- Content-claim matches: N/A or N verified
+
+### Verification Details
+| Citation ID | URL | Status | Freshness | Content Match | Notes |
+|-------------|-----|--------|-----------|---------------|-------|
+| [W-01] | url | ALIVE/DEAD/REDIRECT | Current/Stale(YYYY) | N/A or CONFIRMED/DISPUTED | ... |
+
+### Issues Found
+[List any dead links, stale sources, content mismatches, or unverifiable claims]
+
+### Recommendations
+[Suggested actions: replace dead sources, update stale references, verify disputed claims]
+```
+
+---
+
+## Placeholder Reference
+
+The following placeholders are used in this template and must be substituted at engine
+generation time:
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{{engineDisplayName}}` | Human-readable name of the research engine |
+| `{{confidenceHigh}}` | Definition/criteria for HIGH confidence tier |
+| `{{confidenceMedium}}` | Definition/criteria for MEDIUM confidence tier |
+| `{{confidenceLow}}` | Definition/criteria for LOW confidence tier |
+| `{{confidenceSpeculative}}` | Definition/criteria for SPECULATIVE confidence tier |
+| `{{minimumEvidence}}` | Minimum evidence requirements for claims |
+| `{{vvcClaimTaxonomyBlock}}` | VVC claim taxonomy block (may be empty) |
+| `{{tier1Name}}` | Name label for source credibility Tier 1 |
+| `{{tier1Sources}}` | Source types in credibility Tier 1 |
+| `{{tier2Name}}` | Name label for source credibility Tier 2 |
+| `{{tier2Sources}}` | Source types in credibility Tier 2 |
+| `{{tier3Name}}` | Name label for source credibility Tier 3 |
+| `{{tier3Sources}}` | Source types in credibility Tier 3 |
+| `{{tier4Name}}` | Name label for source credibility Tier 4 |
+| `{{tier4Sources}}` | Source types in credibility Tier 4 |
+| `{{tier5Name}}` | Name label for source credibility Tier 5 |
+| `{{tier5Sources}}` | Source types in credibility Tier 5 |
+| `{{citationStandard}}` | Citation format standard (e.g., APA, Chicago, MLA) |
+| `{{validationRules}}` | Validation rules block for claim and source validation |
+| `{{verificationMode}}` | Active verification mode label |
+| `{{verificationModeInstructions}}` | Instructions for the configured verification mode |
+| `{{probeOnDiscovery}}` | Whether probe-on-discovery is enabled (e.g., ENABLED/DISABLED) |
+| `{{urlLivenessCheck}}` | Whether URL liveness checking is enabled |
+| `{{sourceFreshnessThreshold}}` | Maximum source age before flagging as stale |
+| `{{deadLinkHandling}}` | Dead link handling strategy label |
+| `{{deadLinkInstructions}}` | Instructions for handling dead links |
+| `{{contentClaimMatching}}` | Whether content-claim matching is enabled |
+| `{{verificationReportConfig}}` | Verification report configuration block |
