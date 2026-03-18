@@ -29,6 +29,10 @@ Verify these files exist in the engine directory:
 - `commands/research.md`
 - `commands/sources.md`
 - `skills/*/SKILL.md` (at least one skill directory with a SKILL.md)
+- `skills/*/standards.md`
+- `skills/*/research-protocol.md`
+- `skills/*/provenance.md`
+- `skills/*/vvc-pipeline.md` (when `qualityFramework.vvc.enabled` is true in engine-config.json)
 - `README.md`
 - One `.md` file in `agents/` for each agent defined in `agentPipeline.agents`
 
@@ -109,10 +113,16 @@ Perform multi-level structural validation on `engine-config.json`:
 - `enabled` is `true`
 - `hashAlgorithm` is `"sha256"`
 - `auditPhase.tiers` is a non-empty array of valid tier names (subset of: "standard", "deep", "comprehensive")
-- Read `skills/*/SKILL.md` and verify it contains "Source Hashing Protocol" section
-- Read `skills/*/SKILL.md` and verify it contains "Phase 4.5: Provenance Audit" section
+- Read `skills/*/provenance.md` and verify it contains "Batch Source Hashing" section
+- Read `skills/*/provenance.md` and verify it contains "Phase 4.5: Provenance Audit" section
 - Verify `Bash` is in the `commands/research.md` `allowed-tools` frontmatter
-- Read agent `.md` files and verify they contain "PROVENANCE" instruction line
+- Read agent `.md` files and verify they reference `${CLAUDE_SKILL_DIR}/standards.md` as a first action
+
+**4h: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
+
+**4i: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
+
+**4j: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 

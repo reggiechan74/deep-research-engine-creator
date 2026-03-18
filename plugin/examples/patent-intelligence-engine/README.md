@@ -36,6 +36,7 @@ ln -s "$(pwd)/patent-intelligence-engine" ~/.claude/plugins/patent-intelligence-
 | `--deep` | Deep | Full agent pipeline with all specialists active |
 | `--comprehensive` | Comprehensive | Deep + follow-up rounds for gap closure |
 | `--approve` | *(modifier)* | Pause after planning phase for user approval |
+| `--no-vvc` | *(modifier)* | Skip VVC verification phases (when VVC is enabled) |
 
 ## Agent Pipeline
 
@@ -80,12 +81,24 @@ Every research tool cites sources -- but a citation is just a URL. It doesn't me
 
 ## Output Structure
 
-Research reports are saved to a timestamped directory using the engine's configured file naming convention (`{date}_{topic_slug}_patent_intelligence.md`).
+Research reports are saved to a timestamped directory using the engine's configured file naming convention (`{date}_{topic_slug}_patent_intelligence.md`). Each agent writes to its own isolated files — there is no shared sources file; per-agent file isolation prevents scope contamination across agents.
+
+The skill itself is split across focused instruction files:
+
+```
+skills/patent-intelligence-engine/
+├── SKILL.md                    # Lean orchestrator (~200 lines)
+├── standards.md                # Quality standards, source credibility, citations
+├── research-protocol.md        # Search protocol, file isolation, WebFetch cap
+├── provenance.md               # Phase 2.5 batch hashing, Phase 4.5 audit
+└── vvc-pipeline.md             # VVC Phases 5-6 instructions
+```
+
+Research run output:
 
 ```
 ./research-reports/${RUN_TS}_${TOPIC_SLUG}/
 ├── [TOPIC_SLUG]_Research_Outline.md
-├── [TOPIC_SLUG]_Shared_Sources.md
 ├── [TOPIC_SLUG]_Claims_patent-search-specialist.md
 ├── [TOPIC_SLUG]_patent-search-specialist_Bibliography.md
 ├── [TOPIC_SLUG]_Claims_prior-art-analyst.md

@@ -295,6 +295,7 @@
   },
   "advanced": {
     "maxIterationsPerQuestion": 4,
+    "maxWebFetchesPerAgent": 10,
     "tokenBudgets": {
       "planning": 2500,
       "research": 18000,

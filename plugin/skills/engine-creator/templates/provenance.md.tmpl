@@ -1,0 +1,86 @@
+# Provenance Reference — {{engineDisplayName}}
+
+## Phase 2.5: Batch Source Hashing
+
+After all Phase 2 research agents complete, deploy a **general-purpose** batch hashing agent.
+
+### Instructions
+
+1. Read all bibliography files: `BASE_DIR/[TOPIC_SLUG]_*_Bibliography.md`
+2. Collect all unique URLs across all bibliographies
+3. Deduplicate URLs (same URL from multiple agents = hash once)
+4. Create `BASE_DIR/[TOPIC_SLUG]_Hash_Manifest.md` with header:
+   `| # | URL | SHA-256 | Timestamp | Agent_ID | Event_Hash | Prev_Hash |`
+5. If `--reverifiable`: create `BASE_DIR/Source_Snapshots/` directory via Bash: `mkdir -p`
+6. For each unique URL sequentially:
+   a. Fetch content using WebFetch
+   b. Write fetched content to temp file: `BASE_DIR/Source_Snapshots/[AGENT_PREFIX]-[SEQ]_[url-slug].txt`
+   c. Compute content hash via Bash: `sha256sum "BASE_DIR/Source_Snapshots/[file]" | cut -d' ' -f1`
+   d. Get PREV_HASH: last row's Event_Hash from Hash_Manifest.md, or "GENESIS" if first entry
+   e. Compute event hash via Bash: `echo -n "[SHA-256]|[URL]|[TIMESTAMP]|BATCH|[PREV_HASH]" | sha256sum | cut -d' ' -f1`
+   f. Append row to Hash_Manifest.md: `| [#] | [URL] | [SHA-256] | [Timestamp] | BATCH | [Event_Hash] | [Prev_Hash] |`
+   g. If `--reverifiable` is NOT set: `rm "BASE_DIR/Source_Snapshots/[file]"`
+   h. If `--reverifiable` IS set: retain snapshot for independent re-verification
+
+### Naming Conventions
+
+- `[AGENT_PREFIX]`: `B` (for batch hashing agent)
+- `[SEQ]`: zero-padded counter (e.g., `B-001`, `B-002`)
+- `[url-slug]`: domain + path slug, max 60 chars, lowercase, special chars removed
+
+### Hash Chain Format
+
+`[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]`
+
+---
+
+#### Phase 4.5: Provenance Audit
+
+**Tier behavior:** Quick: skip | {{auditTierBehavior}}
+
+After citation verification, deploy a **general-purpose** provenance agent with instructions to:
+
+- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Hash_Manifest.md`
+- **Verify chain integrity**: Recompute each Event_Hash from the manifest data (`echo -n "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]" | sha256sum | cut -d' ' -f1`) and confirm it matches the recorded Event_Hash; flag any broken links
+- **Generate statistics**: Total sources hashed, unique domains, chain length, any integrity failures
+- **Cross-reference with consolidated `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`**: Verify every WebFetch logged in methodology has a corresponding hash entry; flag any untracked fetches
+- **If `--reverifiable`**: Verify each snapshot file in `BASE_DIR/Source_Snapshots/` exists and its SHA-256 matches the manifest entry. Run: `sha256sum "BASE_DIR/Source_Snapshots/[file]"` and compare
+- **Output**: Save to `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md`
+
+##### Provenance Log Structure
+
+```
+## Provenance Log: [TOPIC]
+
+### Chain Summary
+- Total events: N
+- Chain integrity: INTACT / BROKEN at event #N
+- Sources hashed: N unique URLs across N fetches
+- Domains covered: [list]
+- Snapshot storage: [reverifiable / hash-only]
+
+### Integrity Verification
+| # | Event_Hash | Recomputed | Match | Notes |
+|---|-----------|-----------|-------|-------|
+
+### Coverage Check
+| # | Methodology Log Entry | Hash Manifest Entry | Status |
+|---|----------------------|---------------------|--------|
+
+### Verification Instructions
+To independently verify this research provenance:
+1. Obtain the Hash_Manifest.md file
+2. For each row, recompute: echo -n "[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_EVENT_HASH]" | sha256sum | cut -d' ' -f1
+3. Confirm each recomputed hash matches the Event_Hash column
+4. If reverifiable snapshots exist, confirm: sha256sum Source_Snapshots/[file] matches the SHA-256 column
+```
+
+- Output format (300 tokens or fewer in chat): `## Chain Status | ## Coverage | ## Issues | ## Files Written`
+
+---
+
+## Placeholder Reference
+
+- `{{auditTierBehavior}}`: controls tier-specific behavior for Phase 4.5 audit (e.g., skip or run)
+- `{{reverifiableDefault}}`: default value for the `--reverifiable` flag
+- `{{engineDisplayName}}`: human-readable display name for the engine

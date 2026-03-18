@@ -20,7 +20,7 @@ quality framework, output structure, and prompts.
 
 **Dependency:** This engine REQUIRES the base `/deep-research` skill to be installed
 and available. All core pipeline logic -- phased execution, iterative search-assess-refine,
-cross-agent coordination, failure recovery, context management -- is inherited from the
+failure recovery, context management -- is inherited from the
 base skill.
 
 **What this extension customizes:**
@@ -90,6 +90,11 @@ Each agent below replaces the corresponding phase 2 agent slot in the base pipel
 
 {{agentDeploymentBlocks}}
 
+**Runtime flags:**
+- If `--no-vvc` is present: skip Phases 5-6, Phase 4 becomes final reporting (heading: Professional Reporting, output: `_Comprehensive_Report.md`, claim tagging skipped).
+
+**WebFetch cap:** All Phase 2 agents: cap total WebFetch calls at {{maxWebFetches}}. If a URL returns 403/blocked/paywall, note in methodology log and move on.
+
 ### Quality Framework Override
 
 Replace the base skill's confidence scoring with:
@@ -123,13 +128,21 @@ Verification report: {{verificationReportConfig}}
 
 #### Provenance Configuration Override
 
-Provenance is always on. The base skill's Source Hashing Protocol applies to all agents in this extension. Phase 4.5 Provenance Audit runs on Standard/Deep/Comprehensive tiers.
+Provenance is always on. Provenance uses batch hashing (Phase 2.5). The base skill's batch hashing agent collects all cited URLs after Phase 2 completes and hashes them in a single sequential pass. Per-fetch hashing is not used. Phase 4.5 Provenance Audit runs on Standard/Deep/Comprehensive tiers.
 
 - Provenance enabled: true
 - Hash algorithm: sha256
 - Reverifiable default: {{reverifiableDefault}}
 - Audit tiers: {{auditTierBehavior}}
 - Chain format: `[SHA-256]|[URL]|[TIMESTAMP]|[AGENT_ID]|[PREV_HASH]`
+
+### File Isolation Override
+
+Each Phase 2 agent writes to its own files only. No shared files during parallel research.
+- Sources: `BASE_DIR/[TOPIC_SLUG]_Sources_[AgentID].md`
+- Methodology log: `BASE_DIR/[TOPIC_SLUG]_Methodology_Log_[AgentID].md`
+
+Phase 3 synthesis consolidates per-agent files.
 
 ### Output Structure Override
 
@@ -208,7 +221,6 @@ To execute this extension engine, Claude must merge these overrides with the bas
 
 All base skill protocols remain in effect unless explicitly overridden above:
 - Iterative Search-Assess-Refine Protocol
-- Cross-Agent Coordination Protocol
 - Failure Recovery Protocol
 - Context Management Guidelines
 - Bibliography and Footnote Standards
@@ -278,3 +290,4 @@ with values from the engine configuration (engine-config.json).
 - `{{researchBudget}}` -- token budget for research phase (per agent)
 - `{{synthesisBudget}}` -- token budget for synthesis phase
 - `{{reportingBudget}}` -- token budget for reporting phase
+- `{{maxWebFetches}}` -- maximum WebFetch calls per agent per research session (default: 10)

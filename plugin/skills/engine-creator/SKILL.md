@@ -168,7 +168,7 @@ Inform the user — this is NOT a question:
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 2), max WebFetch calls per agent (1-50, default 10), max follow-up agents for Comprehensive tier (1-5, default 2), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000, provenance: 5000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
@@ -241,16 +241,32 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 6 -- /sources command.** Read `sources-command-template.md.tmpl`, replace placeholders. Format `{{sourceHierarchyTable}}` and `{{searchTemplatesTable}}` as markdown tables. Write to `{OUTPUT_DIR}/commands/sources.md`.
 
-**Step 7 -- Agent files.** For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks. Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
+**Step 7 -- Agent files.** For EACH agent in `agentPipeline.agents`: determine `isVvcAgent` = (`agent.id === "vvc-specialist"`). Pre-compute `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}` based on `isVvcAgent` (see Placeholder Derivation Rules for expansion logic). If `isVvcAgent`, also compute `{{vvcWebFetchCap}}` = `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Read `agent-template.md.tmpl`, replace with agent-specific values including pre-computed blocks. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks (skip `{{searchTemplates}}` for VVC agent). Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
-**Step 8 -- SKILL.md.** Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. For extension mode: before template substitution, verify the base `/deep-research` skill exists. Check `.claude/commands/deep-research.md` first, then `skills/*/SKILL.md` containing "deep-research". If found, set `{{baseSkillPath}}` to the discovered path. If not found, warn user: "Base /deep-research skill not found. Extension mode requires it. Generate as self-contained instead?" and offer AskUserQuestion. Replace ALL placeholders:
+**Step 8 -- Skill files.** Select template set by mode.
+
+**Extension mode:** read `extension-skill.md.tmpl`, replace placeholders, write single file to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
+
+**Self-contained mode:** execute Steps 8a-8e below. Placeholder substitution rules apply to all sub-steps:
 - Simple values: direct substitution
 - Arrays (`{{reportSections}}`, `{{preferredSites}}`): markdown numbered list
 - Objects (`{{tierConfigTable}}`): markdown table rows
 - Nested (`{{agentDeploymentBlocks}}`): one block per agent with ID, role, model, specialization, tools, prompt override
 - `{{subAgentList}}`: research-planning-specialist, synthesis-specialist, research-reporting-specialist, plus custom agents
-- `{{fileStructure}}`: per-agent file entries (Claims, Bibliography)
+- `{{fileStructure}}`: per-agent file entries (Claims, Bibliography, Sources, Methodology_Log)
 - Missing optionals: sensible defaults or empty string
+
+**Step 8a -- Orchestrator SKILL.md.** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers, `{{maxWebFetches}}`). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
+
+**Step 8b -- standards.md.** Read `standards.md.tmpl`. Replace placeholders (confidence scoring, source hierarchy, citation standard, validation rules, evidence rules, verification protocol). Replace `{{vvcClaimTaxonomySummary}}` with the VVC claim taxonomy summary (brief cross-reference to vvc-pipeline.md) when VVC is enabled, or empty string when VVC is disabled. This is distinct from `{{vvcClaimTaxonomyBlock}}` used in Step 8e for the full canonical table in vvc-pipeline.md. Write to `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`.
+
+**Step 8c -- research-protocol.md.** Read `research-protocol.md.tmpl`. Replace placeholders (search templates, preferred sites, maxIterations, maxWebFetches, explorationDepth, per-agent file naming, context discipline, token budgets). Write to `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`.
+
+**Step 8d -- provenance.md.** Read `provenance.md.tmpl`. Replace placeholders (audit tier behavior, reverifiable default, chain format). Write to `{OUTPUT_DIR}/skills/{skillDirName}/provenance.md`.
+
+**Step 8e -- vvc-pipeline.md (only when VVC enabled).** Read `vvc-pipeline.md.tmpl`. Replace placeholders (claim types, verification scope, tier behavior, correction rules, VVC budget). Write to `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md`.
+
+Steps 8a-8e are independent and can be executed in any order.
 
 #### Placeholder Derivation Rules
 
@@ -264,7 +280,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{comprehensiveTierDescription}}` | Build from `tiers.comprehensive.agents` + followUpRound: "All [N] agents + follow-up round" |
 | `{{agentSpecialization}}` | Concatenate all agent `specialization` strings, joined by "; " |
 | `{{quickAgentId}}` | Fully qualified agent name: `{{engineName}}:[first agent ID from tiers.quick.agents]`. Example: `patent-intelligence-engine:patent-search-specialist` |
-| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate |
+| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate. For the Comprehensive tier row, append " + gap follow-up" after the agent count in the Research Agents column. |
 | `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **{{engineName}}:[id]** (model: [model], type: {{engineName}}:[id]) with specialization:\n\n[specialization]\n\n[promptOverride if present]". **Important:** Custom agents defined in the plugin's `agents/` directory MUST use the fully qualified `{{engineName}}:[agentId]` format. Built-in pipeline agents (research-planning-specialist, synthesis-specialist, research-reporting-specialist) do NOT get the prefix. |
 | `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- {{engineName}}:[id] ([role])". If VVC enabled, also append: "- vvc-specialist (Verification, Validation & Correction Specialist)" |
 | `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
@@ -273,7 +289,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{verificationReportConfig}}` | If `verificationReport.enabled` is true: "Generate a standalone Citation Verification Report. Scope: [scope value]. Include summary statistics, per-citation verification table, issues found, and remediation recommendations." If false: "Verification report generation is disabled." |
 | `{{operationalLessons}}` | Default: "No entries yet — update after first research run with `/post-mortem`." |
 | `{{maxIterations}}` | From `advanced.maxIterationsPerQuestion` (default: 3) |
-| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 5) |
+| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 2) |
 | `{{planningBudget}}` | From `advanced.tokenBudgets.planning` (default: 2000) |
 | `{{researchBudget}}` | From `advanced.tokenBudgets.research` (default: 15000) |
 | `{{synthesisBudget}}` | From `advanced.tokenBudgets.synthesis` (default: 8000) |
@@ -301,6 +317,16 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{provenanceTierColumn}}` | From `qualityFramework.provenance.auditPhase.tiers`: "Hash-only" for Quick, "Hash + Audit" for tiers in audit list |
 | `{{reverifiableDefault}}` | From `qualityFramework.provenance.reverifiableDefault`: if true, invert the --reverifiable flag logic (snapshots kept by default, `--no-snapshots` to skip) |
 | `{{scopeDisciplineBlock}}` | Always generate the following conditional block (both modes included in template output): "**If CONTEXT_MODE is standalone (default -- no `--extend` flag):**\n\n### Scope Discipline\n\nYour research scope is LIMITED to the user's stated topic.\n\n- Do NOT read files outside BASE_DIR\n- Do NOT reference prior research runs, their files, or their findings\n- Do NOT incorporate project context from CLAUDE.md into research scope\n- Do NOT use observation history or session context to expand the topic\n- Generate ALL research questions strictly from the user's topic string and your domain expertise in {domain}\n- If the topic is ambiguous, interpret it as a general domain question -- do not assume it relates to any specific project or prior work\n- Every section in the outline must map directly to the stated topic. Remove any section that requires project-specific knowledge to justify.\n\n**If CONTEXT_MODE is extend (`--extend` flag present):**\n\n### Scope Discipline\n\nThis research EXTENDS prior work in this project. You may:\n\n- Read prior research files in the working directory for context\n- Reference project context from CLAUDE.md to inform research scope\n- Build on findings from previous research runs\n- Frame new research questions that deepen or broaden prior findings\n\nClearly mark which sections build on prior work vs. new investigation." |
+| `{{maxWebFetches}}` | From `advanced.maxWebFetchesPerAgent` (default: 10) |
+| `{{isVvcAgent}}` | `true` when the agent being generated has `id === "vvc-specialist"`; `false` for all other agents. Applied per-agent in Step 7 loop. Not emitted into templates directly — used to select which pre-computed block to emit for `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}`. |
+| `{{agentExamplesBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: three VVC-specific examples using structured `<example>` XML blocks with `user:`, `assistant:`, and `<commentary>` elements (per design spec section 1a) — covering claim verification, correction application, and combined Phase 5-6 operation. Otherwise: existing three research examples with `{{agentId}}`, `{{agentRole}}`, `{{domain}}` substituted using the same `<example>` XML block format. |
+| `{{agentBodyBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: expand to the exact structure from the design spec section 1c — `## Verification Protocol` (h2) pointing to `${CLAUDE_SKILL_DIR}/vvc-pipeline.md`, `### WebFetch Budget` with `{{vvcWebFetchCap}}` cap and tier prioritization, `## Output Format` (h2) with verification detail tables and 450-token chat limit, `## Context Discipline` (h2) with sequential claim processing rules. Use h2 for main sections (Verification Protocol, Output Format, Context Discipline) and h3 only for WebFetch Budget subsection. Otherwise: existing Search Protocol + Confidence Scoring + Output Format + Context Discipline with all current placeholders substituted. |
+| `{{agentFirstActionsBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: First Actions reading vvc-pipeline.md, standards.md, and draft report. Otherwise: existing First Actions reading standards.md, research-protocol.md, and research outline. |
+| `{{vvcWebFetchCap}}` | `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Default: 30 (when base cap is 10). Used only in VVC agent body block. |
+| `{{vvcArgumentHint}}` | If `qualityFramework.vvc.enabled` is true: `" [--no-vvc]"`; otherwise: empty string. |
+| `{{comprehensiveFollowUpAgentCap}}` | From `advanced.comprehensiveFollowUpAgentCap` (default: 2). Maximum agents to deploy in Phase 3.5 gap follow-up. |
+| `{{provenanceBudget}}` | From `advanced.tokenBudgets.provenance` (default: 5000). |
+| `{{vvcClaimTaxonomySummary}}` | When VVC enabled, expand to exactly: `### Claim Taxonomy (VVC)\n\nWhen VVC is active, tag every factual claim in reports. See \`${CLAUDE_SKILL_DIR}/vvc-pipeline.md\` for the full claim taxonomy, verification scope, and verification process.\n\nClaim types: \`[VC]\` Verifiable Claim (requires verification), \`[PO]\` Professional Opinion (no verification), \`[IE]\` Inferred/Extrapolated (no verification).` When VVC disabled: empty string. Distinct from `{{vvcClaimTaxonomyBlock}}` which is the full canonical table used in vvc-pipeline.md.tmpl. |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
@@ -329,7 +355,11 @@ Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`:
 
 | Template | Purpose |
 |---|---|
-| `base-research-skill.md.tmpl` | Self-contained engine SKILL.md |
+| `orchestrator-skill.md.tmpl` | Self-contained engine orchestrator SKILL.md (~150-200 lines) |
+| `standards.md.tmpl` | Confidence scoring, source credibility, citation rules |
+| `research-protocol.md.tmpl` | Search protocol, iterative refinement, file isolation, WebFetch cap |
+| `provenance.md.tmpl` | Phase 2.5 batch hashing, Phase 4.5 provenance audit |
+| `vvc-pipeline.md.tmpl` | VVC Phases 5-6 instructions (conditional on VVC enabled) |
 | `extension-skill.md.tmpl` | Extension engine SKILL.md |
 | `command-template.md.tmpl` | /research command |
 | `sources-command-template.md.tmpl` | /sources command |

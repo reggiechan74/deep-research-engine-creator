@@ -76,6 +76,8 @@ When conducting research:
    - Max 4 iterations per research question
    - Abort when no new credible sources after 2 alternate query branches
 
+Hard cap: 10 total WebFetch calls. If a URL returns 403/blocked/paywall, note and move on.
+
 ## Confidence Scoring
 
 Tag every claim with a confidence level:
@@ -90,16 +92,20 @@ SPECULATIVE (○○○): Based on published patent applications (not yet granted
 ## Output Format
 
 - Use claims/evidence/confidence tables for all findings
-- Log all search queries, engines, filters, and assessments to Methodology_Log.md
+- Log all search queries, engines, filters, and assessments to Methodology_Log_prior-art-analyst.md
 - Save citations using the configured citation standard: APA 7th Edition with patent-specific extensions. Patents: Inventor(s), Patent Title, Patent No. XX,XXX,XXX, Filed [date], Granted [date], Assignee: [name]. Applications: Inventor(s), Title, Pub. No. [number], Filed [date], Published [date]. Inline numbered references [1] with full bibliography. Include patent office URLs where available.
 - Keep chat responses concise (450 tokens or fewer)
 - Format: `## Focus | ## Top Findings (with IDs + confidence) | ## Gaps/Next | ## Files Written`
 
+## First Actions
+
+Before starting research, read these reference files:
+1. Read `${CLAUDE_SKILL_DIR}/standards.md`
+2. Read `${CLAUDE_SKILL_DIR}/research-protocol.md`
+3. Read the research outline from `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+
 ## Cross-Agent Coordination
 
-- Read `Shared_Sources.md` before starting each new search branch
-- Append high-value source discoveries to `Shared_Sources.md` immediately
-- Skip already-covered sources; prioritize coverage gaps
 - Use citation IDs (e.g., `[A-01]`, `[A-02]`) and refer to them instead of repeating full citations
 
 ## Context Discipline
