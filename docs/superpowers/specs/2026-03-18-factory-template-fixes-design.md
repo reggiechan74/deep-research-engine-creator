@@ -1,7 +1,7 @@
 # Factory Template Fixes — Design Spec
 
 **Date:** 2026-03-18
-**Status:** Draft
+**Status:** Approved (Rev 2 — passed spec review)
 **Origin:** Code review of `generated-engines/not-for-profit/` (see `REVIEW-FINDINGS.md`)
 
 ---
@@ -16,8 +16,9 @@ This spec covers **template-level fixes only** — changes to files under `plugi
 
 ## Design Decisions
 
-1. **VVC agent template approach:** Conditional branches within the existing `agent-template.md.tmpl` (not a separate template file). The VVC agent shares ~40% of research agent content (source hierarchy, confidence scoring, domain context), so a single template avoids drift.
+1. **VVC agent template approach:** Conditional content within the existing `agent-template.md.tmpl` using pre-computed placeholder blocks (matching existing conventions like `{{vvcClaimTaxonomyBlock}}`). No Handlebars-style `{{#if}}` syntax — the templates use simple placeholder substitution driven by the generation logic in SKILL.md. The VVC agent shares ~40% of research agent content (source hierarchy, confidence scoring, domain context), so a single template avoids drift.
 2. **Comprehensive follow-up round:** Post-synthesis gap closure (Phase 3.5, after Phase 3, before Phase 4). The synthesis agent already identifies gaps, so the follow-up is a natural extension. One round only, no recursion.
+3. **Exploration depth:** Change the default from 5 to 2 and add budget-reservation language. Keep `{{explorationDepth}}` as the single source of truth in both `orchestrator-skill.md.tmpl` and `research-protocol.md.tmpl`.
 
 ---
 
@@ -25,15 +26,28 @@ This spec covers **template-level fixes only** — changes to files under `plugi
 
 ### 1. `agent-template.md.tmpl`
 
-**Issues addressed:** C-1 (VVC uses research template), C-2 (VVC First Actions wrong), H-1 (boilerplate examples), M-2 (450 vs 500 — agent side already correct), M-4 (redundant Domain Context)
+**Issues addressed:** C-1 (VVC uses research template), C-2 (VVC First Actions wrong), H-1 (boilerplate examples), H-4 (VVC WebFetch cap insufficient), M-4 (redundant Domain Context)
 
-#### 1a. Conditional YAML examples (H-1)
+#### 1a. Pre-computed YAML examples block (H-1)
 
-Replace the three hardcoded research examples with a conditional:
+Replace the three hardcoded example blocks in the YAML description with a single placeholder:
 
+**Current** (lines 5-16):
+```yaml
+  <example>Context: User needs {{domain}} research requiring {{agentRole}} capabilities.
+  ...three hardcoded research examples...
 ```
-{{#if isVvcAgent}}
-  <example>Context: Research pipeline has completed draft report and needs claim verification.
+
+**New:**
+```yaml
+  {{agentExamplesBlock}}
+```
+
+**Derivation rule** (added to SKILL.md Step 7):
+
+When `isVvcAgent` is true, `{{agentExamplesBlock}}` expands to:
+```
+<example>Context: Research pipeline has completed draft report and needs claim verification.
   user: 'Verify the claims in the draft report against cited sources'
   assistant: 'I will deploy the {{agentId}} agent to systematically verify [VC]-tagged claims against their cited sources.'
   <commentary>The VVC specialist is deployed post-reporting to verify factual claims in Phases 5-6.</commentary></example>
@@ -45,25 +59,13 @@ Replace the three hardcoded research examples with a conditional:
   user: 'Run verification and correction on the draft'
   assistant: 'The {{agentId}} agent will handle Phases 5-6: first verifying [VC]-tagged claims, then correcting the draft report based on findings.'
   <commentary>The VVC specialist operates only in Phases 5-6, never during Phase 2 research.</commentary></example>
-{{else}}
-  <example>Context: User needs {{domain}} research requiring {{agentRole}} capabilities.
-  user: 'Research the latest developments in {{domain}}'
-  assistant: 'I will deploy the {{agentId}} agent to conduct specialized research in this area.'
-  <commentary>The user needs domain-specific research that matches this agent's specialization in {{domain}}.</commentary></example>
-  <example>Context: A research pipeline needs a {{agentRole}} to gather and analyze information.
-  user: 'I need detailed analysis of trends and data in {{domain}}'
-  assistant: 'Let me engage the {{agentId}} agent for in-depth {{domain}} analysis using authoritative sources.'
-  <commentary>The request requires specialized analytical capabilities that align with this agent's role.</commentary></example>
-  <example>Context: Multi-agent research requiring coordinated specialist contributions.
-  user: 'Run a comprehensive investigation covering multiple angles of this topic'
-  assistant: 'The {{agentId}} agent will handle the {{agentRole}} component of this multi-agent research effort.'
-  <commentary>The comprehensive research request benefits from this agent's focused specialization within the pipeline.</commentary></example>
-{{/if}}
 ```
+
+When `isVvcAgent` is false, `{{agentExamplesBlock}}` expands to the existing three research examples (current lines 5-16, unchanged).
 
 #### 1b. Remove redundant Domain Context section (M-4)
 
-Delete lines 33-34 entirely:
+Delete the `## Domain Context` block entirely (current lines 33-34):
 
 ```markdown
 ## Domain Context
@@ -73,36 +75,22 @@ This engine serves {{domain}} research. Apply domain-specific knowledge, termino
 
 The `## Core Responsibilities` section already contains `{{promptOverride}}` which includes the global preamble with identical domain context. Removing this eliminates ~50 tokens of redundancy per agent.
 
-#### 1c. Conditional body: research vs. VVC (C-1)
+#### 1c. Pre-computed body block: research vs. VVC (C-1, H-4)
 
-After the Source Credibility Hierarchy section (which remains shared), replace the Search Protocol, Confidence Scoring, Output Format, and Context Discipline sections with a conditional:
+Replace everything from `## Search Protocol` through `## Context Discipline` (current lines 44-87) with a single placeholder:
 
+**New:**
 ```markdown
-{{#if isVvcAgent}}
+{{agentBodyBlock}}
+```
+
+**Derivation rule** (added to SKILL.md Step 7):
+
+When `isVvcAgent` is true, `{{agentBodyBlock}}` expands to:
+```markdown
 ## Verification Protocol
 
-Your role is to verify and correct factual claims in draft reports. You do NOT conduct original research. You do NOT participate in Phase 2.
-
-### Phase 5: Verification
-1. Read the draft report and extract all `[VC]`-tagged claims with their cited sources
-2. For each claim per verification scope percentages:
-   a. Fetch the cited source via WebFetch
-   b. Verify the claim accurately reflects the source content
-   c. Score as: CONFIRMED | PARAPHRASED | DISPUTED | UNSUPPORTED | UNREACHABLE
-   d. Record confidence level and source credibility tier
-3. Flag claims where source does not support the claim, source is unreachable, confidence appears inflated, or source credibility tier is too low
-4. Save verification report to `BASE_DIR/[TOPIC_SLUG]_VVC_Verification_Report.md`
-
-### Phase 6: Correction
-1. Read the verification report per-claim table
-2. Apply corrections mechanically from the verification findings:
-   - DISPUTED claims: correct to match source, or remove if irreconcilable
-   - UNSUPPORTED claims: add caveat language, downgrade confidence, or remove
-   - UNREACHABLE sources: note as unverifiable, attempt archive fallback, downgrade confidence
-   - Inflated confidence: downgrade to appropriate level
-3. Preserve all `[VC]`/`[PO]`/`[IE]` tags in the final report
-4. Save final report to `BASE_DIR/[TOPIC_SLUG]_Comprehensive_Report.md`
-5. Save correction log to `BASE_DIR/[TOPIC_SLUG]_VVC_Correction_Log.md`
+Your role is to verify and correct factual claims in draft reports. You do NOT conduct original research. You do NOT participate in Phase 2. Follow the detailed verification and correction protocol in `${CLAUDE_SKILL_DIR}/vvc-pipeline.md`.
 
 ### WebFetch Budget
 
@@ -120,81 +108,40 @@ Cap at {{vvcWebFetchCap}} total WebFetch calls across Phases 5-6. Prioritize ver
 - Process claims sequentially by confidence tier (HIGH first)
 - Do not re-fetch sources already verified — note result and move on
 - Use structured tables for all verification output
-
-{{else}}
-## Search Protocol
-
-When conducting research:
-
-1. **Generate diversified queries** -- minimum 4 query types per research question:
-   - Direct query with primary keywords
-   - Synonym/alternative terminology variant
-   - Adversarial query (problems, criticism, failures, controversy)
-   - Expert-source targeted query (authoritative domains)
-
-2. **Apply search templates** where applicable:
-
-{{searchTemplates}}
-
-3. **Iterative Search-Assess-Refine**:
-   - Pass 1 (SEARCH): Execute diversified query set
-   - Pass 2 (ASSESS): Evaluate evidence sufficiency -- 2+ independent sources for key claims? Contradictions? Gaps?
-   - Pass 3 (REFINE): If gaps found, generate targeted follow-up queries
-   - Max {{maxIterations}} iterations per research question
-   - Abort when no new credible sources after 2 alternate query branches
-
-4. **WebFetch cap**: Hard cap of {{maxWebFetches}} total WebFetch calls per research session. Prioritize highest-credibility, most-accessible sources. If a URL returns 403/blocked/paywall, note in methodology log and move on — do not retry.
-
-## Confidence Scoring
-
-Tag every claim with a confidence level:
-
-{{confidenceScoring}}
-
-## Output Format
-
-- Use claims/evidence/confidence tables for all findings
-- Log all search queries, engines, filters, and assessments to your per-agent Methodology_Log_[AgentID].md
-- Save discovered sources to your per-agent Sources_[AgentID].md
-- Save citations using the configured citation standard: {{citationStandard}}
-- Keep chat responses concise (450 tokens or fewer)
-- Format: `## Focus | ## Top Findings (with IDs + confidence) | ## Gaps/Next | ## Files Written`
-
-## Context Discipline
-
-- Summarize sources immediately; per-source abstracts of 120 words or fewer
-- Operate in passes: (1) initial sweep + notes, (2) synthesis of top claims/gaps, (3) targeted follow-up
-- Use structured outputs (tables, bullet summaries, query logs) to minimize token footprint
-{{/if}}
 ```
 
-#### 1d. Conditional First Actions (C-2)
+Note: The VVC body is intentionally brief. It states the role and points to `vvc-pipeline.md` for the detailed protocol rather than duplicating the Phase 5/6 instructions that already exist in `vvc-pipeline.md.tmpl`. This follows the same deduplication principle applied to the claim taxonomy (M-3).
 
-Replace the First Actions section:
+When `isVvcAgent` is false, `{{agentBodyBlock}}` expands to the existing Search Protocol + Confidence Scoring + Output Format + Context Discipline sections (current lines 44-87, unchanged).
 
+#### 1d. Pre-computed First Actions block (C-2)
+
+Replace the First Actions section (current lines 88-93) with a placeholder:
+
+**New:**
 ```markdown
-{{#if isVvcAgent}}
+{{agentFirstActionsBlock}}
+```
+
+**Derivation rule** (added to SKILL.md Step 7):
+
+When `isVvcAgent` is true, `{{agentFirstActionsBlock}}` expands to:
+```markdown
 ## First Actions
 
 Before starting verification, read these reference files:
 1. `${CLAUDE_SKILL_DIR}/vvc-pipeline.md` — verification process, correction process, claim taxonomy
 2. `${CLAUDE_SKILL_DIR}/standards.md` — confidence scoring, source credibility hierarchy
 3. Read the draft report from `BASE_DIR/[TOPIC_SLUG]_Draft_Report.md`
-{{else}}
-## First Actions
-
-Before starting research, read these reference files:
-1. `${CLAUDE_SKILL_DIR}/standards.md` — quality standards, confidence scoring, source credibility
-2. `${CLAUDE_SKILL_DIR}/research-protocol.md` — search protocol, file isolation rules, WebFetch cap
-3. Read the research outline from `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
-{{/if}}
 ```
+
+When `isVvcAgent` is false, `{{agentFirstActionsBlock}}` expands to the existing First Actions (current lines 88-93, unchanged).
 
 ---
 
 ### 2. `orchestrator-skill.md.tmpl`
 
-**Issues addressed:** C-3 (recursive exploration vs WebFetch cap), H-5 (comprehensive follow-up undefined), H-6 (trailing execution text)
+**Issues addressed:** C-3 (recursive exploration vs WebFetch cap), H-3 (citation verification unorchestrated), H-5 (comprehensive follow-up undefined), H-6 (trailing execution text)
 
 #### 2a. Fix recursive exploration instruction (C-3)
 
@@ -205,10 +152,10 @@ Replace line 105:
 
 With:
 ```
-8. Follow-on link exploration: when a source references related pages, follow up to 2 levels deep. Reserve at least 6 WebFetch calls for primary research queries; use remaining budget for follow-on links only.
+8. Follow-on link exploration: when a source references related pages, follow up to {{explorationDepth}} levels deep. Reserve at least 6 WebFetch calls for primary research queries; use remaining budget for follow-on links only.
 ```
 
-The `{{explorationDepth}}` placeholder is removed from this context. The `advanced.explorationDepth` config field remains in the schema for potential future use but is no longer injected into Common Agent Requirements.
+Keep the `{{explorationDepth}}` placeholder but change the **default value** from 5 to 2 (see section 6 for SKILL.md derivation rule update and section 7 for schema update). This keeps `{{explorationDepth}}` as the single source of truth across both `orchestrator-skill.md.tmpl` and `research-protocol.md.tmpl`.
 
 #### 2b. Add Phase 3.5 comprehensive follow-up (H-5)
 
@@ -229,10 +176,12 @@ After Phase 3 synthesis completes, review the synthesis report's "Gaps & Unresol
 One follow-up round only — do not recursively follow up on follow-up gaps.
 ```
 
-Update the tier config table row for Comprehensive to reflect the mechanic:
+Update the tier config table row for Comprehensive:
 ```
 | Comprehensive | Yes | {{comprehensiveAgentCount}} + gap follow-up | Yes | Full | Hash + Audit | Always |
 ```
+
+Add `{{comprehensiveFollowUpAgentCap}}` to the Placeholder Reference section at the end of the template.
 
 #### 2c. Remove trailing execution text (H-6)
 
@@ -242,6 +191,35 @@ Now executing research deployment...
 ```
 
 The `/research` command template already has `Starting {{engineDisplayName}} research system...` at the correct invocation point.
+
+#### 2d. Update Phase 4.5 for citation verification (H-3)
+
+Replace the existing Phase 4.5 block:
+
+```markdown
+### Phase 4.5: Provenance Audit
+
+**Tier behavior:** Quick: skip | {{auditTierBehavior}}
+
+Deploy a **general-purpose** provenance audit agent. Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the provenance audit protocol.
+```
+
+With:
+
+```markdown
+### Phase 4.5: Provenance Audit & Citation Verification
+
+**Tier behavior:** Quick: skip | {{auditTierBehavior}}
+
+Deploy a **general-purpose** provenance and citation verification agent. Agent instructions:
+1. **FIRST ACTION**: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the batch provenance audit protocol.
+2. Read `${CLAUDE_SKILL_DIR}/standards.md` Source Verification Protocol section.
+3. Execute citation verification on `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`: URL liveness check on all entries, source freshness flagging per configured threshold, dead link handling per configured strategy.
+4. Generate `BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md` per the report template in standards.md.
+5. Generate `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md` per the provenance log template.
+```
+
+This gives the Citation Verification Protocol in `standards.md` an explicit phase owner without adding a new phase. The protocol definition stays in `standards.md.tmpl` (unchanged); the orchestration happens here.
 
 ---
 
@@ -295,7 +273,7 @@ Provenance Audit: {{provenanceBudget}} tokens output max
 
 ### 5. `standards.md.tmpl`
 
-**Issues addressed:** H-2 (probe-on-discovery budget), H-3 (citation verification unorchestrated), M-3 (claim taxonomy duplication)
+**Issues addressed:** H-2 (probe-on-discovery budget), M-3 (claim taxonomy duplication)
 
 #### 5a. Probe-on-discovery budget note (H-2)
 
@@ -307,67 +285,100 @@ After the existing probe-on-discovery bullets (line 110), add:
 
 #### 5b. Deduplicate claim taxonomy (M-3)
 
-Replace line 22 (`{{vvcClaimTaxonomyBlock}}`) with a conditional summary:
+Replace line 22 (`{{vvcClaimTaxonomyBlock}}`) with a new placeholder:
 
 ```markdown
-{{#if vvcEnabled}}
+{{vvcClaimTaxonomySummary}}
+```
+
+**Derivation rule** (added to SKILL.md Step 8b):
+
+When VVC is enabled, `{{vvcClaimTaxonomySummary}}` expands to:
+```markdown
 ### Claim Taxonomy (VVC)
 
 When VVC is active, tag every factual claim in reports. See `${CLAUDE_SKILL_DIR}/vvc-pipeline.md` for the full claim taxonomy, verification scope, and verification process.
 
 Claim types: `[VC]` Verifiable Claim (requires verification), `[PO]` Professional Opinion (no verification), `[IE]` Inferred/Extrapolated (no verification).
-{{/if}}
 ```
 
-The canonical full taxonomy remains in `vvc-pipeline.md.tmpl` (unchanged). Standards.md gets a brief summary with a pointer — enough for Phase 2 research agents to know the tags without duplicating the verification scope table.
+When VVC is disabled, `{{vvcClaimTaxonomySummary}}` is empty string.
 
-#### 5c. Integrate citation verification into Phase 4.5 (H-3)
-
-No changes to `standards.md.tmpl` itself — the Source Verification Protocol section stays as-is (it defines the protocol). The fix is in `orchestrator-skill.md.tmpl` Phase 4.5 (see section 2 above), which now explicitly tells the provenance audit agent to also execute the citation verification protocol from standards.md.
-
-Update Phase 4.5 in `orchestrator-skill.md.tmpl`:
-
-```markdown
-### Phase 4.5: Provenance Audit & Citation Verification
-
-**Tier behavior:** Quick: skip | {{auditTierBehavior}}
-
-Deploy a **general-purpose** provenance and citation verification agent. Agent instructions:
-1. **FIRST ACTION**: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the batch provenance audit protocol.
-2. Read `${CLAUDE_SKILL_DIR}/standards.md` Source Verification Protocol section.
-3. Execute citation verification on `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`: URL liveness check on all entries, source freshness flagging per configured threshold, dead link handling per configured strategy.
-4. Generate `BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md` per the report template in standards.md.
-5. Generate `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md` per the provenance log template.
-```
+The canonical full taxonomy (with verification scope table) remains in `vvc-pipeline.md.tmpl` via the existing `{{vvcClaimTaxonomyBlock}}` placeholder (unchanged). Standards.md gets a brief summary with a pointer — enough for Phase 2 research agents to know the tags without duplicating the verification scope table.
 
 ---
 
 ### 6. `SKILL.md` (Generation Logic)
 
-**Issues addressed:** New placeholder support, schema updates, wizard updates
+**Issues addressed:** New placeholder support, schema updates, wizard updates, default value changes
 
 #### 6a. New placeholders — add to Placeholder Derivation Rules table
 
 | Placeholder | Derivation Rule |
 |---|---|
-| `{{isVvcAgent}}` | `true` when the agent being generated has `id === "vvc-specialist"`; `false` for all other agents. Applied per-agent in Step 7 loop. |
-| `{{vvcWebFetchCap}}` | `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Default: 30 (when base cap is 10). Used only in VVC agent template conditional body. |
+| `{{isVvcAgent}}` | `true` when the agent being generated has `id === "vvc-specialist"`; `false` for all other agents. Applied per-agent in Step 7 loop. Not emitted into templates directly — used to select which pre-computed block to emit for `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}`. |
+| `{{agentExamplesBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: VVC-specific examples (see section 1a). Otherwise: existing research examples with `{{agentId}}`, `{{agentRole}}`, `{{domain}}` substituted. |
+| `{{agentBodyBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: VVC verification protocol summary with `{{vvcWebFetchCap}}` (see section 1c). Otherwise: existing Search Protocol + Confidence Scoring + Output Format + Context Discipline with all current placeholders substituted. |
+| `{{agentFirstActionsBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: VVC First Actions reading vvc-pipeline.md, standards.md, draft report (see section 1d). Otherwise: existing research First Actions reading standards.md, research-protocol.md, research outline. |
+| `{{vvcWebFetchCap}}` | `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Default: 30 (when base cap is 10). Used only in VVC agent body block. |
 | `{{vvcArgumentHint}}` | If `qualityFramework.vvc.enabled` is true: `" [--no-vvc]"`; otherwise: empty string. |
 | `{{comprehensiveFollowUpAgentCap}}` | From `advanced.comprehensiveFollowUpAgentCap` (default: 2). Maximum agents to deploy in Phase 3.5 gap follow-up. |
 | `{{provenanceBudget}}` | From `advanced.tokenBudgets.provenance` (default: 5000). |
-| `{{vvcEnabled}}` | Mirror of `qualityFramework.vvc.enabled`. Used for conditional blocks in standards.md.tmpl. |
+| `{{vvcClaimTaxonomySummary}}` | When VVC enabled: brief claim taxonomy summary with cross-reference to vvc-pipeline.md (see section 5b). When VVC disabled: empty string. Distinct from existing `{{vvcClaimTaxonomyBlock}}` which remains the full canonical table used in vvc-pipeline.md.tmpl. |
 
-#### 6b. Step 7 agent generation update
+#### 6b. Updated default value
 
-Add `isVvcAgent` and `vvcWebFetchCap` derivation to the per-agent loop. Current Step 7 description (line 244):
+Change the default for `{{explorationDepth}}` from 5 to 2:
 
-> For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values.
+**Current** (SKILL.md line 292):
+```
+| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 5) |
+```
+
+**New:**
+```
+| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 2) |
+```
+
+This aligns the default with the WebFetch budget constraint. Users can still configure higher values via the Section 8 wizard, but the default is safe.
+
+#### 6c. Step 7 agent generation update
+
+Current Step 7 description (SKILL.md line 244):
+
+> For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks. Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
 Amend to:
 
-> For EACH agent: set `{{isVvcAgent}}` = (`agent.id === "vvc-specialist"`). Set `{{vvcWebFetchCap}}` = `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Read `agent-template.md.tmpl`, replace with agent-specific values including conditional blocks. Cycle `{{color}}` through blue, magenta, yellow.
+> For EACH agent: determine `isVvcAgent` = (`agent.id === "vvc-specialist"`). Pre-compute `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}` based on `isVvcAgent` (see Placeholder Derivation Rules for expansion logic). If `isVvcAgent`, also compute `{{vvcWebFetchCap}}` = `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Read `agent-template.md.tmpl`, replace with agent-specific values including pre-computed blocks. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks (skip `{{searchTemplates}}` for VVC agent). Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
-#### 6c. `engine-config-schema.json` updates
+#### 6d. Step 8b standards.md update
+
+Add to Step 8b description:
+
+> Replace `{{vvcClaimTaxonomySummary}}` with the VVC claim taxonomy summary (brief cross-reference) when VVC is enabled, or empty string when disabled. This is distinct from `{{vvcClaimTaxonomyBlock}}` used in Step 8e.
+
+#### 6e. Section 8 wizard update
+
+In the advanced settings prompt (SKILL.md line 171):
+
+**Current:**
+```
+max iterations (1-5, default 3), exploration depth (1-10, default 5), max WebFetch calls per agent (1-50, default 10), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
+```
+
+**New:**
+```
+max iterations (1-5, default 3), exploration depth (1-10, default 2), max WebFetch calls per agent (1-50, default 10), max follow-up agents for Comprehensive tier (1-5, default 2), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000, provenance: 5000), custom hooks, MCP server integrations.
+```
+
+---
+
+### 7. `engine-config-schema.json`
+
+**Issues addressed:** M-1 (provenance budget), H-5 (follow-up cap), C-3 (exploration depth default)
+
+#### 7a. Add new schema properties
 
 Add under `advanced` properties:
 
@@ -391,12 +402,18 @@ Add under `advanced.tokenBudgets` properties:
 }
 ```
 
-#### 6d. Section 8 wizard update
+#### 7b. Update exploration depth default
 
-In the advanced settings prompt (SKILL.md line 171), add after "token budgets":
+Change `advanced.explorationDepth` default from 5 to 2:
 
-```
-max follow-up agents for Comprehensive tier (1-5, default 2)
+```json
+"explorationDepth": {
+  "type": "integer",
+  "minimum": 1,
+  "maximum": 10,
+  "default": 2,
+  "description": "Maximum depth for follow-on link exploration from source pages"
+}
 ```
 
 ---
@@ -405,36 +422,45 @@ max follow-up agents for Comprehensive tier (1-5, default 2)
 
 | File | Changes | Issues Fixed |
 |---|---|---|
-| `templates/agent-template.md.tmpl` | Add `{{#if isVvcAgent}}` conditionals for examples, body, First Actions; remove Domain Context section | C-1, C-2, H-1, M-4 |
-| `templates/orchestrator-skill.md.tmpl` | Fix exploration depth instruction; add Phase 3.5 follow-up; remove trailing text; update Phase 4.5 | C-3, H-3, H-5, H-6 |
+| `templates/agent-template.md.tmpl` | Replace examples, body, First Actions with pre-computed placeholders (`{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, `{{agentFirstActionsBlock}}`); remove Domain Context section | C-1, C-2, H-1, H-4, M-4 |
+| `templates/orchestrator-skill.md.tmpl` | Fix exploration depth instruction with budget reservation; add Phase 3.5 follow-up; remove trailing text; update Phase 4.5 with citation verification | C-3, H-3, H-5, H-6 |
 | `templates/command-template.md.tmpl` | Add `{{vvcArgumentHint}}` to argument-hint | C-4 |
 | `templates/research-protocol.md.tmpl` | Align 450 token limit; parameterize provenance budget | M-1, M-2 |
-| `templates/standards.md.tmpl` | Add probe budget note; replace claim taxonomy with cross-reference | H-2, M-3 |
-| `templates/engine-config-schema.json` | Add `comprehensiveFollowUpAgentCap`, `tokenBudgets.provenance` | M-1, H-5 |
-| `SKILL.md` (generation logic) | Add 6 new placeholder derivation rules; update Step 7 loop; update Section 8 wizard | All |
+| `templates/standards.md.tmpl` | Add probe budget note; replace `{{vvcClaimTaxonomyBlock}}` with `{{vvcClaimTaxonomySummary}}` cross-reference | H-2, M-3 |
+| `templates/engine-config-schema.json` | Add `comprehensiveFollowUpAgentCap`, `tokenBudgets.provenance`; change `explorationDepth` default to 2 | M-1, H-5, C-3 |
+| `SKILL.md` (generation logic) | Add 9 new placeholder derivation rules; update Step 7 loop for VVC-aware generation; update Step 8b for taxonomy summary; update Section 8 wizard defaults; change exploration depth default | All |
 
 ## Files NOT Modified
 
 | File | Reason |
 |---|---|
-| `templates/vvc-pipeline.md.tmpl` | Already correct — canonical claim taxonomy stays here |
+| `templates/vvc-pipeline.md.tmpl` | Already correct — canonical claim taxonomy stays here via `{{vvcClaimTaxonomyBlock}}` |
 | `templates/provenance.md.tmpl` | No issues found |
 | `templates/extension-skill.md.tmpl` | Out of scope (extension mode) |
 | `templates/plugin-json.tmpl` | No issues found |
 | `templates/readme-template.md.tmpl` | No issues found |
 | `templates/sources-command-template.md.tmpl` | No issues found |
 
+## Out of Scope
+
+| Issue | Reason |
+|---|---|
+| M-5 (`${CLAUDE_SKILL_DIR}` resolution in agent context) | Requires runtime verification in Claude Code's plugin system, not a template change. Should be tested empirically and filed as a separate issue if it fails. |
+| M-6 (file naming mismatch in config vs SKILL.md) | Config's `fileNaming` field is informational/metadata only. Low impact; can be addressed in a future config cleanup pass. |
+
 ## Testing
 
 After implementation, validate by:
 
-1. Run `/test-engine` against a freshly generated engine with VVC enabled — verify VVC specialist agent file contains verification protocol (not search protocol) and reads `vvc-pipeline.md` in First Actions
-2. Run `/test-engine` against a freshly generated engine with VVC disabled — verify no VVC conditionals leak into agent files
+1. Run `/test-engine` against a freshly generated engine with VVC enabled — verify VVC specialist agent file contains verification protocol pointer to `vvc-pipeline.md` (not search protocol) and reads `vvc-pipeline.md` in First Actions
+2. Run `/test-engine` against a freshly generated engine with VVC disabled — verify no VVC-specific content appears in agent files or standards.md claim taxonomy section
 3. Grep generated SKILL.md for "Now executing research deployment" — should not appear
-4. Grep generated SKILL.md for "Recursive web exploration up to" — should not appear
-5. Verify generated `research.md` command argument-hint contains `--no-vvc` when VVC enabled
-6. Verify generated `standards.md` contains claim taxonomy cross-reference (not full table) when VVC enabled
-7. Verify generated `research-protocol.md` says "450 tokens" (not 500)
+4. Grep generated SKILL.md for "Recursive web exploration up to" — should not appear; instead find "Follow-on link exploration" with budget reservation language
+5. Verify generated `research.md` command argument-hint contains `--no-vvc` when VVC enabled, and does not contain it when VVC disabled
+6. Verify generated `standards.md` contains claim taxonomy cross-reference pointing to `vvc-pipeline.md` (not a full taxonomy table) when VVC enabled
+7. Verify generated `research-protocol.md` says "450 tokens" (not 500) and contains `provenance` token budget line
 8. Verify `engine-config.json` schema validates with new `comprehensiveFollowUpAgentCap` and `tokenBudgets.provenance` fields
-9. Verify Phase 3.5 block appears in generated SKILL.md only in comprehensive tier documentation
-10. Verify Phase 4.5 references both provenance audit AND citation verification
+9. Verify Phase 3.5 block appears in generated SKILL.md AND contains "Skip this phase for Quick, Standard, and Deep tiers"
+10. Verify Phase 4.5 heading is "Provenance Audit & Citation Verification" and references both `provenance.md` and `standards.md`
+11. Verify generated `engine-config.json` has `explorationDepth` default of 2 (not 5)
+12. Verify VVC specialist agent has `{{vvcWebFetchCap}}` value (default: 30) in its WebFetch Budget section, distinct from research agents' cap (default: 10)
