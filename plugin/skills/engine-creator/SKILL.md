@@ -168,7 +168,7 @@ Inform the user — this is NOT a question:
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), max WebFetch calls per agent (1-50, default 10), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
@@ -243,14 +243,30 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 7 -- Agent files.** For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks. Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
-**Step 8 -- SKILL.md.** Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. For extension mode: before template substitution, verify the base `/deep-research` skill exists. Check `.claude/commands/deep-research.md` first, then `skills/*/SKILL.md` containing "deep-research". If found, set `{{baseSkillPath}}` to the discovered path. If not found, warn user: "Base /deep-research skill not found. Extension mode requires it. Generate as self-contained instead?" and offer AskUserQuestion. Replace ALL placeholders:
+**Step 8 -- Skill files.** Select template set by mode.
+
+**Extension mode:** read `extension-skill.md.tmpl`, replace placeholders, write single file to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
+
+**Self-contained mode:** execute Steps 8a-8e below. Placeholder substitution rules apply to all sub-steps:
 - Simple values: direct substitution
 - Arrays (`{{reportSections}}`, `{{preferredSites}}`): markdown numbered list
 - Objects (`{{tierConfigTable}}`): markdown table rows
 - Nested (`{{agentDeploymentBlocks}}`): one block per agent with ID, role, model, specialization, tools, prompt override
 - `{{subAgentList}}`: research-planning-specialist, synthesis-specialist, research-reporting-specialist, plus custom agents
-- `{{fileStructure}}`: per-agent file entries (Claims, Bibliography)
+- `{{fileStructure}}`: per-agent file entries (Claims, Bibliography, Sources, Methodology_Log)
 - Missing optionals: sensible defaults or empty string
+
+**Step 8a -- Orchestrator SKILL.md.** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers, `{{maxWebFetches}}`). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
+
+**Step 8b -- standards.md.** Read `standards.md.tmpl`. Replace placeholders (confidence scoring, source hierarchy, citation standard, validation rules, evidence rules, verification protocol). Write to `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`.
+
+**Step 8c -- research-protocol.md.** Read `research-protocol.md.tmpl`. Replace placeholders (search templates, preferred sites, maxIterations, maxWebFetches, explorationDepth, per-agent file naming, context discipline, token budgets). Write to `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`.
+
+**Step 8d -- provenance.md.** Read `provenance.md.tmpl`. Replace placeholders (audit tier behavior, reverifiable default, chain format). Write to `{OUTPUT_DIR}/skills/{skillDirName}/provenance.md`.
+
+**Step 8e -- vvc-pipeline.md (only when VVC enabled).** Read `vvc-pipeline.md.tmpl`. Replace placeholders (claim types, verification scope, tier behavior, correction rules, VVC budget). Write to `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md`.
+
+Steps 8a-8e are independent and can be executed in any order.
 
 #### Placeholder Derivation Rules
 
@@ -301,6 +317,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{provenanceTierColumn}}` | From `qualityFramework.provenance.auditPhase.tiers`: "Hash-only" for Quick, "Hash + Audit" for tiers in audit list |
 | `{{reverifiableDefault}}` | From `qualityFramework.provenance.reverifiableDefault`: if true, invert the --reverifiable flag logic (snapshots kept by default, `--no-snapshots` to skip) |
 | `{{scopeDisciplineBlock}}` | Always generate the following conditional block (both modes included in template output): "**If CONTEXT_MODE is standalone (default -- no `--extend` flag):**\n\n### Scope Discipline\n\nYour research scope is LIMITED to the user's stated topic.\n\n- Do NOT read files outside BASE_DIR\n- Do NOT reference prior research runs, their files, or their findings\n- Do NOT incorporate project context from CLAUDE.md into research scope\n- Do NOT use observation history or session context to expand the topic\n- Generate ALL research questions strictly from the user's topic string and your domain expertise in {domain}\n- If the topic is ambiguous, interpret it as a general domain question -- do not assume it relates to any specific project or prior work\n- Every section in the outline must map directly to the stated topic. Remove any section that requires project-specific knowledge to justify.\n\n**If CONTEXT_MODE is extend (`--extend` flag present):**\n\n### Scope Discipline\n\nThis research EXTENDS prior work in this project. You may:\n\n- Read prior research files in the working directory for context\n- Reference project context from CLAUDE.md to inform research scope\n- Build on findings from previous research runs\n- Frame new research questions that deepen or broaden prior findings\n\nClearly mark which sections build on prior work vs. new investigation." |
+| `{{maxWebFetches}}` | From `advanced.maxWebFetchesPerAgent` (default: 10) |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
@@ -329,7 +346,11 @@ Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`:
 
 | Template | Purpose |
 |---|---|
-| `base-research-skill.md.tmpl` | Self-contained engine SKILL.md |
+| `orchestrator-skill.md.tmpl` | Self-contained engine orchestrator SKILL.md (~150-200 lines) |
+| `standards.md.tmpl` | Confidence scoring, source credibility, citation rules |
+| `research-protocol.md.tmpl` | Search protocol, iterative refinement, file isolation, WebFetch cap |
+| `provenance.md.tmpl` | Phase 2.5 batch hashing, Phase 4.5 provenance audit |
+| `vvc-pipeline.md.tmpl` | VVC Phases 5-6 instructions (conditional on VVC enabled) |
 | `extension-skill.md.tmpl` | Extension engine SKILL.md |
 | `command-template.md.tmpl` | /research command |
 | `sources-command-template.md.tmpl` | /sources command |
