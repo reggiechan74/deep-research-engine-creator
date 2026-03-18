@@ -1,0 +1,198 @@
+---
+name: {{engineName}}
+description: "Domain-specialized research engine for {{domain}}. Multi-agent pipeline with tiered depth, iterative refinement, and structured confidence scoring for {{audience}}."
+---
+
+# {{engineDisplayName}} Research Engine
+
+Launch a comprehensive multi-agent research system specialized for **{{domain}}** research, serving **{{audience}}**.
+
+This engine implements a {{pipelinePhaseCount}}-phase research pipeline with tier-based depth routing. It is fully self-contained -- no external research plugin dependencies are required. Agent protocols, quality standards, and detailed instructions are in reference files that agents load on-demand.
+
+## Usage
+
+- `/research [topic]` -- Standard tier (default): {{standardTierDescription}}
+- `/research [URL]` -- Research starting from a specific webpage (Standard tier)
+- `/research [topic] --quick` -- Quick tier: {{quickTierDescription}}
+- `/research [topic] --deep` -- Deep tier: {{deepTierDescription}}
+- `/research [topic] --comprehensive` -- Comprehensive tier: {{comprehensiveTierDescription}}
+- `/research [topic] --outline-only` -- Planning phase only (produces outline, then stops)
+- `/research [topic] --approve` -- Pause for user approval after Phase 1 (default for Standard+ tiers)
+- `/research [topic] --no-approve` -- Skip outline approval gate (for automation or fast iteration)
+- `/research [topic] --extend` -- Build on prior research in this project (default: standalone)
+- `/research [topic] --reverifiable` -- Store source snapshots alongside hashes for independent re-verification
+- `/research [topic] --no-vvc` -- Skip VVC verification phases (when VVC is enabled)
+
+---
+
+## Research Architecture
+
+| Phase | Name | Description |
+|-------|------|-------------|
+| 0 | Tier Detection | Parse flags, configure paths and depth |
+| 1 | Research Planning | Strategic framework development and agent task design |
+| 2 | Parallel Research | Multiple specialist agents research simultaneously |
+| 3 | Synthesis | Multi-source integration, contradiction resolution, gap analysis |
+| 4 | {{phase4Name}} | {{phase4Description}} |
+{{vvcPhaseLines}}
+
+| Tier | Planning | Research Agents | Synthesis | Report | Provenance | User Gate |
+|------|----------|----------------|-----------|--------|------------|-----------|
+{{tierConfigTable}}
+
+---
+
+## Phase 0: Tier Detection & Global Configuration
+
+Parse tier from `$ARGUMENTS`: `--quick` / `--standard` / `--deep` / `--comprehensive` (default: Standard). Additional flags: `--outline-only` (stop after Phase 1), `--approve` / `--no-approve` (user gate control), `--extend` (project-aware context), `--reverifiable` (retain source snapshots), `--no-vvc` (skip Phases 5-6, Phase 4 becomes final reporting).
+
+- If `--no-vvc` is present and engine has VVC enabled, set NO_VVC to **true** (skip Phases 5-6, Phase 4 becomes final reporting)
+- If topic starts with `http://` or `https://`, treat as URL seed — fetch, extract topic, derive slug from title
+
+### Derive Configuration
+
+```
+TOPIC_SLUG  = lowercase topic, hyphenate spaces, strip punctuation
+RUN_TS      = YYYY-MM-DD_HHMMSS_ET (Eastern Time via bash: TZ='America/New_York' date '+%Y-%m-%d_%H%M%S_ET')
+BASE_DIR    = "{{reportOutputDir}}/${RUN_TS}_${TOPIC_SLUG}"
+ENGINE_ID   = "{{engineName}}"
+```
+
+All files live under `BASE_DIR`. Never restate the prompt in chat; write long data to files and keep chat responses concise.
+
+---
+
+## Sub-Agent System
+
+{{subAgentList}}
+
+Research agents MUST be referenced by fully qualified name (`{{engineName}}:[agentId]`) when deploying via Task tool.
+{{vvcSubAgentNote}}
+
+---
+
+## Quick Tier
+
+If `--quick` detected, deploy a SINGLE agent (**{{quickAgentId}}**). Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/standards.md`. Conduct focused {{domain}} research. Cap total WebFetch calls at {{maxWebFetches}}. Format: `## Summary | ## Key Findings (with confidence) | ## Sources | ## Limitations`. Skip all remaining phases.
+
+---
+
+## Standard / Deep / Comprehensive Tiers
+
+### Phase 1: Strategic Research Planning
+
+Deploy **research-planning-specialist**: {{scopeDisciplineBlock}}
+- Build scope grid: core questions, sub-questions, dissenting angles, geographic/temporal slices for {{domain}}
+- Design task assignments for downstream agents to reduce overlap
+- Save outline to `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+
+**User Gates:** `--outline-only`: stop here | `--no-approve`: skip gate | Otherwise: present outline for approval.
+
+### Phase 2: Parallel Research Execution
+
+Deploy research agents per tier config. Each agent operates independently. Each agent writes to its own files only.
+
+{{agentDeploymentBlocks}}
+
+**Common Agent Requirements** -- every Phase 2 agent MUST:
+1. **FIRST ACTION**: Read `${CLAUDE_SKILL_DIR}/standards.md`, `${CLAUDE_SKILL_DIR}/research-protocol.md`, and `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+2. Apply Search Query Generation Protocol (4+ query types) and Iterative Search-Assess-Refine (max {{maxIterations}} iterations)
+3. Apply domain-specific focus: {{agentSpecialization}}
+4. Include confidence tier (HIGH/MEDIUM/LOW/SPECULATIVE) and source credibility tier (1-5) for every claim
+5. Save: bibliography (`_[AgentID]_Bibliography.md`), claims table (`_Claims_[AgentID].md`), methodology log (`_Methodology_Log_[AgentID].md`), sources (`_Sources_[AgentID].md`)
+6. Cap total WebFetch calls at {{maxWebFetches}}. If a URL returns 403/blocked/paywall, note in methodology log and move on -- do not retry.
+7. Run contrarian sweep: search for refutations, critiques, failure cases, contradictory data
+8. Recursive web exploration up to {{explorationDepth}} levels deep from seed URLs
+
+### Phase 2.5: Batch Source Hashing
+
+After all Phase 2 agents complete, deploy a **general-purpose** batch hashing agent. Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the batch hashing protocol.
+
+### Phase 3: Research Synthesis
+
+Deploy **synthesis-specialist**:
+- **FIRST ACTION**: Read `BASE_DIR/[TOPIC_SLUG]_Research_Outline.md`
+- Read ALL agent output: claims tables (`_Claims_[AgentID].md`), bibliographies (`_[AgentID]_Bibliography.md`), sources (`_Sources_[AgentID].md`), methodology logs (`_Methodology_Log_[AgentID].md`)
+- Consolidate per-agent methodology logs into `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md`
+- Consolidate per-agent sources into `BASE_DIR/[TOPIC_SLUG]_Sources.md`
+- Integrate findings, cross-reference claims, resolve contradictions, mark confidence scores
+- {{synthesisInstructions}}
+- Save to `BASE_DIR/[TOPIC_SLUG]_Synthesis_Report.md`
+
+### Phase 4: Conditional Reporting
+
+If `--no-vvc` flag is present: Phase 4 heading is "Professional Reporting". Output file: `_Comprehensive_Report.md`. Skip claim tagging. Phases 5-6 are skipped.
+
+Otherwise (VVC enabled, no `--no-vvc` flag): Phase 4 heading is "{{phase4Name}}". Output file: `_{{phase4OutputFile}}`. Apply claim tagging per `${CLAUDE_SKILL_DIR}/vvc-pipeline.md`.
+
+Deploy **research-reporting-specialist**: transform synthesis into professional report. Tone: {{reportingTone}}. Sections: {{reportSections}}. Use {{citationStandard}} format. Consolidate master bibliography. Save to `BASE_DIR/[TOPIC_SLUG]_{{phase4OutputFile}}`.
+{{vvcClaimTaggingInstructions}}
+
+### Phase 4.5: Provenance Audit
+
+**Tier behavior:** Quick: skip | {{auditTierBehavior}}
+
+Deploy a **general-purpose** provenance audit agent. Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the provenance audit protocol.
+
+{{vvcVerifyPhaseBlock}}
+
+{{vvcCorrectPhaseBlock}}
+
+Now executing research deployment...
+
+---
+
+## File Output Structure
+
+```
+{{reportOutputDir}}/${RUN_TS}_${TOPIC_SLUG}/
+├── [TOPIC_SLUG]_Research_Outline.md
+{{fileStructure}}
+├── [TOPIC_SLUG]_Claims_[AgentID].md              # Per-agent
+├── [TOPIC_SLUG]_Sources_[AgentID].md              # Per-agent
+├── [TOPIC_SLUG]_Methodology_Log_[AgentID].md      # Per-agent
+├── [TOPIC_SLUG]_[AgentID]_Bibliography.md         # Per-agent
+├── [TOPIC_SLUG]_Methodology_Log.md                # Consolidated
+├── [TOPIC_SLUG]_Sources.md                        # Consolidated
+├── [TOPIC_SLUG]_Synthesis_Report.md
+{{vvcFileStructure}}
+├── [TOPIC_SLUG]_Hash_Manifest.md                  # Provenance hash chain
+├── [TOPIC_SLUG]_Provenance_Log.md                 # Provenance audit
+├── [TOPIC_SLUG]_Comprehensive_Report.md
+└── [TOPIC_SLUG]_Master_Bibliography.md
+```
+
+---
+
+## Key Workflow Features
+
+- **Planning-first coordination** -- all agents read the outline as their first action
+- **Iterative Search-Assess-Refine** -- up to {{maxIterations}} refinement passes per question
+- **Per-agent file isolation** -- each agent writes to its own files; synthesis consolidates
+- **Confidence scoring** on every claim (HIGH/MEDIUM/LOW/SPECULATIVE)
+- **Source credibility hierarchy** -- no HIGH confidence claim on Tier 4-5 sources alone
+- **Domain specialization** -- all agents operate within {{domain}} context
+- **Cryptographic provenance** -- batch hashing after Phase 2; `--reverifiable` retains snapshots
+{{vvcFeatureBullets}}
+
+---
+
+## Domain Preamble
+
+{{globalPreamble}}
+
+All agents apply {{domain}}-specific knowledge, terminology, and analytical frameworks for {{audience}}.
+
+---
+
+## Operational Lessons
+
+{{operationalLessons}}
+
+When no lessons recorded yet: "No entries yet -- update after first research run with `/post-mortem`."
+
+---
+
+## Placeholder Reference (orchestrator)
+
+`{{engineName}}`, `{{engineDisplayName}}`, `{{domain}}`, `{{audience}}`, `{{pipelinePhaseCount}}`, `{{phase4Name}}`, `{{phase4Description}}`, `{{phase4ReportType}}`, `{{phase4OutputFile}}`, `{{standardTierDescription}}`, `{{quickTierDescription}}`, `{{deepTierDescription}}`, `{{comprehensiveTierDescription}}`, `{{tierConfigTable}}`, `{{reportOutputDir}}`, `{{fileNaming}}`, `{{fileStructure}}`, `{{subAgentList}}`, `{{quickAgentId}}`, `{{agentDeploymentBlocks}}`, `{{agentSpecialization}}`, `{{maxIterations}}`, `{{explorationDepth}}`, `{{maxWebFetches}}`, `{{scopeDisciplineBlock}}`, `{{synthesisInstructions}}`, `{{reportingTone}}`, `{{reportSections}}`, `{{citationStandard}}`, `{{auditTierBehavior}}`, `{{globalPreamble}}`, `{{operationalLessons}}`, `{{vvcPhaseLines}}`, `{{vvcClaimTaggingInstructions}}`, `{{vvcVerifyPhaseBlock}}`, `{{vvcCorrectPhaseBlock}}`, `{{vvcFileStructure}}`, `{{vvcFeatureBullets}}`, `{{vvcSubAgentNote}}`
