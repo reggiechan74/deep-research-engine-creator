@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-18
 **Source:** Post-mortem analysis of RICS AI Governance research run
-**Scope:** Changes to the engine factory templates so that generated engines no longer exhibit 5 performance/correctness problems identified in `deep-research-engine-fixes.md`
+**Scope:** Changes to the engine factory templates so that generated engines no longer exhibit 5 performance/correctness problems identified in [`deep-research-engine-fixes.md`](../../../deep-research-engine-fixes.md)
 
 ---
 
@@ -76,7 +76,7 @@ Provenance audit agent (Phase 4.5): reads `${CLAUDE_SKILL_DIR}/provenance.md`
 ### Fix 1: Batch Hashing (Per-Fetch to Phase 2.5)
 
 **Remove from current `base-research-skill.md.tmpl` (before retirement):**
-- Lines 145-165: Entire "Source Hashing Protocol" section under Global Standards
+- Lines 145-164: Entire "Source Hashing Protocol" section under Global Standards
 - Line 356: "PROVENANCE: After each WebFetch, apply the Source Hashing Protocol" from Common Agent Requirements
 - Lines 85-87: Provenance setup that creates Hash_Manifest.md in Phase 0
 
@@ -107,7 +107,7 @@ Hash chain format reference, provenance log structure, and independent verificat
 - "Cross-agent Shared_Sources.md prevents duplicate work" from Key Workflow Features
 
 **Remove from `agent-template.md.tmpl`:**
-- Lines 81-84: Entire "Cross-Agent Coordination" section
+- Lines 79-84: Entire "Cross-Agent Coordination" section (header + body)
 
 **Change per-agent file naming:**
 - Claims: `{SLUG}_Claims_{AgentID}.md` (already per-agent, no change)
@@ -115,7 +115,9 @@ Hash chain format reference, provenance log structure, and independent verificat
 - Methodology log: `{SLUG}_Methodology_Log_{AgentID}.md` (new — currently shared)
 - Sources: `{SLUG}_Sources_{AgentID}.md` (new — replaces Shared_Sources.md)
 
-**Update Phase 3 synthesis:** Add explicit instruction to read all per-agent source files and methodology logs, deduplicate, and cross-reference.
+**Update Phase 3 synthesis:** Add explicit instruction to read all per-agent source files and methodology logs, deduplicate, and cross-reference into consolidated files (`{SLUG}_Methodology_Log.md` and `{SLUG}_Sources.md`).
+
+**Update Phase 4.5 provenance audit:** The provenance audit cross-references methodology logs. Update `provenance.md.tmpl` to read the consolidated `{SLUG}_Methodology_Log.md` produced by Phase 3 synthesis (not the per-agent files directly).
 
 **Net effect:** Zero race conditions. Duplicate fetches mitigated by WebFetch cap and Phase 1 task partitioning.
 
@@ -164,13 +166,31 @@ Template emits this as a conditional block: "If `--no-vvc` flag is present: [ada
 
 Total across all files: ~510-660 lines (down from 782 monolithic, but the orchestrator system prompt drops to ~150-200).
 
+### Extension Template (`extension-skill.md.tmpl`)
+
+The extension template (280 lines) overlays on a base `/deep-research` skill and inherits its protocols. It is affected by all 5 fixes:
+
+- **Fix 1:** Line 126 references "The base skill's Source Hashing Protocol applies to all agents in this extension." This must change to reference the base skill's batch hashing (Phase 2.5) instead of per-fetch hashing.
+- **Fix 3:** Line 210 lists "Cross-Agent Coordination Protocol" as an inherited unchanged protocol. Remove this reference. Add per-agent file isolation as an override.
+- **Fix 4:** No `--no-vvc` flag handling exists. Add to the extension's Phase 0 flag parsing.
+- **Fix 5:** No WebFetch cap exists. Add `{{maxWebFetches}}` cap to the extension's agent instructions.
+- **Fix 6:** The extension template does not need splitting — it is already lean by design (it inherits most content from the base skill). However, if the base `/deep-research` skill adopts the split structure, the extension's "inherited protocols" references must point to the correct reference files rather than assuming a monolithic base SKILL.md.
+
+**Approach:** Update `extension-skill.md.tmpl` in-place. It remains a single template but with corrected protocol references, `--no-vvc` flag parsing, WebFetch cap, and per-agent file isolation. No structural split needed since extensions are inherently lean.
+
+### Domain Presets
+
+21 preset JSON files exist in `domain-presets/`. The new `advanced.maxWebFetchesPerAgent` field is added to `preset-schema.json` with a default of 10. Presets that omit this field inherit the schema default — no individual preset file updates are required. The generation protocol already falls back to schema defaults for missing optional fields.
+
 ---
 
 ## Section 3: Generation Protocol Changes
 
 ### Step 8 — Multi-File Output
 
-Current Step 8 reads one template, writes one file. New Step 8:
+**Current text (SKILL.md line 246):** "Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. [...] Replace ALL placeholders. [...] Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`."
+
+**Replacement:** Step 8 becomes 5 sub-steps for self-contained mode. Extension mode continues to read `extension-skill.md.tmpl` (updated in-place) and write a single file. New Step 8 for self-contained mode:
 
 **Step 8a — Orchestrator SKILL.md:** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
@@ -191,6 +211,12 @@ Current Step 8 reads one template, writes one file. New Step 8:
 **Wizard Section 8:** Add question: "Max WebFetch calls per agent? Default: 10" → stored as `advanced.maxWebFetchesPerAgent`.
 
 **Placeholder Derivation Rules:** Add `{{maxWebFetches}}` → from `advanced.maxWebFetchesPerAgent` (default: 10).
+
+**Template Reference table (SKILL.md lines 328-343):** Replace the `base-research-skill.md.tmpl` row with 5 rows for the new templates (`orchestrator-skill.md.tmpl`, `standards.md.tmpl`, `research-protocol.md.tmpl`, `provenance.md.tmpl`, `vvc-pipeline.md.tmpl`).
+
+**Wizard Section 8 placement:** The WebFetch cap question is asked only when the user selects "Yes" to "Configure advanced settings?" (SKILL.md line 171). It appears alongside max iterations, exploration depth, and token budgets. When the user selects "No," the default of 10 is used.
+
+**Step ordering:** Steps 8a-8e are independent — no step depends on output from a prior step. They can be executed in any order or parallelized.
 
 **Post-generation file list:** Updated to show multi-file structure.
 
@@ -300,6 +326,9 @@ All 4 agents (`patent-search-specialist.md`, `prior-art-analyst.md`, `ip-landsca
 - `plugin/skills/engine-creator/templates/preset-schema.json` — add `maxWebFetchesPerAgent`
 - `plugin/commands/test-engine.md` — updated structural and content validation checks
 
+### Modified Files (continued)
+- `plugin/skills/engine-creator/templates/extension-skill.md.tmpl` — update inherited protocol references, add `--no-vvc` flag, add WebFetch cap, remove Shared_Sources.md references
+
 ### Example Engine Files (in `plugin/examples/patent-intelligence-engine/`)
 - `skills/patent-intelligence-engine/SKILL.md` — rewritten as lean orchestrator
 - `skills/patent-intelligence-engine/standards.md` (new)
@@ -312,3 +341,21 @@ All 4 agents (`patent-search-specialist.md`, `prior-art-analyst.md`, `ip-landsca
 - `agents/vvc-specialist.md` — updated
 - `engine-config.json` — add `maxWebFetchesPerAgent`
 - `README.md` — updated structure and usage
+
+---
+
+## Migration
+
+Engines previously generated from `base-research-skill.md.tmpl` have the old monolithic SKILL.md with per-fetch hashing, Shared_Sources.md, and no WebFetch cap. These engines are **out of scope** for this spec — they continue to work as-is but carry the performance/correctness issues.
+
+Owners of existing engines have two options:
+1. **Regenerate** using the updated factory (recommended). Run `/create-engine` with the same domain preset and config choices.
+2. **Manual migration.** Apply the fixes from `deep-research-engine-fixes.md` directly to the engine's SKILL.md by hand.
+
+A future `/upgrade-engine` command could automate option 2 but is not part of this spec.
+
+---
+
+## Placeholder Reference
+
+Each new template includes a placeholder reference section at the bottom listing all placeholders it uses. The `{{maxWebFetches}}` placeholder appears in `orchestrator-skill.md.tmpl` (usage block), `research-protocol.md.tmpl` (cap instruction), and `agent-template.md.tmpl` (search protocol).
