@@ -170,13 +170,24 @@ Total across all files: ~510-660 lines (down from 782 monolithic, but the orches
 
 The extension template (280 lines) overlays on a base `/deep-research` skill and inherits its protocols. It is affected by all 5 fixes:
 
-- **Fix 1:** Line 126 references "The base skill's Source Hashing Protocol applies to all agents in this extension." This must change to reference the base skill's batch hashing (Phase 2.5) instead of per-fetch hashing.
-- **Fix 3:** Line 210 lists "Cross-Agent Coordination Protocol" as an inherited unchanged protocol. Remove this reference. Add per-agent file isolation as an override.
-- **Fix 4:** No `--no-vvc` flag handling exists. Add to the extension's Phase 0 flag parsing.
-- **Fix 5:** No WebFetch cap exists. Add `{{maxWebFetches}}` cap to the extension's agent instructions.
-- **Fix 6:** The extension template does not need splitting — it is already lean by design (it inherits most content from the base skill). However, if the base `/deep-research` skill adopts the split structure, the extension's "inherited protocols" references must point to the correct reference files rather than assuming a monolithic base SKILL.md.
+**Fix 1 (line 126):** Replace "The base skill's Source Hashing Protocol applies to all agents in this extension." with: "Provenance uses batch hashing (Phase 2.5). The base skill's batch hashing agent collects all cited URLs after Phase 2 completes and hashes them in a single sequential pass. Per-fetch hashing is not used."
 
-**Approach:** Update `extension-skill.md.tmpl` in-place. It remains a single template but with corrected protocol references, `--no-vvc` flag parsing, WebFetch cap, and per-agent file isolation. No structural split needed since extensions are inherently lean.
+**Fix 3 (line 211):** Remove "Cross-Agent Coordination Protocol" from the inherited protocols list (lines 209-215). Add to the overrides section above it: "### File Isolation Override\n\nEach Phase 2 agent writes to its own files only. No shared files during parallel research.\n- Sources: `{SLUG}_Sources_{AgentID}.md`\n- Methodology log: `{SLUG}_Methodology_Log_{AgentID}.md`\n\nPhase 3 synthesis consolidates per-agent files." The inherited list becomes:
+```
+- Iterative Search-Assess-Refine Protocol
+- Failure Recovery Protocol
+- Context Management Guidelines
+- Bibliography and Footnote Standards
+- Search Query Generation Protocol (extended by domain-specific templates above)
+```
+
+**Fix 4:** Add to the extension's flag parsing section (near line 80-90 where tier flags are handled): "- If `--no-vvc` is present: skip Phases 5-6, Phase 4 becomes final reporting (heading: Professional Reporting, output: `_Comprehensive_Report.md`, claim tagging skipped)."
+
+**Fix 5:** Add to the "Agent Pipeline Override" section (near line 100): "All Phase 2 agents: cap total WebFetch calls at {{maxWebFetches}}. If a URL returns 403/blocked/paywall, note in methodology log and move on."
+
+**Fix 6:** The extension template does not need splitting — it is already lean by design (~280 lines, inherits most content from the base skill). However, the inherited protocols list (lines 209-215) must reflect that the base skill now uses split reference files. No structural change needed.
+
+**Approach:** Update `extension-skill.md.tmpl` in-place with the specific text changes above. It remains a single template.
 
 ### Domain Presets
 
@@ -188,9 +199,9 @@ The extension template (280 lines) overlays on a base `/deep-research` skill and
 
 ### Step 8 — Multi-File Output
 
-**Current text (SKILL.md line 246):** "Select template by mode: self-contained reads `base-research-skill.md.tmpl`, extension reads `extension-skill.md.tmpl`. [...] Replace ALL placeholders. [...] Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`."
+**Replace the entire Step 8 block (SKILL.md lines 246-253)** including the template selection, placeholder substitution rules, and missing-optionals handling. The placeholder substitution rules (simple values, arrays, objects, nested, subAgentList, fileStructure, missing optionals) apply to all sub-steps below and should be stated once at the top of the new Step 8.
 
-**Replacement:** Step 8 becomes 5 sub-steps for self-contained mode. Extension mode continues to read `extension-skill.md.tmpl` (updated in-place) and write a single file. New Step 8 for self-contained mode:
+**New Step 8:** "Select template set by mode. Extension mode: read `extension-skill.md.tmpl`, replace placeholders, write single file to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`. Self-contained mode: execute Steps 8a-8e below."
 
 **Step 8a — Orchestrator SKILL.md:** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
@@ -210,9 +221,23 @@ The extension template (280 lines) overlays on a base `/deep-research` skill and
 
 **Wizard Section 8:** Add question: "Max WebFetch calls per agent? Default: 10" → stored as `advanced.maxWebFetchesPerAgent`.
 
-**Placeholder Derivation Rules:** Add `{{maxWebFetches}}` → from `advanced.maxWebFetchesPerAgent` (default: 10).
+**Placeholder Derivation Rules table (SKILL.md lines 258-303):** Add row:
 
-**Template Reference table (SKILL.md lines 328-343):** Replace the `base-research-skill.md.tmpl` row with 5 rows for the new templates (`orchestrator-skill.md.tmpl`, `standards.md.tmpl`, `research-protocol.md.tmpl`, `provenance.md.tmpl`, `vvc-pipeline.md.tmpl`).
+| Placeholder | Derivation Rule |
+|---|---|
+| `{{maxWebFetches}}` | From `advanced.maxWebFetchesPerAgent` (default: 10) |
+
+**Template Reference table (SKILL.md lines 328-343):** Replace the `base-research-skill.md.tmpl` row with:
+
+| Template | Purpose |
+|---|---|
+| `orchestrator-skill.md.tmpl` | Self-contained engine orchestrator SKILL.md (~150-200 lines) |
+| `standards.md.tmpl` | Confidence scoring, source credibility, citation rules |
+| `research-protocol.md.tmpl` | Search protocol, iterative refinement, file isolation, WebFetch cap |
+| `provenance.md.tmpl` | Phase 2.5 batch hashing, Phase 4.5 provenance audit |
+| `vvc-pipeline.md.tmpl` | VVC Phases 5-6 instructions (conditional on VVC enabled) |
+
+The `extension-skill.md.tmpl` row remains unchanged.
 
 **Wizard Section 8 placement:** The WebFetch cap question is asked only when the user selects "Yes" to "Configure advanced settings?" (SKILL.md line 171). It appears alongside max iterations, exploration depth, and token budgets. When the user selects "No," the default of 10 is used.
 
