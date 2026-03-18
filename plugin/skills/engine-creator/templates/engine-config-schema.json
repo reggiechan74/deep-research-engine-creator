@@ -726,6 +726,13 @@
           "type": "object",
           "description": "MCP (Model Context Protocol) server configurations for external tool integration. Keys are server names, values are server-specific connection configs.",
           "additionalProperties": true
+        },
+        "maxWebFetchesPerAgent": {
+          "type": "integer",
+          "description": "Maximum WebFetch calls per research agent per run. Limits total fetches to control runtime and avoid excessive 403/blocked responses.",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50
         }
       }
     }
