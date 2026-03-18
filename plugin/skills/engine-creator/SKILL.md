@@ -168,7 +168,7 @@ Inform the user — this is NOT a question:
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 5), max WebFetch calls per agent (1-50, default 10), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 2), max WebFetch calls per agent (1-50, default 10), max follow-up agents for Comprehensive tier (1-5, default 2), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000, provenance: 5000), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
@@ -241,7 +241,7 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 6 -- /sources command.** Read `sources-command-template.md.tmpl`, replace placeholders. Format `{{sourceHierarchyTable}}` and `{{searchTemplatesTable}}` as markdown tables. Write to `{OUTPUT_DIR}/commands/sources.md`.
 
-**Step 7 -- Agent files.** For EACH agent: read `agent-template.md.tmpl`, replace with agent-specific values. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks. Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
+**Step 7 -- Agent files.** For EACH agent in `agentPipeline.agents`: determine `isVvcAgent` = (`agent.id === "vvc-specialist"`). Pre-compute `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}` based on `isVvcAgent` (see Placeholder Derivation Rules for expansion logic). If `isVvcAgent`, also compute `{{vvcWebFetchCap}}` = `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Read `agent-template.md.tmpl`, replace with agent-specific values including pre-computed blocks. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks (skip `{{searchTemplates}}` for VVC agent). Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
 
 **Step 8 -- Skill files.** Select template set by mode.
 
@@ -258,7 +258,7 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 8a -- Orchestrator SKILL.md.** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers, `{{maxWebFetches}}`). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
-**Step 8b -- standards.md.** Read `standards.md.tmpl`. Replace placeholders (confidence scoring, source hierarchy, citation standard, validation rules, evidence rules, verification protocol). Write to `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`.
+**Step 8b -- standards.md.** Read `standards.md.tmpl`. Replace placeholders (confidence scoring, source hierarchy, citation standard, validation rules, evidence rules, verification protocol). Replace `{{vvcClaimTaxonomySummary}}` with the VVC claim taxonomy summary (brief cross-reference to vvc-pipeline.md) when VVC is enabled, or empty string when VVC is disabled. This is distinct from `{{vvcClaimTaxonomyBlock}}` used in Step 8e for the full canonical table in vvc-pipeline.md. Write to `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`.
 
 **Step 8c -- research-protocol.md.** Read `research-protocol.md.tmpl`. Replace placeholders (search templates, preferred sites, maxIterations, maxWebFetches, explorationDepth, per-agent file naming, context discipline, token budgets). Write to `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`.
 
@@ -280,7 +280,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{comprehensiveTierDescription}}` | Build from `tiers.comprehensive.agents` + followUpRound: "All [N] agents + follow-up round" |
 | `{{agentSpecialization}}` | Concatenate all agent `specialization` strings, joined by "; " |
 | `{{quickAgentId}}` | Fully qualified agent name: `{{engineName}}:[first agent ID from tiers.quick.agents]`. Example: `patent-intelligence-engine:patent-search-specialist` |
-| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate |
+| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate. For the Comprehensive tier row, append " + gap follow-up" after the agent count in the Research Agents column. |
 | `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **{{engineName}}:[id]** (model: [model], type: {{engineName}}:[id]) with specialization:\n\n[specialization]\n\n[promptOverride if present]". **Important:** Custom agents defined in the plugin's `agents/` directory MUST use the fully qualified `{{engineName}}:[agentId]` format. Built-in pipeline agents (research-planning-specialist, synthesis-specialist, research-reporting-specialist) do NOT get the prefix. |
 | `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- {{engineName}}:[id] ([role])". If VVC enabled, also append: "- vvc-specialist (Verification, Validation & Correction Specialist)" |
 | `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
@@ -289,7 +289,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{verificationReportConfig}}` | If `verificationReport.enabled` is true: "Generate a standalone Citation Verification Report. Scope: [scope value]. Include summary statistics, per-citation verification table, issues found, and remediation recommendations." If false: "Verification report generation is disabled." |
 | `{{operationalLessons}}` | Default: "No entries yet — update after first research run with `/post-mortem`." |
 | `{{maxIterations}}` | From `advanced.maxIterationsPerQuestion` (default: 3) |
-| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 5) |
+| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 2) |
 | `{{planningBudget}}` | From `advanced.tokenBudgets.planning` (default: 2000) |
 | `{{researchBudget}}` | From `advanced.tokenBudgets.research` (default: 15000) |
 | `{{synthesisBudget}}` | From `advanced.tokenBudgets.synthesis` (default: 8000) |
@@ -318,6 +318,15 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{reverifiableDefault}}` | From `qualityFramework.provenance.reverifiableDefault`: if true, invert the --reverifiable flag logic (snapshots kept by default, `--no-snapshots` to skip) |
 | `{{scopeDisciplineBlock}}` | Always generate the following conditional block (both modes included in template output): "**If CONTEXT_MODE is standalone (default -- no `--extend` flag):**\n\n### Scope Discipline\n\nYour research scope is LIMITED to the user's stated topic.\n\n- Do NOT read files outside BASE_DIR\n- Do NOT reference prior research runs, their files, or their findings\n- Do NOT incorporate project context from CLAUDE.md into research scope\n- Do NOT use observation history or session context to expand the topic\n- Generate ALL research questions strictly from the user's topic string and your domain expertise in {domain}\n- If the topic is ambiguous, interpret it as a general domain question -- do not assume it relates to any specific project or prior work\n- Every section in the outline must map directly to the stated topic. Remove any section that requires project-specific knowledge to justify.\n\n**If CONTEXT_MODE is extend (`--extend` flag present):**\n\n### Scope Discipline\n\nThis research EXTENDS prior work in this project. You may:\n\n- Read prior research files in the working directory for context\n- Reference project context from CLAUDE.md to inform research scope\n- Build on findings from previous research runs\n- Frame new research questions that deepen or broaden prior findings\n\nClearly mark which sections build on prior work vs. new investigation." |
 | `{{maxWebFetches}}` | From `advanced.maxWebFetchesPerAgent` (default: 10) |
+| `{{isVvcAgent}}` | `true` when the agent being generated has `id === "vvc-specialist"`; `false` for all other agents. Applied per-agent in Step 7 loop. Not emitted into templates directly — used to select which pre-computed block to emit for `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}`. |
+| `{{agentExamplesBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: three VVC-specific examples showing claim verification and correction deployment. Otherwise: existing three research examples with `{{agentId}}`, `{{agentRole}}`, `{{domain}}` substituted. |
+| `{{agentBodyBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: VVC verification protocol summary pointing to `vvc-pipeline.md`, WebFetch budget of `{{vvcWebFetchCap}}`, verification output format, verification context discipline. Otherwise: existing Search Protocol + Confidence Scoring + Output Format + Context Discipline with all current placeholders substituted. |
+| `{{agentFirstActionsBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: First Actions reading vvc-pipeline.md, standards.md, and draft report. Otherwise: existing First Actions reading standards.md, research-protocol.md, and research outline. |
+| `{{vvcWebFetchCap}}` | `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Default: 30 (when base cap is 10). Used only in VVC agent body block. |
+| `{{vvcArgumentHint}}` | If `qualityFramework.vvc.enabled` is true: `" [--no-vvc]"`; otherwise: empty string. |
+| `{{comprehensiveFollowUpAgentCap}}` | From `advanced.comprehensiveFollowUpAgentCap` (default: 2). Maximum agents to deploy in Phase 3.5 gap follow-up. |
+| `{{provenanceBudget}}` | From `advanced.tokenBudgets.provenance` (default: 5000). |
+| `{{vvcClaimTaxonomySummary}}` | When VVC enabled: brief claim taxonomy summary with cross-reference to vvc-pipeline.md listing claim types [VC], [PO], [IE]. When VVC disabled: empty string. Distinct from `{{vvcClaimTaxonomyBlock}}` which is the full canonical table used in vvc-pipeline.md.tmpl. |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
