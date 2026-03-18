@@ -102,7 +102,7 @@ Deploy research agents per tier config. Each agent operates independently. Each 
 5. Save: bibliography (`_[AgentID]_Bibliography.md`), claims table (`_Claims_[AgentID].md`), methodology log (`_Methodology_Log_[AgentID].md`), sources (`_Sources_[AgentID].md`)
 6. Cap total WebFetch calls at {{maxWebFetches}}. If a URL returns 403/blocked/paywall, note in methodology log and move on -- do not retry.
 7. Run contrarian sweep: search for refutations, critiques, failure cases, contradictory data
-8. Recursive web exploration up to {{explorationDepth}} levels deep from seed URLs
+8. Follow-on link exploration: when a source references related pages, follow up to {{explorationDepth}} levels deep. Reserve at least 6 WebFetch calls for primary research queries; use remaining budget for follow-on links only.
 
 ### Phase 2.5: Batch Source Hashing
 
@@ -119,6 +119,19 @@ Deploy **synthesis-specialist**:
 - {{synthesisInstructions}}
 - Save to `BASE_DIR/[TOPIC_SLUG]_Synthesis_Report.md`
 
+### Phase 3.5: Comprehensive Follow-Up (Comprehensive tier only)
+
+Skip this phase for Quick, Standard, and Deep tiers.
+
+After Phase 3 synthesis completes, review the synthesis report's "Gaps & Unresolved Questions" section.
+
+1. **Assess gap severity**: For each gap, determine if it is material to answering the user's research question. Skip cosmetic gaps, nice-to-have expansions, or topics explicitly out of scope.
+2. **Select agents**: For each material gap, identify the most relevant Phase 2 agent. Re-deploy using fully qualified name (`{{engineName}}:[agentId]`). Deploy a maximum of {{comprehensiveFollowUpAgentCap}} agents.
+3. **Scoped task**: Each follow-up agent receives ONLY its assigned gap as the research question — not the full outline. The agent reads the synthesis report's gap description and conducts targeted research using the same protocols, file isolation rules, and WebFetch cap as Phase 2.
+4. **Merge results**: After follow-up agents complete, deploy the synthesis specialist to integrate follow-up findings into the existing synthesis report. The synthesis specialist reads follow-up agent outputs and appends a "Follow-Up Findings" section to `BASE_DIR/[TOPIC_SLUG]_Synthesis_Report.md`.
+
+One follow-up round only — do not recursively follow up on follow-up gaps.
+
 ### Phase 4: Conditional Reporting
 
 If `--no-vvc` flag is present: Phase 4 heading is "Professional Reporting". Output file: `_Comprehensive_Report.md`. Skip claim tagging. Phases 5-6 are skipped.
@@ -128,17 +141,20 @@ Otherwise (VVC enabled, no `--no-vvc` flag): Phase 4 heading is "{{phase4Name}}"
 Deploy **research-reporting-specialist**: transform synthesis into professional report. Tone: {{reportingTone}}. Sections: {{reportSections}}. Use {{citationStandard}} format. Consolidate master bibliography. Save to `BASE_DIR/[TOPIC_SLUG]_{{phase4OutputFile}}`.
 {{vvcClaimTaggingInstructions}}
 
-### Phase 4.5: Provenance Audit
+### Phase 4.5: Provenance Audit & Citation Verification
 
 **Tier behavior:** Quick: skip | {{auditTierBehavior}}
 
-Deploy a **general-purpose** provenance audit agent. Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the provenance audit protocol.
+Deploy a **general-purpose** provenance and citation verification agent. Agent instructions:
+1. **FIRST ACTION**: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the batch provenance audit protocol.
+2. Read `${CLAUDE_SKILL_DIR}/standards.md` Source Verification Protocol section.
+3. Execute citation verification on `BASE_DIR/[TOPIC_SLUG]_Master_Bibliography.md`: URL liveness check on all entries, source freshness flagging per configured threshold, dead link handling per configured strategy.
+4. Generate `BASE_DIR/[TOPIC_SLUG]_Citation_Verification_Report.md` per the report template in standards.md.
+5. Generate `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md` per the provenance log template.
 
 {{vvcVerifyPhaseBlock}}
 
 {{vvcCorrectPhaseBlock}}
-
-Now executing research deployment...
 
 ---
 
@@ -195,4 +211,4 @@ When no lessons recorded yet: "No entries yet -- update after first research run
 
 ## Placeholder Reference (orchestrator)
 
-`{{engineName}}`, `{{engineDisplayName}}`, `{{domain}}`, `{{audience}}`, `{{pipelinePhaseCount}}`, `{{phase4Name}}`, `{{phase4Description}}`, `{{phase4ReportType}}`, `{{phase4OutputFile}}`, `{{standardTierDescription}}`, `{{quickTierDescription}}`, `{{deepTierDescription}}`, `{{comprehensiveTierDescription}}`, `{{tierConfigTable}}`, `{{reportOutputDir}}`, `{{fileNaming}}`, `{{fileStructure}}`, `{{subAgentList}}`, `{{quickAgentId}}`, `{{agentDeploymentBlocks}}`, `{{agentSpecialization}}`, `{{maxIterations}}`, `{{explorationDepth}}`, `{{maxWebFetches}}`, `{{scopeDisciplineBlock}}`, `{{synthesisInstructions}}`, `{{reportingTone}}`, `{{reportSections}}`, `{{citationStandard}}`, `{{auditTierBehavior}}`, `{{globalPreamble}}`, `{{operationalLessons}}`, `{{vvcPhaseLines}}`, `{{vvcClaimTaggingInstructions}}`, `{{vvcVerifyPhaseBlock}}`, `{{vvcCorrectPhaseBlock}}`, `{{vvcFileStructure}}`, `{{vvcFeatureBullets}}`, `{{vvcSubAgentNote}}`
+`{{engineName}}`, `{{engineDisplayName}}`, `{{domain}}`, `{{audience}}`, `{{pipelinePhaseCount}}`, `{{phase4Name}}`, `{{phase4Description}}`, `{{phase4ReportType}}`, `{{phase4OutputFile}}`, `{{standardTierDescription}}`, `{{quickTierDescription}}`, `{{deepTierDescription}}`, `{{comprehensiveTierDescription}}`, `{{tierConfigTable}}`, `{{reportOutputDir}}`, `{{fileNaming}}`, `{{fileStructure}}`, `{{subAgentList}}`, `{{quickAgentId}}`, `{{agentDeploymentBlocks}}`, `{{agentSpecialization}}`, `{{maxIterations}}`, `{{explorationDepth}}`, `{{maxWebFetches}}`, `{{scopeDisciplineBlock}}`, `{{synthesisInstructions}}`, `{{reportingTone}}`, `{{reportSections}}`, `{{citationStandard}}`, `{{auditTierBehavior}}`, `{{comprehensiveFollowUpAgentCap}}`, `{{globalPreamble}}`, `{{operationalLessons}}`, `{{vvcPhaseLines}}`, `{{vvcClaimTaggingInstructions}}`, `{{vvcVerifyPhaseBlock}}`, `{{vvcCorrectPhaseBlock}}`, `{{vvcFileStructure}}`, `{{vvcFeatureBullets}}`, `{{vvcSubAgentNote}}`
