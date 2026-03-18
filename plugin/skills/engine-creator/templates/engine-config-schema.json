@@ -707,6 +707,13 @@
               "description": "Token budget for the VVC verification and correction phases combined. Only used when VVC is enabled.",
               "minimum": 0,
               "examples": [8000]
+            },
+            "provenance": {
+              "type": "integer",
+              "description": "Token budget for provenance audit and citation verification phase",
+              "default": 5000,
+              "minimum": 0,
+              "examples": [5000]
             }
           }
         },
@@ -717,8 +724,8 @@
         },
         "explorationDepth": {
           "type": "integer",
-          "description": "Maximum depth for recursive web exploration from seed URLs (following citation chains and references)",
-          "default": 5,
+          "description": "Maximum depth for follow-on link exploration from source pages",
+          "default": 2,
           "minimum": 1,
           "maximum": 10
         },
@@ -733,6 +740,13 @@
           "default": 10,
           "minimum": 1,
           "maximum": 50
+        },
+        "comprehensiveFollowUpAgentCap": {
+          "type": "integer",
+          "description": "Maximum agents to deploy in Phase 3.5 comprehensive follow-up round",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 5
         }
       }
     }
