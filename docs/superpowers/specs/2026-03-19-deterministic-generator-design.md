@@ -229,7 +229,7 @@ The script generates ALL files. It reads `config.engineMeta.mode` to determine t
 | `provenance.md.tmpl` | `skills/{name}/provenance.md` | Audit tier behavior, reverifiable default, chain format |
 | `vvc-pipeline.md.tmpl` | `skills/{name}/vvc-pipeline.md` | VVC claim types, verification scope, tier behavior (only when VVC enabled) |
 | `dashboard-server.js.tmpl` | `skills/{name}/dashboard-server.js` | dashboardPort |
-| `dashboard.html.tmpl` | `skills/{name}/dashboard.html` | None (verbatim copy) |
+| `dashboard.html.tmpl` | `skills/{name}/dashboard.html` | None (no placeholders, but UI enhanced in Section 7) |
 | `readme-template.md.tmpl` | `README.md` | agentTable, sourceTable, sampleQuestions, qualitySummary, mode, createdAt, outputFiles |
 
 \* Per-agent values from `config._derived`
@@ -521,36 +521,7 @@ These checks become unnecessary because the script guarantees them:
 
 ## Files Changed
 
-| File | Change Type | Description |
-|------|-------------|-------------|
-| `plugin/generator/generate.py` | New | Deterministic generator script (~400-500 lines) |
-| `plugin/skills/engine-creator/SKILL.md` | Modified | Replace Steps 1-9 with single script invocation, add _derived computation step, bump version to 1.9.0 |
-| `plugin/skills/engine-creator/templates/engine-config-schema.json` | Modified | Add `_derived` to top-level `required` array AND `properties` object (schema uses `additionalProperties: false`) |
-| `plugin/commands/test-engine.md` | Modified | Remove checks 4f, 4k, 4l, 4m, 4p; update remaining check numbers |
-| `plugin/examples/patent-intelligence-engine/engine-config.json` | Modified | Add `_derived` section with patent-domain content |
-| `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate all output files using the new script to validate end-to-end |
-| `plugin/.claude-plugin/plugin.json` | Modified | Version bump to 1.9.0 |
-| `.claude-plugin/marketplace.json` | Modified | Version bump to 1.9.0 |
-| `CHANGELOG.md` | Modified | v1.9.0 entry |
-
-## Files NOT Changed
-
-| File | Reason |
-|------|--------|
-| `templates/orchestrator-skill.md.tmpl` | Phase 0 status init and dashboard launch already present from v1.8.0 |
-| `templates/agent-template.md.tmpl` | Agent Constraints section already present from v1.8.0 |
-| `templates/standards.md.tmpl` | No changes |
-| `templates/provenance.md.tmpl` | No changes |
-| `templates/vvc-pipeline.md.tmpl` | No changes |
-| `templates/command-template.md.tmpl` | No changes |
-| `templates/sources-command-template.md.tmpl` | No changes |
-| `templates/plugin-json.tmpl` | No changes |
-| `templates/extension-skill.md.tmpl` | No changes |
-| `templates/readme-template.md.tmpl` | No changes |
-| `templates/dashboard-server.js.tmpl` | Modified (see Section 7) |
-| `plugin/skills/engine-creator/domain-presets/*.json` | Presets don't include `_derived` |
-| `preset-schema.json` | Presets don't include `_derived` |
-| `plugin-manifest-schema.json` | Used only by `/test-engine`, not by `generate.py` |
+**(Superseded by the Updated Files Changed table at the end of this document — see Section 7g.)**
 
 ---
 
@@ -641,6 +612,18 @@ Written by the agent alongside its status JSON. Overwritten after each research 
 - `pending` — claim identified but not yet corroborated or verified
 - `under_investigation` — agent is actively looking for supporting/contradicting sources
 - `investigated` — claim has been assessed and assigned a confidence level
+
+**Field types:**
+- `id`: string (e.g., "C-01")
+- `text`: string (claim text, max ~200 chars)
+- `confidence`: one of `"HIGH"`, `"MEDIUM"`, `"LOW"`, `"SPECULATIVE"`, or `null` (when status is `pending`)
+- `status`: one of `"pending"`, `"under_investigation"`, `"investigated"`
+- `sourceCount`: integer (number of supporting sources found)
+- `question`: string (the research question this claim originated from)
+
+**Write timing:** Claims JSON is overwritten after each research question (cumulative). However, individual `claim` events also appear in the action log in real-time. The dashboard shows claims from the JSON file (updated per question) — new claims discovered mid-question appear in the Activity Log tab first, then in the Claims tab after the question completes and the JSON is rewritten.
+
+**Quick tier:** Quick-tier agents still write claims JSON and action log files. Although the dashboard is not launched for Quick tier, these files are available for post-mortem analysis and can be inspected manually.
 
 **Change target:** `templates/research-protocol.md.tmpl` — Incremental Write Protocol section
 
@@ -749,6 +732,11 @@ Log these events:
 Each entry includes a timestamp. The log is append-only — never overwrite or truncate.
 On agent start, create the file with an empty array `[]`. Append by reading the current
 array, pushing the new entry, and writing back.
+
+**Size limit:** Cap the log at 500 entries per agent. If the array exceeds 500 entries,
+drop the oldest entries to stay within the limit. For a typical research session
+(5 questions × ~30 actions per question = ~150 entries), this cap is never hit.
+It guards against edge cases in Comprehensive tier with extensive follow-up rounds.
 ```
 
 ### 7d: Dashboard UI Enhancements
@@ -779,9 +767,11 @@ array, pushing the new entry, and writing back.
 - Timestamps shown as relative ("3s ago", "1m ago")
 
 **Tab 3: Sources**
-- List of sources discovered by this agent
-- Each shows: credibility tier badge (1-5), URL (linked), fetch status
-- Grouped by tier (Tier 1 first)
+- List of URLs fetched by this agent, extracted from the action log (`fetch` entries)
+- Each shows: URL (linked), fetch status badge (success=green, blocked=rose, timeout=amber)
+- Grouped by status (successful fetches first, then blocked/failed)
+- Source count header: "8 sources (6 fetched, 1 blocked, 1 timeout)"
+- Note: Credibility tier information is not available at the agent level (tiers are assigned during synthesis). The sources tab shows fetch status only.
 
 **Data source:** The dashboard server reads `_status/[AgentID]_claims.json` and `_status/[AgentID]_log.json` alongside the existing `_status/[AgentID].json`. All three are included in the SSE push and `/api/status` response.
 
@@ -820,6 +810,10 @@ function getStatus() {
 
 The `fs.watch` handler already triggers on any `.json` file change, so claims and log file updates automatically push to the dashboard via SSE.
 
+**SSE payload management:** To prevent large payloads during long sessions, the SSE broadcast caps the action log to the **last 50 entries** per agent. The full log is available via a new `GET /api/agent/:id/log` endpoint for clients that need the complete history (e.g., expanding the Activity Log tab triggers a full fetch). Claims are sent in full since they are capped by the number of research questions (typically <50 claims per agent).
+
+**Write frequency:** The `currentAction` field updates before each WebSearch/WebFetch call, which can produce dozens of status file writes per minute per agent. The existing 100ms debounce timer on `fs.watch` coalesces rapid-fire writes into a single SSE broadcast. This is sufficient — the dashboard doesn't need sub-100ms latency, and the debounce prevents SSE flooding.
+
 ### 7f: Updated File Structure
 
 ```
@@ -851,11 +845,31 @@ The Python generator reads these templates as-is — no generator changes needed
 | `plugin/generator/generate.py` | New | Deterministic generator script |
 | `plugin/skills/engine-creator/SKILL.md` | Modified | Replace generation steps with script invocation, add _derived, bump to v1.9.0 |
 | `templates/engine-config-schema.json` | Modified | Add `_derived` to required + properties |
-| `templates/research-protocol.md.tmpl` | Modified | Add currentAction, claims JSON, Action Logging Protocol |
-| `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files in getStatus() |
-| `templates/dashboard.html.tmpl` | Modified | Expandable cards, claims/log/sources tabs, currentAction display |
+| `templates/research-protocol.md.tmpl` | Modified | Add currentAction field, claims JSON writing, Action Logging Protocol section |
+| `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files in getStatus(), cap log entries in SSE |
+| `templates/dashboard.html.tmpl` | Modified | Expandable cards with claims/activity log tabs, currentAction display |
 | `plugin/commands/test-engine.md` | Modified | Remove impossible-to-fail checks |
 | `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate with script + updated templates |
 | `plugin/.claude-plugin/plugin.json` | Modified | Version 1.9.0 |
 | `.claude-plugin/marketplace.json` | Modified | Version 1.9.0 |
 | `CHANGELOG.md` | Modified | v1.9.0 entry |
+
+## Files NOT Changed
+
+| File | Reason |
+|------|--------|
+| `templates/orchestrator-skill.md.tmpl` | Phase 0 status init already present from v1.8.0 |
+| `templates/agent-template.md.tmpl` | Agent Constraints already present from v1.8.0 |
+| `templates/standards.md.tmpl` | No changes |
+| `templates/provenance.md.tmpl` | No changes |
+| `templates/vvc-pipeline.md.tmpl` | No changes |
+| `templates/command-template.md.tmpl` | No changes |
+| `templates/sources-command-template.md.tmpl` | No changes |
+| `templates/plugin-json.tmpl` | No changes |
+| `templates/extension-skill.md.tmpl` | No changes (extension mode inherits observability from base plugin — see note below) |
+| `templates/readme-template.md.tmpl` | No changes |
+| `plugin/skills/engine-creator/domain-presets/*.json` | Presets don't include `_derived` |
+| `preset-schema.json` | Presets don't include `_derived` |
+| `plugin-manifest-schema.json` | Used only by `/test-engine`, not by `generate.py` |
+
+**Extension mode note:** Extension-mode engines inherit `research-protocol.md`, `dashboard-server.js`, and `dashboard.html` from the base `/deep-research` plugin. The observability enhancements in Section 7 only take effect for extension engines when the base plugin is updated to include these changes. This is a known limitation — extension mode is inherently dependent on the base plugin version.
