@@ -86,6 +86,12 @@ After completing all Search-Assess-Refine passes for one research question:
 3. APPEND the iteration log entry to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log_[AgentID].md`
 4. APPEND discovered sources to `BASE_DIR/[TOPIC_SLUG]_Sources_[AgentID].md`
 5. OVERWRITE status JSON to `BASE_DIR/_status/[AgentID].json` (see Agent Status Protocol)
+6. OVERWRITE claims status to `BASE_DIR/_status/[AgentID]_claims.json` with all claims
+   discovered so far (cumulative, not per-question). Each claim is a JSON object:
+   `{"id": "C-01", "text": "...", "confidence": "HIGH|MEDIUM|LOW|SPECULATIVE|null",
+    "status": "pending|under_investigation|investigated", "sourceCount": 2,
+    "question": "The originating research question"}`
+   The file is a JSON array of these objects. On first write, create as `[]` then populate.
 
 ### File Creation Convention
 
@@ -119,30 +125,94 @@ The `_status/` directory is created by the orchestrator before agents are deploy
   "engineId": "${ENGINE_ID}",
   "phase": 2,
   "status": "researching | writing | assessing | refining | complete | error",
-  "currentQuestion": "The research question currently being worked on",
-  "questionsCompleted": 2,
-  "questionsTotal": 5,
+  "currentAction": "Searching 'solid-state battery cathode 2024'",
   "activity": "searching | assessing | refining | writing | idle",
+  "questions": [
+    {
+      "text": "The research question text",
+      "status": "complete | active | pending",
+      "startedAt": "ISO-8601 timestamp or null",
+      "completedAt": "ISO-8601 timestamp or null",
+      "durationMs": 102000
+    }
+  ],
   "webFetchesUsed": 4,
   "webFetchCap": 10,
   "claimsFound": 7,
   "sourcesCollected": 4,
   "iterationPass": 2,
   "maxIterations": 3,
+  "errors": 0,
+  "aborts": 0,
   "lastUpdated": "ISO-8601 timestamp"
 }
 ```
 
 ### When to Write Status
 
-- On agent start: status "researching", questionsCompleted 0, activity "searching"
+- On agent start: status "researching", initialize questions array with all assigned
+  questions (status "pending"), set first question to "active" with startedAt timestamp,
+  activity "searching", errors 0, aborts 0
+- Before each WebSearch call: update currentAction to the search query string
+  (e.g., "Searching 'solid-state battery cathode patent 2024'")
+- Before each WebFetch call: update currentAction to the URL being fetched
+  (e.g., "Fetching https://patents.google.com/patent/US20240123456")
 - After each Search pass: update activity to "searching"
+- During assessment: update currentAction to what is being assessed
+  (e.g., "Assessing claim C-03 against 2 sources")
 - After each Assess pass: update activity to "assessing"
+- During refinement: update currentAction to the refinement query
+  (e.g., "Refining: searching for contradictory evidence on cathode materials")
 - After each Refine pass: update activity to "refining"
-- After writing files for a completed question: increment questionsCompleted,
+- After writing files for a completed question: set the question's status to "complete"
+  with completedAt and durationMs, set next question to "active" with startedAt,
   update claimsFound and sourcesCollected totals, activity "writing"
+- On error: increment errors counter, status "error" if fatal, add "message" field
+- On abort: increment aborts counter, log abort reason
 - On completion of all questions: status "complete", activity "idle"
-- On error or abort: status "error", add "message" field with explanation
+
+---
+
+## Action Logging Protocol
+
+Maintain an append-only action log at `BASE_DIR/_status/[AgentID]_log.json`.
+This file is a JSON array. Append new entries after each significant action.
+
+Log these events:
+- Before starting each research question: type "start"
+- After each WebSearch call: type "search" with query and result count
+- After each WebFetch call: type "fetch" with URL and status (success/403_blocked/timeout/error)
+- When a new claim is identified: type "claim" with ID, text, initial confidence
+- When assessing a claim: type "assess" with claim ID and result
+- After writing files to disk: type "write" with file list and counts
+- After completing a research question: type "question_complete" with totals
+- On error or abort: type "error" or "abort" with message/reason
+
+Each entry includes a timestamp. The log is append-only — never overwrite or truncate.
+On agent start, create the file with an empty array `[]`. Append by reading the current
+array, pushing the new entry, and writing back.
+
+**Size limit:** Cap the log at 500 entries per agent. If the array exceeds 500 entries,
+drop the oldest entries to stay within the limit.
+
+### Log Entry Schema
+
+```json
+{
+  "type": "start | search | fetch | claim | assess | write | question_complete | error | abort",
+  "timestamp": "ISO-8601 timestamp",
+  // type-specific fields:
+  // start: "question", "questionIndex"
+  // search: "query", "engine", "resultCount"
+  // fetch: "url", "status" (success/403_blocked/timeout/error)
+  // claim: "claimId", "text", "confidence"
+  // assess: "claimId", "result", "sourcesChecked"
+  // write: "files", "claimsAdded", "sourcesAdded"
+  // question_complete: "question", "questionIndex", "claimsTotal", "sourcesTotal"
+  // error: "message"
+  // abort: "reason"
+}
+```
 
 ---
 
@@ -155,6 +225,9 @@ Per-agent output files:
 - Bibliography: `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md`
 - Methodology log: `BASE_DIR/[TOPIC_SLUG]_Methodology_Log_[AgentID].md`
 - Sources: `BASE_DIR/[TOPIC_SLUG]_Sources_[AgentID].md`
+- Status: `BASE_DIR/_status/[AgentID].json`
+- Claims status: `BASE_DIR/_status/[AgentID]_claims.json`
+- Action log: `BASE_DIR/_status/[AgentID]_log.json`
 
 Phase 3 synthesis consolidates per-agent files into unified versions.
 Do NOT write to any file that another agent might also be writing to.
