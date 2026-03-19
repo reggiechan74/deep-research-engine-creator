@@ -1,0 +1,543 @@
+# Deterministic Python Generator — Design Spec
+
+**Date:** 2026-03-19
+**Status:** Draft
+**Scope:** Replace LLM-driven file generation with a deterministic Python script
+
+## Problem Statement
+
+The engine creator uses the LLM as its template engine — SKILL.md instructs Claude to read `.tmpl` files, substitute placeholders, and write output. This is unreliable:
+
+1. **Non-deterministic output.** Same config can produce slightly different files across runs. The LLM may rephrase, reformat, or skip content.
+2. **Skipped steps.** The model can miss generation steps entirely (v1.8.0: Step 8f was skipped because the preamble said "8a-8e" instead of "8a-8f"). A code generator never forgets to write a file.
+3. **Expensive validation.** The `/test-engine` suite exists primarily because LLM output can't be trusted — placeholder residue scans, file existence checks, line count limits. A deterministic generator makes most of these checks unnecessary.
+4. **Wasted tokens.** Template substitution is mechanical string replacement. Using the most expensive tool (an LLM) for work that `str.replace()` handles is wasteful.
+
+## Design Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Wizard interview | Stays as LLM conversation | Benefits from LLM judgment (sample question analysis, agent suggestions, contextual recommendations) |
+| File generation | Python script | Deterministic, testable, guaranteed file completeness |
+| Creative content | LLM pre-computes, stores in `config._derived` | Clean split: LLM handles judgment, Python handles mechanics |
+| Generator structure | Single file (`generate.py`) | 74 rules is manageable in one file; premature modularity adds complexity |
+| Template engine | Custom `{{key}}` substitution | Zero dependencies; Jinja2 adds a pip requirement and syntax migration |
+| Invocation | LLM runs `python3 generate.py config.json ./output/` via Bash | Single command, validate-then-generate, clear error codes |
+| Old generation path | Removed entirely | Maintaining two paths guarantees divergence |
+| Test changes | Drop impossible-to-fail checks, keep semantic checks | Script guarantees file completeness and placeholder substitution |
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SKILL.md Wizard (LLM)                                     │
+│                                                             │
+│  Sections 1-9: Interview → engine-config.json               │
+│  Derived Content: Compute _derived section                  │
+│  Preview: Show user what will be generated                  │
+│  Invoke: python3 generate.py config.json ./output/          │
+└────────────┬────────────────────────────────────────────────┘
+             │ engine-config.json (with _derived)
+             ▼
+┌─────────────────────────────────────────────────────────────┐
+│  generate.py (Python, zero dependencies)                    │
+│                                                             │
+│  1. load_config(path)        → dict                         │
+│  2. validate(config)         → pass or sys.exit(1)          │
+│  3. derive_placeholders(config) → dict (70+ rules)          │
+│  4. generate_files(config, placeholders, output_dir)        │
+│     - Read each .tmpl file                                  │
+│     - Substitute {{placeholders}}                           │
+│     - Write output files                                    │
+│  5. verify_output(output_dir) → pass or sys.exit(2)         │
+│  6. print_summary()                                         │
+└────────────┬────────────────────────────────────────────────┘
+             │ Deterministic output
+             ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Generated Engine (self-contained mode)                      │
+│  .claude-plugin/plugin.json                                 │
+│  commands/research.md, sources.md                           │
+│  agents/{agentId}.md (one per agent)                        │
+│  skills/{name}/SKILL.md, standards.md, research-protocol.md │
+│  skills/{name}/provenance.md, vvc-pipeline.md (if VVC)      │
+│  skills/{name}/dashboard-server.js, dashboard.html          │
+│  README.md                                                  │
+│                                                             │
+│  Generated Engine (extension mode)                          │
+│  .claude-plugin/plugin.json                                 │
+│  commands/research.md, sources.md                           │
+│  agents/{agentId}.md (one per agent)                        │
+│  skills/{name}/SKILL.md (from extension template)           │
+│  README.md                                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Section 1: Generator Script
+
+### File: `plugin/generator/generate.py`
+
+**Interface:**
+```
+python3 plugin/generator/generate.py <config-path> <output-dir>
+```
+
+**Exit codes:**
+- `0` — success, all files generated
+- `1` — validation error (config malformed, missing required fields)
+- `2` — template error (template file not found, substitution failure)
+
+**Stdout:** progress log (one line per file written), final summary count.
+**Stderr:** errors and warnings.
+
+### Function Structure
+
+```python
+def main(config_path: str, output_dir: str) -> None:
+    config = load_config(config_path)
+    validate(config)
+    placeholders = derive_placeholders(config)
+    generate_files(config, placeholders, output_dir)
+    verify_output(output_dir, config)
+    print_summary(output_dir)
+
+def load_config(path: str) -> dict:
+    """Read and parse engine-config.json."""
+
+def validate(config: dict) -> None:
+    """Check required fields, types, relational constraints.
+    Exits with code 1 and descriptive error on failure."""
+
+def derive_placeholders(config: dict) -> dict:
+    """Apply all 70+ mechanical derivation rules.
+    Returns flat dict: placeholder name → substitution value."""
+
+def substitute(template: str, placeholders: dict) -> str:
+    """Replace all {{key}} occurrences in template string.
+    Warns on any unresolved {{...}} remaining after substitution."""
+
+def generate_files(config: dict, placeholders: dict, output_dir: str) -> None:
+    """Create directories, read templates, substitute, write output files."""
+
+def verify_output(output_dir: str, config: dict) -> None:
+    """Post-generation check: all expected files exist and are non-empty.
+    Exits with code 2 if any file is missing."""
+
+def print_summary(output_dir: str) -> None:
+    """List all generated files with sizes."""
+```
+
+### Template Discovery
+
+Templates are located relative to the script at `../skills/engine-creator/templates/`. Resolved at runtime:
+
+```python
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(SCRIPT_DIR, '..', 'skills', 'engine-creator', 'templates')
+```
+
+### Substitution Behavior
+
+The `substitute()` function performs simple string replacement:
+
+```python
+def substitute(template: str, placeholders: dict) -> str:
+    result = template
+    for key, value in placeholders.items():
+        result = result.replace('{{' + key + '}}', str(value))
+    # Warn about unresolved placeholders
+    remaining = re.findall(r'\{\{[a-zA-Z0-9_-]+\}\}', result)
+    if remaining:
+        print(f"WARNING: unresolved placeholders: {remaining}", file=sys.stderr)
+    return result
+```
+
+No Jinja2, no template engine. Raw string replacement. The warning catches any derivation rules that were missed.
+
+## Section 2: Wizard Changes
+
+### Config Assembly: New `_derived` Section
+
+After assembling `engine-config.json` (current "Config Assembly" section in SKILL.md) and before the preview, the LLM computes creative content and stores it in `config._derived`:
+
+```
+## Derived Content Generation
+
+Before preview, compute creative/contextual content that requires LLM judgment
+and store in config._derived:
+
+1. For each agent in agentPipeline.agents:
+   - Determine isVvcAgent (id === "vvc-specialist")
+   - Generate agentExamplesBlock: 3 domain-specific examples using <example> XML blocks
+     - VVC agent: verification-specific examples
+     - Research agents: research-specific examples with domain terms
+   - Generate agentBodyBlock:
+     - VVC agent: Verification Protocol, WebFetch Budget, Output Format, Context Discipline
+     - Research agents: Search Protocol, Confidence Scoring, Output Format, Context Discipline
+   - Generate agentFirstActionsBlock:
+     - VVC agent: read vvc-pipeline.md, standards.md, draft report
+     - Research agents: read standards.md, research-protocol.md, research outline
+2. Generate scopeDisciplineBlock: both standalone and --extend variants,
+   incorporating domain-specific terminology
+3. Set operationalLessons: "No entries yet -- update after first research run with /post-mortem."
+
+Store all values in engine-config.json under "_derived" key.
+```
+
+### Generation Step Replacement
+
+Steps 1-7 (directory creation, plugin.json, engine-config.json, commands, sources, agent files) and Steps 8a-8f (skill files, dashboard files) and Step 9 (README) are ALL replaced with a single step:
+
+```
+**Step 8 -- Generate engine files.** Run the generator script:
+
+    python3 ${CLAUDE_PLUGIN_ROOT}/generator/generate.py {OUTPUT_DIR}/engine-config.json {OUTPUT_DIR}
+
+The script reads engine-config.json (including _derived content), loads all templates,
+performs placeholder substitution, and writes every output file deterministically.
+
+If the script exits with error code 1 (validation), review the error message and fix
+the config. Re-run the script.
+If exit code 2 (template error), report the error to the user.
+If exit code 0, proceed to Post-Generation.
+```
+
+Note: The LLM still writes `engine-config.json` to `{OUTPUT_DIR}/` before invoking the script. The script reads it as input.
+
+### Post-Generation Simplified
+
+Drop the manual file verification checklist (the script's `verify_output()` does this). Keep:
+- Suggest `/test-engine` for semantic validation
+- Copy install command
+- Suggest publish
+
+## Section 3: File Generation Mapping
+
+The script generates ALL files. It reads `config.engineMeta.mode` to determine the output mode.
+
+### Self-Contained Mode (mode: "self-contained")
+
+| Template | Output | Key Placeholders |
+|----------|--------|-----------------|
+| `plugin-json.tmpl` | `.claude-plugin/plugin.json` | engineName, engineDescription, authorName, authorEmail, keywords |
+| `command-template.md.tmpl` | `commands/research.md` | tierSummary, vvcArgumentHint, engineName, skillDirName |
+| `sources-command-template.md.tmpl` | `commands/sources.md` | sourceHierarchyTable, searchTemplatesTable, filters |
+| `agent-template.md.tmpl` | `agents/{agentId}.md` (loop) | agentId, agentRole, agentSpecialization, agentExamplesBlock*, agentBodyBlock*, agentFirstActionsBlock*, sourceHierarchy, promptOverride, color, tools |
+| `orchestrator-skill.md.tmpl` | `skills/{name}/SKILL.md` | All orchestrator placeholders (~40) |
+| `standards.md.tmpl` | `skills/{name}/standards.md` | Confidence levels, tier names/sources, citation management fields, VVC taxonomy summary |
+| `research-protocol.md.tmpl` | `skills/{name}/research-protocol.md` | Search templates, iteration limits, WebFetch cap, token budgets |
+| `provenance.md.tmpl` | `skills/{name}/provenance.md` | Audit tier behavior, reverifiable default, chain format |
+| `vvc-pipeline.md.tmpl` | `skills/{name}/vvc-pipeline.md` | VVC claim types, verification scope, tier behavior (only when VVC enabled) |
+| `dashboard-server.js.tmpl` | `skills/{name}/dashboard-server.js` | dashboardPort |
+| `dashboard.html.tmpl` | `skills/{name}/dashboard.html` | None (verbatim copy) |
+| `readme-template.md.tmpl` | `README.md` | agentTable, sourceTable, sampleQuestions, qualitySummary, mode, createdAt, outputFiles |
+
+\* Per-agent values from `config._derived`
+
+### Extension Mode (mode: "extension")
+
+Extension mode produces fewer files — the core pipeline is inherited from the base `/deep-research` plugin.
+
+| Template | Output | Key Placeholders |
+|----------|--------|-----------------|
+| `plugin-json.tmpl` | `.claude-plugin/plugin.json` | Same as self-contained |
+| `command-template.md.tmpl` | `commands/research.md` | Same as self-contained |
+| `sources-command-template.md.tmpl` | `commands/sources.md` | Same as self-contained |
+| `agent-template.md.tmpl` | `agents/{agentId}.md` (loop) | Same as self-contained |
+| `extension-skill.md.tmpl` | `skills/{name}/SKILL.md` | baseSkillPath, tier/source/confidence/citation overrides (~30 placeholders) |
+| `readme-template.md.tmpl` | `README.md` | Same as self-contained |
+
+Extension mode does NOT generate: `standards.md`, `research-protocol.md`, `provenance.md`, `vvc-pipeline.md`, `dashboard-server.js`, `dashboard.html`. These are inherited from the base plugin.
+
+### Mode Branching in `generate.py`
+
+```python
+def generate_files(config, placeholders, output_dir):
+    mode = config["engineMeta"]["mode"]
+    # Common files (both modes)
+    generate_plugin_json(...)
+    generate_commands(...)
+    generate_agents(...)
+    generate_readme(...)
+    if mode == "self-contained":
+        generate_skill_files(...)  # orchestrator + standards + protocol + provenance + VVC + dashboard
+    elif mode == "extension":
+        generate_extension_skill(...)  # single SKILL.md from extension template
+```
+
+**Directory creation:** The script creates `.claude-plugin/`, `commands/`, `agents/`, `skills/{engineName}/` under the output directory.
+
+**`engine-config.json`:** Written by the LLM before script invocation. The script reads it as input only.
+
+**`plugin-manifest-schema.json`:** Used only by `/test-engine` for validation. The script does not use it.
+
+## Section 4: Derivation Rules
+
+The `derive_placeholders(config)` function returns a flat `dict[str, str]`. Rules grouped by type:
+
+### Direct Config Reads (~20 rules)
+
+| Placeholder | Source |
+|-------------|--------|
+| `{{engineName}}` | `config.engineMeta.name` |
+| `{{engineDisplayName}}` | `config.engineMeta.displayName` |
+| `{{domain}}` | `config.engineMeta.domain` |
+| `{{audience}}` | `config.engineMeta.audience` |
+| `{{engineVersion}}` | `config.engineMeta.version` |
+| `{{maxIterations}}` | `config.advanced.maxIterationsPerQuestion` (default: 3) |
+| `{{explorationDepth}}` | `config.advanced.explorationDepth` (default: 2) |
+| `{{maxWebFetches}}` | `config.advanced.maxWebFetchesPerAgent` (default: 10) |
+| `{{dashboardPort}}` | `config.advanced.dashboardPort` (default: 3847) |
+| `{{planningBudget}}` | `config.advanced.tokenBudgets.planning` (default: 2000) |
+| `{{researchBudget}}` | `config.advanced.tokenBudgets.research` (default: 15000) |
+| `{{synthesisBudget}}` | `config.advanced.tokenBudgets.synthesis` (default: 8000) |
+| `{{reportingBudget}}` | `config.advanced.tokenBudgets.reporting` (default: 10000) |
+| `{{provenanceBudget}}` | `config.advanced.tokenBudgets.provenance` (default: 5000) |
+| `{{citationStandard}}` | `config.qualityFramework.citationStandard` |
+| `{{reportOutputDir}}` | `config.outputStructure.reportOutputDir` |
+| `{{fileNaming}}` | `config.outputStructure.fileNaming` |
+| `{{comprehensiveFollowUpAgentCap}}` | `config.advanced.comprehensiveFollowUpAgentCap` (default: 2) |
+| `{{reportingTone}}` | `config.prompts.reportingTone` |
+| `{{globalPreamble}}` | `config.prompts.globalPreamble` |
+| `{{confidenceHigh}}` | `config.qualityFramework.confidenceScoring.HIGH` |
+| `{{confidenceMedium}}` | `config.qualityFramework.confidenceScoring.MEDIUM` |
+| `{{confidenceLow}}` | `config.qualityFramework.confidenceScoring.LOW` |
+| `{{confidenceSpeculative}}` | `config.qualityFramework.confidenceScoring.SPECULATIVE` |
+| `{{minimumEvidence}}` | `config.qualityFramework.minimumEvidence` |
+| `{{tier1Name}}` | `config.sourceStrategy.credibilityTiers.tier1.name` |
+| `{{tier1Sources}}` | `config.sourceStrategy.credibilityTiers.tier1.sources` (joined) |
+| `{{tier2Name}}` | `config.sourceStrategy.credibilityTiers.tier2.name` |
+| `{{tier2Sources}}` | `config.sourceStrategy.credibilityTiers.tier2.sources` (joined) |
+| `{{tier3Name}}` | `config.sourceStrategy.credibilityTiers.tier3.name` |
+| `{{tier3Sources}}` | `config.sourceStrategy.credibilityTiers.tier3.sources` (joined) |
+| `{{tier4Name}}` | `config.sourceStrategy.credibilityTiers.tier4.name` |
+| `{{tier4Sources}}` | `config.sourceStrategy.credibilityTiers.tier4.sources` (joined) |
+| `{{tier5Name}}` | `config.sourceStrategy.credibilityTiers.tier5.name` |
+| `{{tier5Sources}}` | `config.sourceStrategy.credibilityTiers.tier5.sources` (joined) |
+| `{{verificationMode}}` | `config.qualityFramework.citationManagement.verificationMode` |
+| `{{urlLivenessCheck}}` | `config.qualityFramework.citationManagement.urlLivenessCheck` |
+| `{{contentClaimMatching}}` | `config.qualityFramework.citationManagement.contentClaimMatching` |
+| `{{sourceFreshnessThreshold}}` | `config.qualityFramework.citationManagement.sourceFreshnessThreshold` |
+| `{{deadLinkHandling}}` | `config.qualityFramework.citationManagement.deadLinkHandling` |
+| `{{probeOnDiscovery}}` | `config.qualityFramework.citationManagement.probeOnDiscovery` |
+| `{{skillDirName}}` | `config.engineMeta.name` (same as engineName) |
+| `{{mode}}` | `config.engineMeta.mode` ("self-contained" or "extension") |
+| `{{createdAt}}` | `config.engineMeta.createdAt` |
+| `{{baseSkillPath}}` | `config.engineMeta.baseSkillPath` (extension mode only) |
+| `{{engineDescription}}` | `config.engineMeta.description` |
+| `{{authorName}}` | `config.engineMeta.author.name` (default: empty) |
+| `{{authorEmail}}` | `config.engineMeta.author.email` (default: empty, see special handling) |
+
+### Formatted Outputs (~30 rules)
+
+Built by iterating config structures and emitting markdown:
+
+| Placeholder | Logic |
+|-------------|-------|
+| `{{tierConfigTable}}` | Iterate `config.agentPipeline.tiers`, emit one markdown table row per tier with columns: Tier, Planning, Research Agents (fully qualified), Synthesis, Report, Provenance, User Gate |
+| `{{agentDeploymentBlocks}}` | For each agent: emit `#### Agent: [role]\n\nDeploy **{engineName}:[id]**` block with specialization and prompt override |
+| `{{subAgentList}}` | Built-in agents (planning, synthesis, reporting) + custom agents as bullet list. VVC specialist appended if VVC enabled |
+| `{{fileStructure}}` | Per-agent: `├── [TOPIC_SLUG]_Claims_[agentId].md` + bibliography line |
+| `{{reportSections}}` | `config.outputStructure.reportSections` as numbered markdown list |
+| `{{preferredSites}}` | `config.sourceStrategy.preferredSources` as bullet list |
+| `{{excludedSources}}` | `config.sourceStrategy.excludedSources` as bullet list |
+| `{{additionalSearchTemplates}}` | `config.sourceStrategy.searchTemplates` formatted as numbered list |
+| `{{sourceHierarchy}}` | All 5 tiers formatted as text block |
+| `{{validationRules}}` | `config.qualityFramework.validationRules` as numbered list |
+| `{{specialDeliverables}}` | `config.outputStructure.specialDeliverables` as bullet list |
+| `{{sampleQuestions}}` | `config.sampleQuestions` as numbered list |
+| `{{agentTable}}` | Agent pipeline as markdown table for README |
+| `{{sourceTable}}` | Source hierarchy as markdown table for README |
+| `{{qualitySummary}}` | Brief text from quality framework for README |
+| `{{agentSpecialization}}` | All agent specializations joined by "; " |
+| `{{synthesisInstructions}}` | `config.prompts.synthesisInstructions` |
+| `{{agentOverrides}}` | `config.prompts.agentOverrides` formatted per-agent |
+| `{{quickTierDescription}}` | "Single-agent lookup using [first agent role]" |
+| `{{standardTierDescription}}` | "[N] agents: [role1], [role2]" |
+| `{{deepTierDescription}}` | "Full pipeline with [N] agents: [roles]" |
+| `{{comprehensiveTierDescription}}` | "All [N] agents + follow-up round" |
+| `{{quickAgentId}}` | `{engineName}:{first agent from quick tier}` |
+| `{{tierSummary}}` | Markdown table for command help |
+| `{{sourceHierarchyTable}}` | Formatted table for sources command |
+| `{{searchTemplatesTable}}` | Formatted table for sources command |
+| `{{keywords}}` | `config.engineMeta.keywords` as quoted comma-separated |
+| `{{verificationModeInstructions}}` | Expand from `citationManagement.verificationMode`: "none" → trust text, "spot-check" → sample HIGH, "comprehensive" → verify all |
+| `{{deadLinkInstructions}}` | Expand from `citationManagement.deadLinkHandling`: "flag-only" → tag, "archive-fallback" → Wayback, "exclude-from-high" → downgrade |
+| `{{verificationReportConfig}}` | If `verificationReport.enabled`: generate scope text; else: "disabled" |
+| `{{filters}}` | `config.sourceStrategy.filters` formatted as text block |
+| `{{outputFiles}}` | List of output files for README based on mode and VVC config |
+| `{{tools}}` | Per-agent tool list from `config.agentPipeline.agents[i].tools` (joined) |
+
+### Conditional Blocks (~15 rules)
+
+All follow the pattern: if VVC enabled → content, else → empty string.
+
+| Placeholder | Content When VVC Enabled |
+|-------------|------------------------|
+| `{{vvcPhaseLines}}` | Phase 5-6 table rows |
+| `{{vvcClaimTaggingInstructions}}` | Claim tagging paragraph with [VC]/[PO]/[IE] |
+| `{{vvcVerifyPhaseBlock}}` | Complete Phase 5 section |
+| `{{vvcCorrectPhaseBlock}}` | Complete Phase 6 section |
+| `{{vvcFileStructure}}` | Draft report + VVC files in tree |
+| `{{vvcFeatureBullets}}` | Feature list bullets |
+| `{{vvcBudgetLine}}` | Token budget line |
+| `{{vvcSubAgentNote}}` | Pipeline agent note |
+| `{{vvcExtensionOverride}}` | Extension VVC config block |
+| `{{vvcTierNote}}` | Tier behavior note |
+| `{{vvcReadmeSection}}` | README VVC section |
+| `{{vvcArgumentHint}}` | ` [--no-vvc]` |
+| `{{vvcClaimTaxonomyBlock}}` | Full claim taxonomy table |
+| `{{vvcClaimTaxonomySummary}}` | Brief cross-reference to vvc-pipeline.md |
+
+### Computed Values (~10 rules)
+
+| Placeholder | Computation |
+|-------------|------------|
+| `{{pipelinePhaseCount}}` | "seven" if VVC, "five" if not |
+| `{{pipelinePhaseDescription}}` | "seven-phase" if VVC, "five-phase" if not |
+| `{{phase4Name}}` | "Draft Reporting" if VVC, "Professional Reporting" if not |
+| `{{phase4Description}}` | Conditional description |
+| `{{phase4ReportType}}` | "draft" if VVC, "final" if not |
+| `{{phase4OutputFile}}` | "Draft_Report.md" if VVC, "Comprehensive_Report.md" if not |
+| `{{vvcWebFetchCap}}` | `min(maxWebFetchesPerAgent * 3, 50)` |
+| `{{agentPrefix}}` | First char of agent ID, uppercased |
+| `{{auditTierBehavior}}` | "Standard: run | Deep: run | Comprehensive: run" from tier list |
+| `{{provenanceTierColumn}}` | "Hash-only" for Quick, "Hash + Audit" for audit tiers |
+| `{{reverifiableDefault}}` | From config provenance setting |
+
+### From `_derived` (~5 rules)
+
+Passed through verbatim from `config._derived`. For optional fields with defaults (e.g., `operationalLessons`), the script uses `config._derived.get(key, default_value)`:
+
+| Placeholder | Source |
+|-------------|--------|
+| `{{agentExamplesBlock}}` | `config._derived.agentExamplesBlocks[agentId]` (per-agent) |
+| `{{agentBodyBlock}}` | `config._derived.agentBodyBlocks[agentId]` (per-agent) |
+| `{{agentFirstActionsBlock}}` | `config._derived.agentFirstActionsBlocks[agentId]` (per-agent) |
+| `{{scopeDisciplineBlock}}` | `config._derived.scopeDisciplineBlock` |
+| `{{operationalLessons}}` | `config._derived.operationalLessons` |
+
+### Per-Agent Loop
+
+Agent files are generated in a loop. For each agent in `config.agentPipeline.agents`:
+
+1. Determine `isVvcAgent` = (agent.id === "vvc-specialist")
+2. Build agent-specific placeholders: `{{agentId}}`, `{{agentRole}}`, `{{agentSpecialization}}`, `{{model}}`, `{{color}}` (cycled: blue, magenta, yellow), `{{tools}}`
+3. Pull per-agent `_derived` blocks based on agent ID
+4. Pull `{{promptOverride}}` from `config.prompts.agentOverrides[agentId]` if present
+5. For VVC agent: use `{{vvcWebFetchCap}}` instead of `{{maxWebFetches}}`
+6. Substitute into `agent-template.md.tmpl`, write to `agents/{agentId}.md`
+
+### Special Handling: plugin.json Author Email
+
+If `config.engineMeta.author.email` is empty or absent, the entire `"email": "..."` line must be removed from the generated plugin.json (not emitted as empty string). The script handles this as a post-substitution fixup.
+
+## Section 5: Test Changes
+
+### Checks Removed
+
+These checks become unnecessary because the script guarantees them:
+
+| Check | Reason for Removal |
+|-------|-------------------|
+| 4f (placeholder residue scan) | Script warns on unresolved placeholders; substitution is deterministic |
+| 4k (SKILL.md line count) | Script output is deterministic from template |
+| 4l (no per-fetch hashing) | Template content is fixed |
+| 4m (no shared file writes) | Template content is fixed |
+| 4p (dashboard assets present) | Script always writes them |
+
+### Checks Kept
+
+| Check | Reason |
+|-------|--------|
+| 1 (plugin structure) | Lighter confirmation — still useful as smoke test |
+| 2 (YAML frontmatter) | Validates template content correctness |
+| 3 (agent definitions) | Validates config-to-file mapping |
+| 4a-schema (JSON Schema) | Config structure validation |
+| 4a-4e (structural checks) | Config relational integrity |
+| 4g (preset validation) | Preset structure |
+| 4h (citation management) | Config semantics |
+| 4i (VVC validation) | Config semantics — VVC agent not in tier arrays |
+| 4j (provenance validation) | Config semantics |
+| 4n (status protocol) | Template content verification |
+| 4o (agent constraints) | Template content verification |
+| 4q (pipeline status init) | Template content verification |
+| 4r (output verification) | Template content verification |
+| 5 (quick smoke test) | Functional test |
+
+### Schema Updates
+
+`engine-config-schema.json` gains a `_derived` object as a required top-level key:
+
+```json
+"_derived": {
+  "type": "object",
+  "description": "Pre-computed content generated by the LLM during the wizard interview. The Python generator reads these values verbatim during file generation.",
+  "required": ["agentExamplesBlocks", "agentBodyBlocks", "agentFirstActionsBlocks", "scopeDisciplineBlock"],
+  "additionalProperties": false,
+  "properties": {
+    "agentExamplesBlocks": {
+      "type": "object",
+      "description": "Per-agent example blocks keyed by agent ID. Each value is a complete markdown string with 3 domain-specific examples.",
+      "additionalProperties": { "type": "string" }
+    },
+    "agentBodyBlocks": {
+      "type": "object",
+      "description": "Per-agent body blocks keyed by agent ID. Contains search protocol, confidence scoring, output format, and context discipline sections.",
+      "additionalProperties": { "type": "string" }
+    },
+    "agentFirstActionsBlocks": {
+      "type": "object",
+      "description": "Per-agent first actions blocks keyed by agent ID. Contains the ordered list of files the agent reads on startup.",
+      "additionalProperties": { "type": "string" }
+    },
+    "scopeDisciplineBlock": {
+      "type": "string",
+      "description": "Conditional scope discipline instructions containing both standalone and --extend variants with domain-specific terminology."
+    },
+    "operationalLessons": {
+      "type": "string",
+      "description": "Operational lessons section content. Defaults to placeholder text for new engines.",
+      "default": "No entries yet -- update after first research run with `/post-mortem`."
+    }
+  }
+}
+```
+
+`preset-schema.json` does NOT gain `_derived` — presets are partial configs and `_derived` content is computed per-engine during the wizard.
+
+## Section 6: Migration and Backward Compatibility
+
+**Existing generated engines:** Unaffected. Their files are static on disk.
+
+**Existing `engine-config.json` without `_derived`:** Cannot be used with `generate.py` directly — validation will fail. Two migration paths:
+
+1. **Re-run wizard.** `/create-engine` with existing config loads it, LLM computes `_derived`, saves updated config, runs script.
+2. **`/update-engine` migration.** If the LLM detects a config without `_derived`, it computes the derived content and adds it before invoking the script.
+
+**Domain presets:** No changes needed. Presets don't include `_derived`.
+
+**Old generation path:** Removed entirely. Steps 8a-8f (LLM-driven generation) are replaced with a single script invocation. No fallback path maintained — two generation paths would inevitably diverge.
+
+## Files Changed
+
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `plugin/generator/generate.py` | New | Deterministic generator script (~400-500 lines) |
+| `plugin/skills/engine-creator/SKILL.md` | Modified | Replace Steps 1-9 with single script invocation, add _derived computation step, bump version to 1.9.0 |
+| `plugin/skills/engine-creator/templates/engine-config-schema.json` | Modified | Add `_derived` to top-level `required` array AND `properties` object (schema uses `additionalProperties: false`) |
+| `plugin/commands/test-engine.md` | Modified | Remove checks 4f, 4k, 4l, 4m, 4p; update remaining check numbers |
+| `plugin/examples/patent-intelligence-engine/engine-config.json` | Modified | Add `_derived` section with patent-domain content |
+| `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate all output files using the new script to validate end-to-end |
+| `plugin/.claude-plugin/plugin.json` | Modified | Version bump to 1.9.0 |
+| `.claude-plugin/marketplace.json` | Modified | Version bump to 1.9.0 |
+| `CHANGELOG.md` | Modified | v1.9.0 entry |
+
+## Files NOT Changed
+
+| File | Reason |
+|------|--------|
+| All `.tmpl` template files | Templates stay exactly as they are — the script reads them |
+| `plugin/skills/engine-creator/domain-presets/*.json` | Presets don't include `_derived` |
+| `preset-schema.json` | Presets don't include `_derived` |
+| `plugin-manifest-schema.json` | Used only by `/test-engine`, not by `generate.py` |
