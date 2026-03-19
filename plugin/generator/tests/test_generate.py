@@ -176,3 +176,93 @@ class TestValidate:
         with pytest.raises(SystemExit) as exc_info:
             generate.validate(config)
         assert exc_info.value.code == 1
+
+
+class TestDerivePlaceholders:
+    def test_direct_config_reads(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert p["engineName"] == "test-engine"
+        assert p["engineDisplayName"] == "Test Engine"
+        assert p["domain"] == "testing"
+        assert p["audience"] == "testers"
+        assert p["maxIterations"] == "3"
+        assert p["explorationDepth"] == "2"
+        assert p["maxWebFetches"] == "10"
+        assert p["dashboardPort"] == "3847"
+        assert p["citationStandard"] == "APA 7th Edition"
+
+    def test_tier_descriptions(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert "research-agent" in p["quickAgentId"]
+        assert "Single-agent" in p["quickTierDescription"]
+
+    def test_tier_config_table(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert "Quick" in p["tierConfigTable"]
+        assert "Standard" in p["tierConfigTable"]
+
+    def test_vvc_disabled_produces_empty_blocks(self):
+        config = make_minimal_config()
+        # No VVC in config
+        p = generate.derive_placeholders(config)
+        assert p["vvcPhaseLines"] == ""
+        assert p["vvcClaimTaggingInstructions"] == ""
+        assert p["vvcVerifyPhaseBlock"] == ""
+        assert p["vvcCorrectPhaseBlock"] == ""
+        assert p["pipelinePhaseCount"] == "five"
+        assert p["phase4Name"] == "Professional Reporting"
+
+    def test_vvc_enabled_produces_content(self):
+        config = make_minimal_config()
+        config["qualityFramework"]["vvc"] = {
+            "enabled": True,
+            "claimTypes": [
+                {"tag": "VC", "label": "Verifiable Claim", "description": "Factual", "requiresVerification": True},
+                {"tag": "PO", "label": "Professional Opinion", "description": "Opinion", "requiresVerification": False},
+                {"tag": "IE", "label": "Inferred", "description": "Inference", "requiresVerification": False}
+            ],
+            "verificationScope": {"HIGH": 100, "MEDIUM": 100, "LOW": 100, "SPECULATIVE": 100},
+            "tierBehavior": {"quick": "none", "standard": "verify-only", "deep": "full", "comprehensive": "full"}
+        }
+        config["advanced"]["tokenBudgets"]["vvc"] = 8000
+        p = generate.derive_placeholders(config)
+        assert p["pipelinePhaseCount"] == "seven"
+        assert p["phase4Name"] == "Draft Reporting"
+        assert "VVC" in p["vvcPhaseLines"]
+        assert "[VC]" in p["vvcClaimTaggingInstructions"]
+        assert p["vvcWebFetchCap"] == "30"
+
+    def test_derived_passthrough(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert p["scopeDisciplineBlock"] == "### Scope Discipline\n\nStay on topic."
+        assert p["operationalLessons"] == "No entries yet."
+
+    def test_source_hierarchy(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert "Primary" in p["sourceHierarchy"]
+        assert "tier1Name" in p
+        assert p["tier1Name"] == "Primary"
+
+    def test_confidence_levels(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert p["confidenceHigh"] == "Multiple corroborating sources"
+        assert p["confidenceMedium"] == "Single reliable source"
+
+    def test_agent_deployment_blocks(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert "research-agent" in p["agentDeploymentBlocks"]
+        assert "test-engine:research-agent" in p["agentDeploymentBlocks"]
+
+    def test_sub_agent_list(self):
+        config = make_minimal_config()
+        p = generate.derive_placeholders(config)
+        assert "research-planning-specialist" in p["subAgentList"]
+        assert "synthesis-specialist" in p["subAgentList"]
+        assert "test-engine:research-agent" in p["subAgentList"]
