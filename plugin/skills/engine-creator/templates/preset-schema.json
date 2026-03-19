@@ -241,7 +241,14 @@
           "additionalProperties": false
         },
         "explorationDepth": { "type": "integer", "minimum": 1, "maximum": 10 },
-        "maxWebFetchesPerAgent": { "type": "integer", "minimum": 1, "maximum": 50 }
+        "maxWebFetchesPerAgent": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "dashboardPort": {
+          "type": "integer",
+          "description": "Port for the research dashboard server. Auto-increments if busy.",
+          "default": 3847,
+          "minimum": 1024,
+          "maximum": 65535
+        }
       },
       "additionalProperties": false
     }
