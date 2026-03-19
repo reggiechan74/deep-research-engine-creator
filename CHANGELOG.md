@@ -11,15 +11,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **`_derived` config section** -- LLM pre-computes creative content (agent examples, body blocks, first actions, scope discipline) during wizard, stores in engine-config.json for deterministic substitution
 - **Generator test suite** (`plugin/generator/tests/test_generate.py`) -- unit tests for config loading, validation, placeholder derivation, file generation, extension mode, and end-to-end patent engine generation
 - **Extension mode support** in generator -- single-SKILL.md output from extension template
+- **Enhanced research dashboard** -- full observability console replacing basic progress-bar view:
+  - Per-question tracker with status icons, durations, and live current-action display
+  - Expandable agent cards with tabbed detail views (Claims, Activity Log, Sources)
+  - Aggregate stats bar (total claims, sources, web fetches across all agents)
+  - Phase duration display with live counters for in-progress phases
+  - VVC Verification Panel with progress bar, verdict counts, and per-claim detail table
+  - Collapsible color legend
+- **Structured claims tracking** -- agents write cumulative claims JSON (`[AgentID]_claims.json`) with per-claim ID, text, confidence, status, and source count
+- **Append-only action log** -- agents maintain `[AgentID]_log.json` with timestamped events (search, fetch, claim, assess, write, error) capped at 500 entries
+- **VVC verification status file** -- `vvc-specialist_verification.json` enables real-time dashboard tracking of claim-by-claim verification and correction progress
+- **Per-agent log API** -- `GET /api/agent/:id/log` endpoint returns full action log for a specific agent
+- **Phase timing** -- `startedAt` and `completedAt` timestamps on each pipeline phase for duration tracking
 
 ### Changed
 - SKILL.md Generation Protocol reduced from 9 steps + 74 derivation rules to 3 steps (output dir, write config, run script)
 - `/test-engine` simplified: removed 5 checks made impossible by deterministic generation (placeholder residue, line count, per-fetch hashing, shared file writes, dashboard assets)
 - `engine-config-schema.json` now requires `_derived` top-level key
+- Agent status JSON schema expanded: added `currentAction`, `questions` array (per-question status/timing), `errors` and `aborts` counters; removed `currentQuestion`, `questionsCompleted`, `questionsTotal`
+- Dashboard server SSE broadcasts cap agent logs to last 50 entries (full log available via REST API)
+- Research protocol "When to Write Status" rules expanded from 6 to 12 trigger points including per-action tracking
 
 ### Removed
 - LLM-driven file generation (Steps 1-9 with manual placeholder substitution) -- replaced by `generate.py`
 - Placeholder Derivation Rules prose table in SKILL.md -- rules now implemented as Python code
+- Progress bar UI in dashboard -- replaced by per-question tracker with richer status information
 
 ## [1.8.0] - 2026-03-19
 

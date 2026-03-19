@@ -185,10 +185,12 @@ your-engine-name/
 ├── skills/
 │   └── your-domain/
 │       ├── SKILL.md               # Research orchestrator (~300-400 lines)
-│       ├── research-protocol.md   # File isolation, WebFetch caps, token budgets
+│       ├── research-protocol.md   # File isolation, WebFetch caps, token budgets, action logging
 │       ├── standards.md           # Confidence scoring, source hierarchy, citation standard
 │       ├── provenance.md          # SHA-256 hashing protocol, audit procedures
-│       └── vvc-pipeline.md        # VVC claim taxonomy, verification & correction phases
+│       ├── vvc-pipeline.md        # VVC claim taxonomy, verification & correction phases
+│       ├── dashboard-server.js    # Live research dashboard SSE server
+│       └── dashboard.html         # Real-time observability console
 └── README.md                      # Auto-generated documentation
 ```
 
@@ -201,6 +203,8 @@ Every generated engine includes:
 - **Claim verification (VVC)** -- not just citations. Every factual claim is extracted, the cited source is re-fetched, and both source credibility and accurate representation are verified. Citations can still hallucinate. Verified claims can't.
 - **Context isolation** -- engines default to standalone mode, scoping research strictly to the user's topic. Project context (CLAUDE.md, prior research files, observation history) is ignored unless the user explicitly passes `--extend`. An approval gate (default ON for Standard+ tiers) lets users review the outline before research agents execute.
 - **Cryptographic provenance (always on)** -- every WebFetch is SHA-256 hashed and logged to `Hash_Manifest.md` with tamper-evident event hash chaining. Phase 4.5 audits chain integrity and cross-references methodology logs. `--reverifiable` retains source snapshots for independent re-verification.
+- **Live research dashboard** -- real-time observability console with per-question tracking, expandable agent cards (claims/log/sources tabs), phase duration display, aggregate stats, and a dedicated VVC verification panel
+- **Deterministic generation** -- a Python generator script (`generate.py`) replaces LLM-driven file generation. Same config always produces identical output. Zero external dependencies.
 - Structured report output with configurable sections
 
 ## Two Output Modes
@@ -326,7 +330,7 @@ flowchart LR
         G5["README.md"]
     end
 
-    TEMPLATES["Templates<br/>(11 .tmpl + 3 schemas)"]
+    TEMPLATES["Templates<br/>(13 .tmpl + 3 schemas)"]
     ENGINE["Standalone<br/>Claude Code Plugin"]
 
     PRESET -.->|"pre-fills<br/>sections 4-9"| WIZARD
@@ -571,10 +575,13 @@ deep-research-engine-creator/
     │   ├── preview-engine.md                           # /preview-engine read-only preview
     │   ├── list-engines.md                             # /list-engines directory scanner
     │   └── install-local-plugin.md                     # /install-local-plugin local registration
+    ├── generator/
+    │   ├── generate.py                                 # Deterministic engine generator (Python 3 stdlib)
+    │   └── tests/test_generate.py                      # Generator test suite (33 tests)
     ├── skills/engine-creator/
     │   ├── SKILL.md                                    # Core wizard + generation logic
     │   ├── domain-presets/                             # 21 domain presets
-    │   └── templates/                                  # 11 .tmpl templates + 3 JSON schemas
+    │   └── templates/                                  # 13 .tmpl templates + 3 JSON schemas
     ├── scripts/
     │   └── publish-engine.sh                           # Marketplace publishing script
     ├── examples/
