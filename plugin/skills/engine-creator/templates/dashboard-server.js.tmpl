@@ -22,24 +22,34 @@ function readJsonSafe(filePath) {
   }
 }
 
-function getStatus() {
+function getStatus(capLog) {
   const pipeline = readJsonSafe(PIPELINE_FILE);
   const agents = {};
+  const vvcFile = path.join(STATUS_DIR, 'vvc-specialist_verification.json');
   try {
     for (const file of fs.readdirSync(STATUS_DIR)) {
       if (file.endsWith('.json') && !file.startsWith('_')) {
-        const data = readJsonSafe(path.join(STATUS_DIR, file));
-        if (data) agents[file.replace('.json', '')] = data;
+        if (!file.includes('_claims') && !file.includes('_log') && !file.includes('_verification')) {
+          const agentId = file.replace('.json', '');
+          const data = readJsonSafe(path.join(STATUS_DIR, file));
+          if (data) {
+            data.claims = readJsonSafe(path.join(STATUS_DIR, `${agentId}_claims.json`)) || [];
+            const fullLog = readJsonSafe(path.join(STATUS_DIR, `${agentId}_log.json`)) || [];
+            data.log = capLog ? fullLog.slice(-50) : fullLog;
+            agents[agentId] = data;
+          }
+        }
       }
     }
   } catch { /* directory read failed */ }
-  return { pipeline, agents };
+  const vvc = readJsonSafe(vvcFile) || null;
+  return { pipeline, agents, vvc };
 }
 
 const sseClients = new Set();
 
 function broadcastStatus() {
-  const status = getStatus();
+  const status = getStatus(true);  // cap log to last 50 entries for SSE
   const data = `data: ${JSON.stringify(status)}\n\n`;
   for (const res of sseClients) {
     try { res.write(data); } catch { sseClients.delete(res); }
@@ -79,7 +89,7 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    res.end(JSON.stringify(getStatus()));
+    res.end(JSON.stringify(getStatus(false)));
   } else if (req.url === '/api/events') {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -87,9 +97,18 @@ const server = http.createServer((req, res) => {
       'Connection': 'keep-alive',
       'Access-Control-Allow-Origin': '*'
     });
-    res.write(`data: ${JSON.stringify(getStatus())}\n\n`);
+    res.write(`data: ${JSON.stringify(getStatus(true))}\n\n`);
     sseClients.add(res);
     req.on('close', () => sseClients.delete(res));
+  } else if (req.url.startsWith('/api/agent/') && req.url.endsWith('/log')) {
+    const agentId = req.url.replace('/api/agent/', '').replace('/log', '');
+    const logFile = path.join(STATUS_DIR, `${agentId}_log.json`);
+    const logData = readJsonSafe(logFile) || [];
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify(logData));
   } else {
     res.writeHead(404);
     res.end('Not found');
