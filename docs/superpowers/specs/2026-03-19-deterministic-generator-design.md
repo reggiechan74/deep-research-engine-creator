@@ -1,8 +1,8 @@
-# Deterministic Python Generator — Design Spec
+# Deterministic Python Generator & Enhanced Observability — Design Spec
 
 **Date:** 2026-03-19
 **Status:** Draft
-**Scope:** Replace LLM-driven file generation with a deterministic Python script
+**Scope:** Replace LLM-driven file generation with a deterministic Python script; enhance dashboard with granular agent visibility
 
 ## Problem Statement
 
@@ -537,7 +537,325 @@ These checks become unnecessary because the script guarantees them:
 
 | File | Reason |
 |------|--------|
-| All `.tmpl` template files | Templates stay exactly as they are — the script reads them |
+| `templates/orchestrator-skill.md.tmpl` | Phase 0 status init and dashboard launch already present from v1.8.0 |
+| `templates/agent-template.md.tmpl` | Agent Constraints section already present from v1.8.0 |
+| `templates/standards.md.tmpl` | No changes |
+| `templates/provenance.md.tmpl` | No changes |
+| `templates/vvc-pipeline.md.tmpl` | No changes |
+| `templates/command-template.md.tmpl` | No changes |
+| `templates/sources-command-template.md.tmpl` | No changes |
+| `templates/plugin-json.tmpl` | No changes |
+| `templates/extension-skill.md.tmpl` | No changes |
+| `templates/readme-template.md.tmpl` | No changes |
+| `templates/dashboard-server.js.tmpl` | Modified (see Section 7) |
 | `plugin/skills/engine-creator/domain-presets/*.json` | Presets don't include `_derived` |
 | `preset-schema.json` | Presets don't include `_derived` |
 | `plugin-manifest-schema.json` | Used only by `/test-engine`, not by `generate.py` |
+
+---
+
+## Section 7: Enhanced Observability
+
+This section describes changes to the v1.8.0 observability system. These are template-level changes that the Python generator will pick up automatically (it reads templates as-is).
+
+### 7a: Live Action Tracking
+
+**Problem:** Agents only update status at research question boundaries. The `currentQuestion` field stays static for long stretches while the agent executes multiple search queries, fetches, and assessments.
+
+**Change target:** `templates/research-protocol.md.tmpl` — Agent Status Protocol section
+
+**Add `currentAction` field** to the status JSON schema:
+
+```json
+{
+  "agentId": "[AgentID]",
+  "engineId": "${ENGINE_ID}",
+  "phase": 2,
+  "status": "researching | writing | assessing | refining | complete | error",
+  "currentQuestion": "The research question currently being worked on",
+  "currentAction": "Searching 'constructive dismissal Ontario 2024 site:canlii.org'",
+  "questionsCompleted": 2,
+  "questionsTotal": 5,
+  "activity": "searching | assessing | refining | writing | idle",
+  "webFetchesUsed": 4,
+  "webFetchCap": 10,
+  "claimsFound": 7,
+  "sourcesCollected": 4,
+  "iterationPass": 2,
+  "maxIterations": 3,
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+**Update "When to Write Status" rules** — agents now update before each major action:
+
+```
+- Before each WebSearch call: update currentAction to the search query string
+  (e.g., "Searching 'solid-state battery cathode patent 2024'")
+- Before each WebFetch call: update currentAction to the URL being fetched
+  (e.g., "Fetching https://patents.google.com/patent/US20240123456")
+- During assessment: update currentAction to what is being assessed
+  (e.g., "Assessing claim C-03 against 2 sources")
+- During refinement: update currentAction to the refinement query
+  (e.g., "Refining: searching for contradictory evidence on cathode materials")
+```
+
+The `currentAction` field is a short human-readable string (max ~120 chars) describing exactly what the agent is doing right now. It changes frequently — potentially every few seconds during active research.
+
+### 7b: Structured Claims Tracking
+
+**New file per agent:** `BASE_DIR/_status/[AgentID]_claims.json`
+
+Written by the agent alongside its status JSON. Overwritten after each research question (reflects cumulative state). Contains every claim discovered so far with investigation status.
+
+```json
+[
+  {
+    "id": "C-01",
+    "text": "Toyota filed 3 solid-state battery patents in Q1 2024",
+    "confidence": "HIGH",
+    "status": "investigated",
+    "sourceCount": 2,
+    "question": "What prior art exists for solid-state lithium battery cathode designs?"
+  },
+  {
+    "id": "C-02",
+    "text": "QuantumScape's lithium-metal anode approach shows 80% capacity retention after 800 cycles",
+    "confidence": "MEDIUM",
+    "status": "under_investigation",
+    "sourceCount": 1,
+    "question": "What prior art exists for solid-state lithium battery cathode designs?"
+  },
+  {
+    "id": "C-03",
+    "text": "Samsung SDI partnership with Solid Power announced March 2024",
+    "confidence": null,
+    "status": "pending",
+    "sourceCount": 0,
+    "question": "Are there contradictory patents in the solid-state electrolyte space?"
+  }
+]
+```
+
+**Claim statuses:**
+- `pending` — claim identified but not yet corroborated or verified
+- `under_investigation` — agent is actively looking for supporting/contradicting sources
+- `investigated` — claim has been assessed and assigned a confidence level
+
+**Change target:** `templates/research-protocol.md.tmpl` — Incremental Write Protocol section
+
+Add to the per-question write steps:
+
+```
+6. OVERWRITE claims status to `BASE_DIR/_status/[AgentID]_claims.json` with all claims
+   discovered so far (cumulative, not per-question). Each claim includes id, text,
+   confidence (null if pending), status, sourceCount, and originating question.
+```
+
+### 7c: Append-Only Action Log
+
+**New file per agent:** `BASE_DIR/_status/[AgentID]_log.json`
+
+Append-only JSON array. Each entry is one action the agent performed. This provides a complete audit trail of agent behavior and survives agent crashes (partial logs are still valuable).
+
+```json
+[
+  {
+    "type": "start",
+    "question": "What prior art exists for solid-state lithium battery cathode designs?",
+    "questionIndex": 0,
+    "timestamp": "2026-03-19T14:30:05Z"
+  },
+  {
+    "type": "search",
+    "query": "solid-state battery cathode patent landscape 2024",
+    "engine": "WebSearch",
+    "resultCount": 12,
+    "timestamp": "2026-03-19T14:30:08Z"
+  },
+  {
+    "type": "fetch",
+    "url": "https://patents.google.com/patent/US20240123456",
+    "status": "success",
+    "timestamp": "2026-03-19T14:30:15Z"
+  },
+  {
+    "type": "fetch",
+    "url": "https://example.com/paywalled-article",
+    "status": "403_blocked",
+    "timestamp": "2026-03-19T14:30:18Z"
+  },
+  {
+    "type": "claim",
+    "claimId": "C-01",
+    "text": "Toyota filed 3 solid-state battery patents in Q1 2024",
+    "confidence": "HIGH",
+    "timestamp": "2026-03-19T14:30:25Z"
+  },
+  {
+    "type": "assess",
+    "claimId": "C-02",
+    "result": "needs_more_sources",
+    "sourcesChecked": 1,
+    "timestamp": "2026-03-19T14:30:30Z"
+  },
+  {
+    "type": "write",
+    "files": ["Claims_patent-search-specialist.md", "Bibliography.md"],
+    "claimsAdded": 3,
+    "sourcesAdded": 2,
+    "timestamp": "2026-03-19T14:30:35Z"
+  },
+  {
+    "type": "question_complete",
+    "question": "What prior art exists for solid-state lithium battery cathode designs?",
+    "questionIndex": 0,
+    "claimsTotal": 3,
+    "sourcesTotal": 2,
+    "timestamp": "2026-03-19T14:30:36Z"
+  }
+]
+```
+
+**Action types:**
+- `start` — began working on a research question
+- `search` — executed a WebSearch query
+- `fetch` — fetched a URL (with success/failure status)
+- `claim` — identified a new claim
+- `assess` — assessed a claim against sources
+- `write` — wrote findings to disk
+- `question_complete` — finished a research question
+- `error` — encountered an error
+- `abort` — aborted a research branch (with reason)
+
+**Change target:** `templates/research-protocol.md.tmpl` — new "Action Logging Protocol" section
+
+```markdown
+## Action Logging Protocol
+
+Maintain an append-only action log at `BASE_DIR/_status/[AgentID]_log.json`.
+This file is a JSON array. Append new entries after each significant action.
+
+Log these events:
+- Before starting each research question: type "start"
+- After each WebSearch call: type "search" with query and result count
+- After each WebFetch call: type "fetch" with URL and status (success/403_blocked/timeout/error)
+- When a new claim is identified: type "claim" with ID, text, initial confidence
+- When assessing a claim: type "assess" with claim ID and result
+- After writing files to disk: type "write" with file list and counts
+- After completing a research question: type "question_complete" with totals
+- On error or abort: type "error" or "abort" with message/reason
+
+Each entry includes a timestamp. The log is append-only — never overwrite or truncate.
+On agent start, create the file with an empty array `[]`. Append by reading the current
+array, pushing the new entry, and writing back.
+```
+
+### 7d: Dashboard UI Enhancements
+
+**Change target:** `templates/dashboard.html.tmpl`
+
+**Expandable agent cards:** Each agent card gets a chevron button. Clicking it expands the card to reveal a tabbed detail view:
+
+**Tab 1: Claims**
+- Table with columns: ID, Text (truncated), Confidence, Status, Sources
+- Status shown as colored pills:
+  - `pending` → gray pill
+  - `under_investigation` → amber pill (pulsing if agent activity is "assessing")
+  - `investigated` → green pill
+- Confidence shown as tier badges (HIGH/MEDIUM/LOW/SPECULATIVE) with existing accent colors
+- Sortable by status (pending first, then under_investigation, then investigated)
+- Count header: "12 claims (3 pending, 2 investigating, 7 investigated)"
+
+**Tab 2: Activity Log**
+- Scrollable feed, newest at top
+- Each entry styled by type:
+  - `search` → cyan icon, shows query in monospace
+  - `fetch` → cyan icon, shows URL (truncated), status badge (success=green, blocked=rose)
+  - `claim` → emerald icon, shows claim text
+  - `assess` → amber icon, shows claim ID and result
+  - `error`/`abort` → rose icon, shows message
+- Auto-scrolls to show latest entry when new events arrive via SSE
+- Timestamps shown as relative ("3s ago", "1m ago")
+
+**Tab 3: Sources**
+- List of sources discovered by this agent
+- Each shows: credibility tier badge (1-5), URL (linked), fetch status
+- Grouped by tier (Tier 1 first)
+
+**Data source:** The dashboard server reads `_status/[AgentID]_claims.json` and `_status/[AgentID]_log.json` alongside the existing `_status/[AgentID].json`. All three are included in the SSE push and `/api/status` response.
+
+**Collapsed state (default):** Cards show the same compact view as v1.8.0, plus the new `currentAction` text replacing the static `currentQuestion` when `currentAction` is available. The `currentQuestion` is shown as a smaller label above `currentAction`.
+
+### 7e: Dashboard Server Changes
+
+**Change target:** `templates/dashboard-server.js.tmpl`
+
+The `getStatus()` function expands to read detail files:
+
+```javascript
+function getStatus() {
+  const pipeline = readJsonSafe(PIPELINE_FILE);
+  const agents = {};
+  try {
+    for (const file of fs.readdirSync(STATUS_DIR)) {
+      if (file.endsWith('.json') && !file.startsWith('_')) {
+        // Agent status files: {agentId}.json
+        if (!file.includes('_claims') && !file.includes('_log')) {
+          const agentId = file.replace('.json', '');
+          const data = readJsonSafe(path.join(STATUS_DIR, file));
+          if (data) {
+            // Attach claims and log if they exist
+            data.claims = readJsonSafe(path.join(STATUS_DIR, `${agentId}_claims.json`)) || [];
+            data.log = readJsonSafe(path.join(STATUS_DIR, `${agentId}_log.json`)) || [];
+            agents[agentId] = data;
+          }
+        }
+      }
+    }
+  } catch { /* directory read failed */ }
+  return { pipeline, agents };
+}
+```
+
+The `fs.watch` handler already triggers on any `.json` file change, so claims and log file updates automatically push to the dashboard via SSE.
+
+### 7f: Updated File Structure
+
+```
+BASE_DIR/_status/
+├── _pipeline.json                    # Pipeline state (unchanged)
+├── [AgentID].json                    # Agent status with currentAction (enhanced)
+├── [AgentID]_claims.json             # Structured claims array (new)
+├── [AgentID]_log.json                # Append-only action log (new)
+├── server.js                         # Dashboard server (enhanced)
+└── dashboard.html                    # Dashboard UI (enhanced)
+```
+
+### 7g: Impact on Templates and Generator
+
+These observability changes modify two template files:
+
+| Template | Changes |
+|----------|---------|
+| `templates/research-protocol.md.tmpl` | Add `currentAction` to status schema, update "When to Write Status" rules, add claims JSON writing to Incremental Write Protocol, add Action Logging Protocol section |
+| `templates/dashboard-server.js.tmpl` | Update `getStatus()` to read claims and log files, filter out `_claims.json`/`_log.json` from agent ID parsing |
+| `templates/dashboard.html.tmpl` | Add expandable agent cards, claims tab, activity log tab, sources tab, currentAction display |
+
+The Python generator reads these templates as-is — no generator changes needed for the observability enhancements. The templates contain the protocol instructions that agents follow at runtime.
+
+## Updated Files Changed (Complete)
+
+| File | Change Type | Description |
+|------|-------------|-------------|
+| `plugin/generator/generate.py` | New | Deterministic generator script |
+| `plugin/skills/engine-creator/SKILL.md` | Modified | Replace generation steps with script invocation, add _derived, bump to v1.9.0 |
+| `templates/engine-config-schema.json` | Modified | Add `_derived` to required + properties |
+| `templates/research-protocol.md.tmpl` | Modified | Add currentAction, claims JSON, Action Logging Protocol |
+| `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files in getStatus() |
+| `templates/dashboard.html.tmpl` | Modified | Expandable cards, claims/log/sources tabs, currentAction display |
+| `plugin/commands/test-engine.md` | Modified | Remove impossible-to-fail checks |
+| `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate with script + updated templates |
+| `plugin/.claude-plugin/plugin.json` | Modified | Version 1.9.0 |
+| `.claude-plugin/marketplace.json` | Modified | Version 1.9.0 |
+| `CHANGELOG.md` | Modified | v1.9.0 entry |
