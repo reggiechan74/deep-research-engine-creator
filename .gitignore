@@ -1,2 +1,6 @@
 # Generated engine output — don't commit to plugin repo
 generated-engines/
+
+# Python
+__pycache__/
+*.pyc
