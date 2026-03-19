@@ -56,7 +56,7 @@ body.complete {
   background-blend-mode: normal;
 }
 
-/* ── Header ─────────────────────────────────────── */
+/* -- Header ------------------------------------------------- */
 
 .header {
   padding: 20px 24px;
@@ -122,7 +122,30 @@ body.complete {
 body.complete .complete-label { display: inline; }
 body.complete .live-timer { display: none; }
 
-/* ── Pipeline ───────────────────────────────────── */
+/* -- Aggregate Stats Bar ------------------------------------ */
+
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.stats-bar .stat-value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-bar .stat-separator {
+  color: var(--border-active);
+}
+
+/* -- Pipeline ----------------------------------------------- */
 
 .pipeline-section {
   padding: 24px;
@@ -212,6 +235,18 @@ body.complete .live-timer { display: none; }
   text-overflow: ellipsis;
 }
 
+.phase-duration {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.phase-duration.active {
+  color: var(--accent-search);
+}
+
 .phase-connector {
   width: 36px;
   height: 2px;
@@ -220,7 +255,7 @@ body.complete .live-timer { display: none; }
   overflow: hidden;
   flex-shrink: 0;
   align-self: center;
-  margin-bottom: 22px; /* align with diamond center, above label */
+  margin-bottom: 34px; /* align with diamond center, above label + duration */
 }
 
 .phase-connector.active::after {
@@ -240,7 +275,7 @@ body.complete .live-timer { display: none; }
   100% { left: 100%; }
 }
 
-/* ── Agent Cards ────────────────────────────────── */
+/* -- Agent Cards -------------------------------------------- */
 
 .agents-section {
   padding: 24px;
@@ -260,6 +295,7 @@ body.complete .live-timer { display: none; }
   padding: 16px;
   transition: opacity 300ms ease, border-color 300ms ease;
   animation: slideIn 400ms ease both;
+  position: relative;
 }
 
 body.complete .agent-card {
@@ -312,40 +348,242 @@ body.complete .agent-card {
   transition: background-color 300ms ease;
 }
 
-/* ── Progress Bar ───────────────────────────────── */
+/* -- Question Tracker --------------------------------------- */
 
-.progress-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.question-list {
+  list-style: none;
   margin-bottom: 10px;
 }
 
-.progress-track {
+.question-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.question-icon {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.question-icon.complete { color: var(--accent-complete); }
+.question-icon.active { color: var(--accent-search); animation: pulse-text 2s ease-in-out infinite; }
+.question-icon.pending { color: var(--text-muted); }
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.question-text {
   flex: 1;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
+  color: var(--text-muted);
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.progress-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 400ms ease, background-color 300ms ease;
+.question-item.active .question-text { color: var(--text-primary); }
+
+.question-duration {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  font-size: 0.65rem;
 }
 
-.progress-text {
+.question-action {
+  padding-left: 22px;
+  font-size: 0.65rem;
+  color: var(--accent-search);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  opacity: 0.8;
+}
+
+/* -- Expandable Cards --------------------------------------- */
+
+.expand-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  margin-top: 6px;
+}
+
+.expand-toggle:hover { color: var(--text-primary); }
+
+.agent-detail {
+  display: none;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.agent-card.expanded .agent-detail { display: block; }
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.tab-btn {
   font-family: var(--font-body);
   font-size: 0.7rem;
   color: var(--text-muted);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  min-width: 30px;
-  text-align: right;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
 }
 
-/* ── WebFetch Meter ─────────────────────────────── */
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent-search); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* -- Error Badge -------------------------------------------- */
+
+.error-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  color: var(--accent-error);
+  background: var(--bg-deep);
+  border: 1px solid var(--accent-error);
+  border-radius: 8px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* -- Claims Table ------------------------------------------- */
+
+.claims-table {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  border-collapse: collapse;
+}
+
+.claims-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+.claims-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.claim-pill {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.claim-pill.pending { background: var(--border); color: var(--text-muted); }
+.claim-pill.under_investigation { background: rgba(245,158,11,0.2); color: var(--accent-assess); }
+.claim-pill.investigated { background: rgba(74,222,128,0.2); color: var(--accent-complete); }
+
+/* -- Activity Log ------------------------------------------- */
+
+.log-feed {
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+}
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.log-icon {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+.log-icon.search, .log-icon.fetch { color: var(--accent-search); }
+.log-icon.claim, .log-icon.write { color: var(--accent-complete); }
+.log-icon.assess { color: var(--accent-assess); }
+.log-icon.error, .log-icon.abort { color: var(--accent-error); }
+.log-icon.question_complete { color: var(--accent-complete); }
+.log-icon.start { color: var(--accent-refine); }
+
+.log-text {
+  flex: 1;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.log-time {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-query {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  color: var(--accent-search);
+  opacity: 0.8;
+}
+
+.log-status-badge {
+  display: inline-block;
+  font-size: 0.55rem;
+  padding: 0 4px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.log-status-badge.success { background: rgba(74,222,128,0.2); color: var(--accent-complete); }
+.log-status-badge.blocked { background: rgba(251,113,133,0.2); color: var(--accent-error); }
+.log-status-badge.timeout { background: rgba(245,158,11,0.2); color: var(--accent-assess); }
+
+/* -- WebFetch Meter ----------------------------------------- */
 
 .wf-row {
   display: flex;
@@ -381,7 +619,7 @@ body.complete .agent-card {
   background: var(--accent-search);
 }
 
-/* ── Stats Row ──────────────────────────────────── */
+/* -- Stats Row ---------------------------------------------- */
 
 .stats-row {
   display: flex;
@@ -401,7 +639,7 @@ body.complete .agent-card {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Current Question ───────────────────────────── */
+/* -- Current Question --------------------------------------- */
 
 .current-question {
   font-family: var(--font-body);
@@ -414,7 +652,197 @@ body.complete .agent-card {
   line-height: 1.4;
 }
 
-/* ── Footer ─────────────────────────────────────── */
+/* -- VVC Panel ---------------------------------------------- */
+
+.vvc-panel {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vvc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.vvc-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.vvc-phase-info {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.vvc-mode {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.vvc-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  flex-wrap: wrap;
+}
+
+.vvc-progress-track {
+  flex: 1;
+  min-width: 200px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vvc-progress-fill {
+  height: 100%;
+  background: var(--accent-search);
+  border-radius: 3px;
+  transition: width 400ms ease;
+}
+
+.vvc-verdict-counts {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.vvc-table {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  border-collapse: collapse;
+}
+
+.vvc-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+.vvc-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.vvc-table tr { cursor: pointer; }
+.vvc-table tr:hover { background: rgba(255,255,255,0.02); }
+
+.vvc-row-detail {
+  display: none;
+  padding: 8px 8px 8px 40px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.15);
+}
+
+.vvc-row-detail.visible { display: table-row; }
+
+.verdict-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.verdict-badge.confirmed, .verdict-badge.paraphrased { color: var(--accent-complete); }
+.verdict-badge.overstated, .verdict-badge.understated { color: var(--accent-assess); }
+.verdict-badge.disputed, .verdict-badge.unsupported { color: var(--accent-error); }
+.verdict-badge.source_unavailable { color: var(--accent-error); opacity: 0.7; }
+
+.applied-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.applied-badge.kept { color: var(--accent-complete); }
+.applied-badge.applied { color: var(--accent-assess); }
+.applied-badge.removed { color: var(--accent-error); }
+.applied-badge.applying { color: var(--accent-search); animation: pulse-text 2s ease-in-out infinite; }
+
+/* -- Legend ------------------------------------------------- */
+
+.legend-toggle {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-toggle:hover { color: var(--text-primary); border-color: var(--border-active); }
+
+.legend-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  z-index: 10;
+  min-width: 300px;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.legend-panel.visible { display: block; }
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  flex-shrink: 0;
+  min-width: 60px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* -- Footer ------------------------------------------------- */
 
 .footer {
   padding: 16px 24px;
@@ -446,7 +874,7 @@ body.complete .agent-card {
 .connection-dot.polling { background: var(--accent-assess); }
 .connection-dot.disconnected { background: var(--accent-error); }
 
-/* ── Empty State ────────────────────────────────── */
+/* -- Empty State -------------------------------------------- */
 
 .empty-state {
   text-align: center;
@@ -471,7 +899,7 @@ body.complete .agent-card {
   to { transform: rotate(360deg); }
 }
 
-/* ── Responsive ─────────────────────────────────── */
+/* -- Responsive --------------------------------------------- */
 
 @media (max-width: 640px) {
   .pipeline-track {
@@ -514,12 +942,16 @@ body.complete .agent-card {
   .agents-section, .pipeline-section {
     padding: 16px;
   }
+
+  .stats-bar {
+    padding: 10px 16px;
+  }
 }
 </style>
 </head>
 <body>
 
-<header class="header" id="header">
+<header class="header" id="header" style="position:relative">
   <span class="header-title" id="engine-name">---</span>
   <span class="header-topic" id="topic">---</span>
   <span class="tier-badge" id="tier-badge">---</span>
@@ -527,7 +959,19 @@ body.complete .agent-card {
     <span class="live-timer"><span class="elapsed-value" id="elapsed">00:00:00</span></span>
     <span class="complete-label" id="complete-label">RESEARCH COMPLETE <span id="final-time"></span></span>
   </span>
+  <button class="legend-toggle" id="legend-toggle" title="Legend">?</button>
+  <div class="legend-panel" id="legend-panel">
+    <!-- Legend content rendered by JS -->
+  </div>
 </header>
+
+<div class="stats-bar" id="stats-bar">
+  Claims: <span class="stat-value" id="agg-claims">0</span>
+  <span class="stat-separator">|</span>
+  Sources: <span class="stat-value" id="agg-sources">0</span>
+  <span class="stat-separator">|</span>
+  Web Fetches: <span class="stat-value" id="agg-fetches">0/0</span>
+</div>
 
 <section class="pipeline-section">
   <div class="pipeline-track" id="pipeline-track">
@@ -538,7 +982,11 @@ body.complete .agent-card {
   </div>
 </section>
 
-<section class="agents-section">
+<section class="vvc-panel" id="vvc-panel" style="display:none">
+  <!-- VVC Verification Panel rendered by JS -->
+</section>
+
+<section class="agents-section" id="agents-section">
   <div class="agents-grid" id="agents-grid">
     <!-- Agent cards rendered dynamically -->
   </div>
@@ -558,29 +1006,40 @@ body.complete .agent-card {
 (function () {
   "use strict";
 
-  // ── State ──────────────────────────────────────
-  let lastStatus = null;
-  let timerInterval = null;
-  let eventSource = null;
-  let pollInterval = null;
-  let isComplete = false;
+  // -- State ------------------------------------------------
+  var lastStatus = null;
+  var timerInterval = null;
+  var eventSource = null;
+  var pollInterval = null;
+  var isComplete = false;
+  var expandedCards = {};   // agentId -> boolean
+  var activeTabMap = {};    // agentId -> tab name ('claims'|'log'|'sources')
+  var fullLogCache = {};    // agentId -> full log array (loaded on tab open)
 
-  // ── DOM refs ───────────────────────────────────
-  const $ = (id) => document.getElementById(id);
-  const engineNameEl = $("engine-name");
-  const topicEl = $("topic");
-  const tierBadgeEl = $("tier-badge");
-  const elapsedEl = $("elapsed");
-  const completeLabelEl = $("complete-label");
-  const finalTimeEl = $("final-time");
-  const pipelineTrackEl = $("pipeline-track");
-  const pipelineEmptyEl = $("pipeline-empty");
-  const agentsGridEl = $("agents-grid");
-  const lastUpdatedEl = $("last-updated");
-  const connDotEl = $("conn-dot");
-  const connLabelEl = $("conn-label");
+  // -- DOM refs ---------------------------------------------
+  var $ = function (id) { return document.getElementById(id); };
+  var engineNameEl = $("engine-name");
+  var topicEl = $("topic");
+  var tierBadgeEl = $("tier-badge");
+  var elapsedEl = $("elapsed");
+  var completeLabelEl = $("complete-label");
+  var finalTimeEl = $("final-time");
+  var pipelineTrackEl = $("pipeline-track");
+  var pipelineEmptyEl = $("pipeline-empty");
+  var agentsGridEl = $("agents-grid");
+  var lastUpdatedEl = $("last-updated");
+  var connDotEl = $("conn-dot");
+  var connLabelEl = $("conn-label");
+  var statsBarEl = $("stats-bar");
+  var aggClaimsEl = $("agg-claims");
+  var aggSourcesEl = $("agg-sources");
+  var aggFetchesEl = $("agg-fetches");
+  var vvcPanelEl = $("vvc-panel");
+  var agentsSectionEl = $("agents-section");
+  var legendToggleEl = $("legend-toggle");
+  var legendPanelEl = $("legend-panel");
 
-  // ── Color mapping ─────────────────────────────
+  // -- Color mapping ----------------------------------------
   function activityToColor(activity) {
     switch ((activity || "").toLowerCase()) {
       case "searching": return "var(--accent-search)";
@@ -598,7 +1057,7 @@ body.complete .agent-card {
     return activity.charAt(0).toUpperCase() + activity.slice(1);
   }
 
-  // ── Elapsed time ──────────────────────────────
+  // -- Duration helpers -------------------------------------
   function formatElapsed(startedAt) {
     if (!startedAt) return "00:00:00";
     var diff = Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
@@ -606,6 +1065,29 @@ body.complete .agent-card {
     var m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
     var s = String(diff % 60).padStart(2, "0");
     return h + ":" + m + ":" + s;
+  }
+
+  function formatDurationMs(ms) {
+    if (!ms && ms !== 0) return "";
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    s = s % 60;
+    if (m > 0) return m + "m " + String(s).padStart(2, "0") + "s";
+    return s + "s";
+  }
+
+  function formatDurationFromTo(from, to) {
+    if (!from) return "";
+    var end = to ? new Date(to).getTime() : Date.now();
+    return formatDurationMs(end - new Date(from).getTime());
+  }
+
+  function relativeTime(isoStr) {
+    if (!isoStr) return "";
+    var diff = Math.max(0, Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000));
+    if (diff < 60) return diff + "s ago";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    return Math.floor(diff / 3600) + "h ago";
   }
 
   function startTimer(startedAt) {
@@ -617,10 +1099,10 @@ body.complete .agent-card {
     elapsedEl.textContent = formatElapsed(startedAt);
   }
 
-  // ── WebFetch Meter ────────────────────────────
+  // -- WebFetch Meter ---------------------------------------
   function createWebFetchMeter(used, cap) {
     if (!cap || cap <= 0) return "";
-    var html = '<div class="wf-row"><span class="wf-label">WF</span><div class="wf-meter">';
+    var html = '<div class="wf-row"><span class="wf-label">Web Fetches</span><div class="wf-meter">';
     for (var i = 0; i < cap; i++) {
       html += '<div class="wf-block' + (i < used ? " filled" : "") + '"></div>';
     }
@@ -628,7 +1110,7 @@ body.complete .agent-card {
     return html;
   }
 
-  // ── Pipeline ──────────────────────────────────
+  // -- Pipeline ---------------------------------------------
   function renderPipeline(phases) {
     if (!phases || phases.length === 0) {
       pipelineEmptyEl.style.display = "";
@@ -648,16 +1130,24 @@ body.complete .agent-card {
         html += '<div class="phase-connector' + connActive + '"></div>';
       }
 
+      var durationHtml = "";
+      if (status === "complete" && p.startedAt && p.completedAt) {
+        durationHtml = '<div class="phase-duration">' + formatDurationFromTo(p.startedAt, p.completedAt) + '</div>';
+      } else if (status === "in_progress" && p.startedAt) {
+        durationHtml = '<div class="phase-duration active" data-started="' + p.startedAt + '">' + formatDurationFromTo(p.startedAt, null) + '</div>';
+      }
+
       html += '<div class="phase-unit"><div class="phase-node-wrap">';
       html += '<div class="phase-diamond ' + status + '"></div>';
       html += '<div class="phase-label">' + escapeHtml(label) + '</div>';
+      html += durationHtml;
       html += '</div></div>';
     }
 
     pipelineTrackEl.innerHTML = html;
   }
 
-  // ── Agent Cards ───────────────────────────────
+  // -- Agent Cards ------------------------------------------
   var renderedAgentIds = [];
 
   function renderAgentCards(agents) {
@@ -691,12 +1181,72 @@ body.complete .agent-card {
     }
   }
 
+  function questionStatusIcon(status) {
+    switch (status) {
+      case "complete": return '<span class="question-icon complete">&#10003;</span>';
+      case "active":   return '<span class="question-icon active">&#9679;</span>';
+      default:         return '<span class="question-icon pending">&#9675;</span>';
+    }
+  }
+
+  function buildQuestionList(a) {
+    var questions = a.questions || [];
+    if (questions.length === 0) {
+      // Fallback for old-style data
+      var total = a.questionsTotal || 0;
+      var completed = a.questionsCompleted || 0;
+      if (total === 0) return '';
+      var html = '<ul class="question-list">';
+      for (var i = 0; i < total; i++) {
+        var qs = i < completed ? "complete" : (i === completed ? "active" : "pending");
+        html += '<li class="question-item ' + qs + '">';
+        html += questionStatusIcon(qs);
+        html += '<span class="question-text">Question ' + (i + 1) + '</span>';
+        html += '</li>';
+      }
+      html += '</ul>';
+      return html;
+    }
+
+    var html = '<ul class="question-list">';
+    for (var i = 0; i < questions.length; i++) {
+      var q = questions[i];
+      var qs = q.status || "pending";
+      var dur = "";
+      if (qs === "complete" && q.durationMs) {
+        dur = '<span class="question-duration">' + formatDurationMs(q.durationMs) + '</span>';
+      } else if (qs === "active" && q.startedAt) {
+        dur = '<span class="question-duration active" data-started="' + q.startedAt + '">' + formatDurationFromTo(q.startedAt, null) + '</span>';
+      }
+      html += '<li class="question-item ' + qs + '">';
+      html += questionStatusIcon(qs);
+      html += '<span class="question-text" title="' + escapeAttr(q.text || "") + '">' + escapeHtml(q.text || ("Question " + (i + 1))) + '</span>';
+      html += dur;
+      html += '</li>';
+      // Show current action under the active question
+      if (qs === "active" && a.currentAction) {
+        html += '<li class="question-action" title="' + escapeAttr(a.currentAction) + '">' + escapeHtml(a.currentAction) + '</li>';
+      }
+    }
+    html += '</ul>';
+    return html;
+  }
+
   function buildAgentCard(id, a, index) {
     var color = activityToColor(a.activity);
-    var pct = a.questionsTotal > 0 ? Math.round((a.questionsCompleted / a.questionsTotal) * 100) : 0;
     var delay = index * 150;
+    var expanded = expandedCards[id] || false;
+    var activeTab = activeTabMap[id] || "claims";
 
-    var html = '<div class="agent-card" id="card-' + escapeAttr(id) + '" style="animation-delay:' + delay + 'ms; border-left-color:' + color + '">';
+    var html = '<div class="agent-card' + (expanded ? ' expanded' : '') + '" id="card-' + escapeAttr(id) + '" style="animation-delay:' + delay + 'ms; border-left-color:' + color + '">';
+
+    // Error badge
+    var errorCount = (a.errors || 0) + (a.aborts || 0);
+    if (errorCount > 0) {
+      html += '<span class="error-badge" id="err-' + escapeAttr(id) + '">' + errorCount + ' error' + (errorCount > 1 ? 's' : '') + '</span>';
+    }
+
+    // Header
     html += '<div class="agent-card-header">';
     html += '<span class="agent-id">' + escapeHtml(id) + '</span>';
     html += '<span class="activity-badge" id="badge-' + escapeAttr(id) + '" style="color:' + color + '">';
@@ -704,19 +1254,38 @@ body.complete .agent-card {
     html += activityToLabel(a.activity);
     html += '</span></div>';
 
-    html += '<div class="progress-row">';
-    html += '<div class="progress-track"><div class="progress-fill" id="pfill-' + escapeAttr(id) + '" style="width:' + pct + '%;background-color:' + color + '"></div></div>';
-    html += '<span class="progress-text">' + (a.questionsCompleted || 0) + '/' + (a.questionsTotal || 0) + '</span>';
-    html += '</div>';
+    // Question tracker
+    html += buildQuestionList(a);
 
+    // WebFetch meter
     html += createWebFetchMeter(a.webFetchesUsed || 0, a.webFetchCap || 0);
 
+    // Stats row
     html += '<div class="stats-row">';
-    html += '<span class="stat-item">claims: <span class="stat-value">' + (a.claimsFound || 0) + '</span></span>';
-    html += '<span class="stat-item">sources: <span class="stat-value">' + (a.sourcesCollected || 0) + '</span></span>';
+    html += '<span class="stat-item">claims: <span class="stat-value" id="sc-' + escapeAttr(id) + '">' + (a.claimsFound || 0) + '</span></span>';
+    html += '<span class="stat-item">sources: <span class="stat-value" id="ss-' + escapeAttr(id) + '">' + (a.sourcesCollected || 0) + '</span></span>';
     html += '</div>';
 
-    html += '<div class="current-question" id="cq-' + escapeAttr(id) + '" title="' + escapeAttr(a.currentQuestion || "") + '">' + escapeHtml(a.currentQuestion || "---") + '</div>';
+    // Expand toggle
+    html += '<button class="expand-toggle" data-agent="' + escapeAttr(id) + '">' + (expanded ? '\u25BC collapse' : '\u25B6 expand') + '</button>';
+
+    // Detail section (tabs)
+    html += '<div class="agent-detail" id="detail-' + escapeAttr(id) + '">';
+    html += '<div class="tab-bar">';
+    html += '<button class="tab-btn' + (activeTab === "claims" ? " active" : "") + '" data-agent="' + escapeAttr(id) + '" data-tab="claims">Claims</button>';
+    html += '<button class="tab-btn' + (activeTab === "log" ? " active" : "") + '" data-agent="' + escapeAttr(id) + '" data-tab="log">Activity Log</button>';
+    html += '<button class="tab-btn' + (activeTab === "sources" ? " active" : "") + '" data-agent="' + escapeAttr(id) + '" data-tab="sources">Sources</button>';
+    html += '</div>';
+    html += '<div class="tab-panel' + (activeTab === "claims" ? " active" : "") + '" data-tab="claims" id="tp-claims-' + escapeAttr(id) + '">';
+    html += renderClaimsTab(id, a.claims || []);
+    html += '</div>';
+    html += '<div class="tab-panel' + (activeTab === "log" ? " active" : "") + '" data-tab="log" id="tp-log-' + escapeAttr(id) + '">';
+    html += renderLogTab(id, a.log || []);
+    html += '</div>';
+    html += '<div class="tab-panel' + (activeTab === "sources" ? " active" : "") + '" data-tab="sources" id="tp-sources-' + escapeAttr(id) + '">';
+    html += renderSourcesTab(id, a.log || []);
+    html += '</div>';
+    html += '</div>';
 
     html += '</div>';
     return html;
@@ -727,10 +1296,9 @@ body.complete .agent-card {
     if (!card) return;
 
     var color = activityToColor(a.activity);
-    var pct = a.questionsTotal > 0 ? Math.round((a.questionsCompleted / a.questionsTotal) * 100) : 0;
-
     card.style.borderLeftColor = color;
 
+    // Activity badge
     var badge = document.getElementById("badge-" + id);
     if (badge) {
       badge.style.color = color;
@@ -739,16 +1307,35 @@ body.complete .agent-card {
       badge.lastChild.textContent = activityToLabel(a.activity);
     }
 
-    var pfill = document.getElementById("pfill-" + id);
-    if (pfill) {
-      pfill.style.width = pct + "%";
-      pfill.style.backgroundColor = color;
+    // Error badge
+    var errorCount = (a.errors || 0) + (a.aborts || 0);
+    var errEl = document.getElementById("err-" + id);
+    if (errorCount > 0) {
+      if (!errEl) {
+        errEl = document.createElement("span");
+        errEl.className = "error-badge";
+        errEl.id = "err-" + id;
+        card.appendChild(errEl);
+      }
+      errEl.textContent = errorCount + " error" + (errorCount > 1 ? "s" : "");
+    } else if (errEl) {
+      errEl.remove();
     }
 
-    var progText = card.querySelector(".progress-text");
-    if (progText) progText.textContent = (a.questionsCompleted || 0) + "/" + (a.questionsTotal || 0);
+    // Question tracker
+    var qList = card.querySelector(".question-list");
+    if (qList) {
+      var newQHtml = buildQuestionList(a);
+      // Use a temp container to extract inner HTML
+      var tempDiv = document.createElement("div");
+      tempDiv.innerHTML = newQHtml;
+      var newList = tempDiv.querySelector(".question-list");
+      if (newList) {
+        qList.innerHTML = newList.innerHTML;
+      }
+    }
 
-    // Update WebFetch meter
+    // WebFetch meter
     var wfRow = card.querySelector(".wf-row");
     if (wfRow) {
       var blocks = wfRow.querySelectorAll(".wf-block");
@@ -762,20 +1349,404 @@ body.complete .agent-card {
       }
     }
 
-    var statsValues = card.querySelectorAll(".stat-value");
-    if (statsValues.length >= 2) {
-      statsValues[0].textContent = a.claimsFound || 0;
-      statsValues[1].textContent = a.sourcesCollected || 0;
-    }
+    // Stats
+    var scEl = document.getElementById("sc-" + id);
+    if (scEl) scEl.textContent = a.claimsFound || 0;
+    var ssEl = document.getElementById("ss-" + id);
+    if (ssEl) ssEl.textContent = a.sourcesCollected || 0;
 
-    var cq = document.getElementById("cq-" + id);
-    if (cq) {
-      cq.textContent = a.currentQuestion || "---";
-      cq.title = a.currentQuestion || "";
+    // Update tabs if expanded
+    if (expandedCards[id]) {
+      var claimsPanel = document.getElementById("tp-claims-" + id);
+      if (claimsPanel) claimsPanel.innerHTML = renderClaimsTab(id, a.claims || []);
+
+      var logPanel = document.getElementById("tp-log-" + id);
+      if (logPanel) logPanel.innerHTML = renderLogTab(id, fullLogCache[id] || a.log || []);
+
+      var sourcesPanel = document.getElementById("tp-sources-" + id);
+      if (sourcesPanel) sourcesPanel.innerHTML = renderSourcesTab(id, fullLogCache[id] || a.log || []);
     }
   }
 
-  // ── Main Render ───────────────────────────────
+  // -- Tab rendering ----------------------------------------
+
+  function renderClaimsTab(id, claims) {
+    if (!claims || claims.length === 0) {
+      return '<div style="color:var(--text-muted);font-size:0.7rem;padding:8px 0;">No claims yet</div>';
+    }
+    var pending = 0, investigating = 0, investigated = 0;
+    for (var c = 0; c < claims.length; c++) {
+      var st = (claims[c].status || "pending").toLowerCase();
+      if (st === "pending") pending++;
+      else if (st === "under_investigation") investigating++;
+      else if (st === "investigated") investigated++;
+    }
+
+    var html = '<div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:8px;">';
+    html += claims.length + ' claims';
+    if (investigated > 0) html += ' &middot; ' + investigated + ' investigated';
+    if (investigating > 0) html += ' &middot; ' + investigating + ' investigating';
+    if (pending > 0) html += ' &middot; ' + pending + ' pending';
+    html += '</div>';
+
+    html += '<table class="claims-table"><thead><tr>';
+    html += '<th>ID</th><th>Claim</th><th>Confidence</th><th>Status</th><th>Sources</th>';
+    html += '</tr></thead><tbody>';
+    for (var i = 0; i < claims.length; i++) {
+      var cl = claims[i];
+      var conf = cl.confidence || "---";
+      var statusCls = (cl.status || "pending").toLowerCase().replace(/ /g, "_");
+      html += '<tr>';
+      html += '<td>' + escapeHtml(cl.id || ("C-" + (i + 1))) + '</td>';
+      html += '<td title="' + escapeAttr(cl.text || "") + '">' + escapeHtml(cl.text || "---") + '</td>';
+      html += '<td>' + escapeHtml(conf) + '</td>';
+      html += '<td><span class="claim-pill ' + statusCls + '">' + escapeHtml(cl.status || "pending") + '</span></td>';
+      html += '<td>' + (cl.sourceCount || 0) + '</td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    return html;
+  }
+
+  function logEntryIcon(type) {
+    switch (type) {
+      case "search": return "\uD83D\uDD0D";
+      case "fetch":  return "\uD83C\uDF10";
+      case "claim":  return "\uD83D\uDCCC";
+      case "assess": return "\u2696";
+      case "write":  return "\uD83D\uDCBE";
+      case "question_complete": return "\u2705";
+      case "start":  return "\u25B6";
+      case "error":  return "\u26A0";
+      case "abort":  return "\u2718";
+      default:       return "\u2022";
+    }
+  }
+
+  function renderLogTab(id, log) {
+    if (!log || log.length === 0) {
+      return '<div style="color:var(--text-muted);font-size:0.7rem;padding:8px 0;">No activity logged</div>';
+    }
+    var html = '<div class="log-feed">';
+    // Show newest first
+    for (var i = log.length - 1; i >= 0; i--) {
+      var entry = log[i];
+      var type = entry.type || "info";
+      html += '<div class="log-entry">';
+      html += '<span class="log-icon ' + escapeAttr(type) + '">' + logEntryIcon(type) + '</span>';
+      html += '<span class="log-text">';
+      switch (type) {
+        case "search":
+          html += 'Search: <span class="log-query">' + escapeHtml(entry.query || "") + '</span>';
+          if (entry.resultCount !== undefined) html += ' (' + entry.resultCount + ' results)';
+          break;
+        case "fetch":
+          html += 'Fetch: ' + escapeHtml(entry.url || "");
+          if (entry.status) {
+            var badgeCls = entry.status === "success" ? "success" : (entry.status.indexOf("403") >= 0 ? "blocked" : (entry.status === "timeout" ? "timeout" : "blocked"));
+            html += ' <span class="log-status-badge ' + badgeCls + '">' + escapeHtml(entry.status) + '</span>';
+          }
+          break;
+        case "claim":
+          html += 'Claim ' + escapeHtml(entry.claimId || "") + ': ' + escapeHtml(entry.text || "");
+          break;
+        case "assess":
+          html += 'Assess ' + escapeHtml(entry.claimId || "") + ': ' + escapeHtml(entry.result || "");
+          break;
+        case "write":
+          html += 'Write: ' + (entry.claimsAdded || 0) + ' claims, ' + (entry.sourcesAdded || 0) + ' sources';
+          break;
+        case "question_complete":
+          html += 'Completed: ' + escapeHtml(entry.question || "");
+          break;
+        case "start":
+          html += 'Started: ' + escapeHtml(entry.question || "");
+          break;
+        case "error":
+          html += 'Error: ' + escapeHtml(entry.message || "");
+          break;
+        case "abort":
+          html += 'Abort: ' + escapeHtml(entry.reason || "");
+          break;
+        default:
+          html += escapeHtml(JSON.stringify(entry));
+      }
+      html += '</span>';
+      html += '<span class="log-time">' + relativeTime(entry.timestamp) + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderSourcesTab(id, log) {
+    if (!log || log.length === 0) {
+      return '<div style="color:var(--text-muted);font-size:0.7rem;padding:8px 0;">No sources yet</div>';
+    }
+    // Extract fetch entries
+    var fetches = [];
+    for (var i = 0; i < log.length; i++) {
+      if (log[i].type === "fetch") fetches.push(log[i]);
+    }
+    if (fetches.length === 0) {
+      return '<div style="color:var(--text-muted);font-size:0.7rem;padding:8px 0;">No sources yet</div>';
+    }
+    // Sort: success first
+    fetches.sort(function(a, b) {
+      if (a.status === "success" && b.status !== "success") return -1;
+      if (a.status !== "success" && b.status === "success") return 1;
+      return 0;
+    });
+
+    var successCount = 0;
+    for (var s = 0; s < fetches.length; s++) {
+      if (fetches[s].status === "success") successCount++;
+    }
+
+    var html = '<div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:8px;">';
+    html += fetches.length + ' fetched &middot; ' + successCount + ' successful</div>';
+    html += '<div class="log-feed">';
+    for (var j = 0; j < fetches.length; j++) {
+      var f = fetches[j];
+      var badgeCls = f.status === "success" ? "success" : (f.status && f.status.indexOf("403") >= 0 ? "blocked" : (f.status === "timeout" ? "timeout" : "blocked"));
+      html += '<div class="log-entry">';
+      html += '<span class="log-icon fetch">\uD83C\uDF10</span>';
+      html += '<span class="log-text">' + escapeHtml(f.url || "") + ' <span class="log-status-badge ' + badgeCls + '">' + escapeHtml(f.status || "") + '</span></span>';
+      html += '<span class="log-time">' + relativeTime(f.timestamp) + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // -- Event delegation for agent cards ---------------------
+  agentsGridEl.addEventListener("click", function (e) {
+    // Expand toggle
+    var toggle = e.target.closest(".expand-toggle");
+    if (toggle) {
+      var cardId = toggle.dataset.agent;
+      expandedCards[cardId] = !expandedCards[cardId];
+      var card = document.getElementById("card-" + cardId);
+      if (card) {
+        card.classList.toggle("expanded", expandedCards[cardId]);
+        toggle.textContent = expandedCards[cardId] ? "\u25BC collapse" : "\u25B6 expand";
+      }
+      // Load full log on first expand
+      if (expandedCards[cardId] && !fullLogCache[cardId]) {
+        fetch("/api/agent/" + encodeURIComponent(cardId) + "/log")
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            fullLogCache[cardId] = data;
+            // Re-render log and sources tabs
+            var logPanel = document.getElementById("tp-log-" + cardId);
+            if (logPanel) logPanel.innerHTML = renderLogTab(cardId, data);
+            var sourcesPanel = document.getElementById("tp-sources-" + cardId);
+            if (sourcesPanel) sourcesPanel.innerHTML = renderSourcesTab(cardId, data);
+          })
+          .catch(function () {});
+      }
+      return;
+    }
+
+    // Tab switching
+    var tabBtn = e.target.closest(".tab-btn");
+    if (tabBtn) {
+      var agentId = tabBtn.dataset.agent;
+      var tab = tabBtn.dataset.tab;
+      activeTabMap[agentId] = tab;
+      var card = document.getElementById("card-" + agentId);
+      if (card) {
+        var btns = card.querySelectorAll(".tab-btn");
+        for (var b = 0; b < btns.length; b++) {
+          btns[b].classList.toggle("active", btns[b].dataset.tab === tab);
+        }
+        var panels = card.querySelectorAll(".tab-panel");
+        for (var p = 0; p < panels.length; p++) {
+          panels[p].classList.toggle("active", panels[p].dataset.tab === tab);
+        }
+      }
+    }
+  });
+
+  // -- Aggregate Stats --------------------------------------
+  function renderAggregateStats(agents) {
+    var totalClaims = 0, totalSources = 0, totalFetchUsed = 0, totalFetchCap = 0;
+    for (var id in agents) {
+      var a = agents[id];
+      totalClaims += (a.claimsFound || 0);
+      totalSources += (a.sourcesCollected || 0);
+      totalFetchUsed += (a.webFetchesUsed || 0);
+      totalFetchCap += (a.webFetchCap || 0);
+    }
+    aggClaimsEl.textContent = totalClaims;
+    aggSourcesEl.textContent = totalSources;
+    aggFetchesEl.textContent = totalFetchUsed + "/" + totalFetchCap + " used";
+  }
+
+  // -- VVC Panel --------------------------------------------
+  function renderVvcPanel(vvc) {
+    if (!vvc) {
+      vvcPanelEl.style.display = "none";
+      return;
+    }
+    vvcPanelEl.style.display = "";
+
+    var claims = vvc.claims || [];
+    var totalClaims = claims.length;
+    var verified = 0;
+    var verdictCounts = {};
+    for (var i = 0; i < claims.length; i++) {
+      var v = claims[i].verdict;
+      if (v) {
+        verified++;
+        var vKey = v.toLowerCase();
+        verdictCounts[vKey] = (verdictCounts[vKey] || 0) + 1;
+      }
+    }
+    var pct = totalClaims > 0 ? Math.round((verified / totalClaims) * 100) : 0;
+
+    var isPhase6 = vvc.phase === 6 || vvc.phase === "correction";
+    var isVerifyOnly = vvc.mode === "verify-only";
+    var titleText = isPhase6 ? "VVC Correction" : "VVC Verification";
+    var phaseLabel = isPhase6 ? "Phase 6" : "Phase 5";
+
+    var html = '<div class="vvc-header">';
+    html += '<span class="vvc-title">' + titleText + '</span>';
+    html += '<span class="vvc-phase-info">' + phaseLabel + ' &middot; ' + verified + '/' + totalClaims + ' verified</span>';
+    html += '</div>';
+
+    if (isVerifyOnly) {
+      html += '<div class="vvc-mode">verify only -- no corrections applied</div>';
+    } else if (vvc.mode) {
+      html += '<div class="vvc-mode">Mode: ' + escapeHtml(vvc.mode) + '</div>';
+    }
+
+    // Progress bar
+    html += '<div class="vvc-summary">';
+    html += '<div class="vvc-progress-track"><div class="vvc-progress-fill" style="width:' + pct + '%"></div></div>';
+    html += '<span>' + pct + '%</span>';
+    html += '</div>';
+
+    // Verdict counts
+    var countKeys = Object.keys(verdictCounts);
+    if (countKeys.length > 0) {
+      html += '<div class="vvc-verdict-counts">';
+      var parts = [];
+      for (var ck = 0; ck < countKeys.length; ck++) {
+        parts.push(countKeys[ck] + ': ' + verdictCounts[countKeys[ck]]);
+      }
+      html += parts.join(' &middot; ');
+      html += '</div>';
+    }
+
+    // Claims table
+    html += '<table class="vvc-table"><thead><tr>';
+    html += '<th>ID</th><th>Claim</th><th>Confidence</th><th>Verdict</th>';
+    if (!isVerifyOnly) html += '<th>Recommendation</th>';
+    if (isPhase6) html += '<th>Applied</th>';
+    html += '</tr></thead><tbody>';
+
+    for (var j = 0; j < claims.length; j++) {
+      var cl = claims[j];
+      var verdictVal = cl.verdict || "";
+      var verdictCls = verdictVal.toLowerCase().replace(/ /g, "_");
+      var verdictIcon = "";
+      if (!verdictVal) {
+        // Not yet verified
+        if (cl.verifying) {
+          verdictIcon = '<span class="question-icon active">&#9679;</span>';
+        } else {
+          verdictIcon = '<span class="question-icon pending">&#9675;</span>';
+        }
+      }
+      var verdictDisplay = verdictVal
+        ? '<span class="verdict-badge ' + verdictCls + '">' + escapeHtml(verdictVal) + '</span>'
+        : verdictIcon;
+
+      html += '<tr data-vvc-row="' + j + '">';
+      html += '<td>' + escapeHtml(cl.id || ("C-" + (j + 1))) + '</td>';
+      html += '<td title="' + escapeAttr(cl.text || "") + '" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(cl.text || "---") + '</td>';
+      html += '<td>' + escapeHtml(cl.confidence || "---") + '</td>';
+      html += '<td>' + verdictDisplay + '</td>';
+      if (!isVerifyOnly) {
+        html += '<td>' + escapeHtml(cl.recommendation || "---") + '</td>';
+      }
+      if (isPhase6) {
+        var appliedVal = cl.applied || "";
+        var appliedCls = appliedVal.toLowerCase().replace(/ /g, "_");
+        html += '<td>';
+        if (appliedVal) {
+          html += '<span class="applied-badge ' + appliedCls + '">' + escapeHtml(appliedVal) + '</span>';
+        } else {
+          html += '---';
+        }
+        html += '</td>';
+      }
+      html += '</tr>';
+
+      // Expandable detail row
+      html += '<tr class="vvc-row-detail" data-vvc-detail="' + j + '"><td colspan="' + (isPhase6 ? 6 : (isVerifyOnly ? 4 : 5)) + '">';
+      if (cl.sourceUrl) html += '<div>Source: <a href="' + escapeAttr(cl.sourceUrl) + '" style="color:var(--accent-search)" target="_blank" rel="noopener">' + escapeHtml(cl.sourceUrl) + '</a></div>';
+      if (cl.sourceQuote) html += '<div style="margin-top:4px;font-style:italic;">"' + escapeHtml(cl.sourceQuote) + '"</div>';
+      if (cl.correctedText) html += '<div style="margin-top:4px;color:var(--accent-assess)">Corrected: ' + escapeHtml(cl.correctedText) + '</div>';
+      if (!cl.sourceUrl && !cl.sourceQuote && !cl.correctedText) html += '<div>No additional details</div>';
+      html += '</td></tr>';
+    }
+
+    html += '</tbody></table>';
+    vvcPanelEl.innerHTML = html;
+
+    // Add click handlers for VVC row expansion
+    var vvcTable = vvcPanelEl.querySelector(".vvc-table");
+    if (vvcTable) {
+      vvcTable.addEventListener("click", function (e) {
+        var row = e.target.closest("tr[data-vvc-row]");
+        if (row) {
+          var idx = row.dataset.vvcRow;
+          var detail = vvcPanelEl.querySelector('tr[data-vvc-detail="' + idx + '"]');
+          if (detail) {
+            detail.classList.toggle("visible");
+          }
+        }
+      });
+    }
+  }
+
+  // -- Legend ------------------------------------------------
+  function renderLegend() {
+    var html = '<strong style="color:var(--text-primary)">Legend</strong>';
+    html += '<div class="legend-row"><span class="legend-label">Pipeline</span>';
+    html += '<span class="legend-swatch" style="background:var(--border)"></span> pending ';
+    html += '<span class="legend-swatch" style="background:var(--accent-search)"></span> active ';
+    html += '<span class="legend-swatch" style="background:var(--accent-complete)"></span> complete ';
+    html += '<span class="legend-swatch" style="background:var(--accent-error)"></span> error</div>';
+    html += '<div class="legend-row"><span class="legend-label">Activity</span>';
+    html += '<span class="legend-swatch" style="background:var(--accent-search)"></span> searching ';
+    html += '<span class="legend-swatch" style="background:var(--accent-assess)"></span> assessing ';
+    html += '<span class="legend-swatch" style="background:var(--accent-refine)"></span> refining ';
+    html += '<span class="legend-swatch" style="background:var(--accent-write)"></span> writing ';
+    html += '<span class="legend-swatch" style="background:var(--accent-complete)"></span> idle</div>';
+    html += '<div class="legend-row"><span class="legend-label">Questions</span>';
+    html += '<span style="color:var(--accent-complete)">&#10003;</span> complete ';
+    html += '<span style="color:var(--accent-search)">&#9679;</span> active ';
+    html += '<span style="color:var(--text-muted)">&#9675;</span> pending</div>';
+    html += '<div class="legend-row"><span class="legend-label">Web Fetches</span>';
+    html += '<span class="legend-swatch" style="background:var(--accent-search)"></span> used ';
+    html += '<span class="legend-swatch" style="background:var(--border)"></span> remaining</div>';
+    html += '<div class="legend-row"><span class="legend-label">Claims</span>';
+    html += '<span class="claim-pill pending" style="font-size:0.55rem">pending</span> ';
+    html += '<span class="claim-pill under_investigation" style="font-size:0.55rem">investigating</span> ';
+    html += '<span class="claim-pill investigated" style="font-size:0.55rem">investigated</span></div>';
+    legendPanelEl.innerHTML = html;
+  }
+
+  legendToggleEl.addEventListener("click", function () {
+    legendPanelEl.classList.toggle("visible");
+  });
+
+  renderLegend();
+
+  // -- Main Render ------------------------------------------
   function render(status) {
     if (!status) return;
     lastStatus = status;
@@ -805,26 +1776,66 @@ body.complete .agent-card {
         if (timerInterval) clearInterval(timerInterval);
         var finalElapsed = formatElapsed(pipeline.startedAt);
         finalTimeEl.textContent = finalElapsed;
-
-        // Fill all agent progress bars to 100%
-        var allCards = document.querySelectorAll(".progress-fill");
-        for (var c = 0; c < allCards.length; c++) {
-          allCards[c].style.width = "100%";
-          allCards[c].style.backgroundColor = "var(--accent-complete)";
-        }
       }
 
       renderPipeline(pipeline.phases);
     }
 
     renderAgentCards(agents);
+    renderAggregateStats(agents);
+
+    // VVC panel
+    if (status.vvc) {
+      renderVvcPanel(status.vvc);
+    }
+
+    // Hide agent cards during non-Phase-2 phases if all agents complete
+    if (pipeline && pipeline.currentPhase > 2) {
+      var allAgentsDone = true;
+      var agentIds = Object.keys(agents);
+      for (var i = 0; i < agentIds.length; i++) {
+        var ast = agents[agentIds[i]].status;
+        if (ast !== "complete" && ast !== "error") {
+          allAgentsDone = false;
+          break;
+        }
+      }
+      if (allAgentsDone && !status.vvc) {
+        agentsSectionEl.style.display = "none";
+      } else {
+        agentsSectionEl.style.display = "";
+      }
+    } else {
+      agentsSectionEl.style.display = "";
+    }
+
+    // Update live phase durations
+    var activeDurations = document.querySelectorAll(".phase-duration.active");
+    for (var d = 0; d < activeDurations.length; d++) {
+      var started = activeDurations[d].dataset.started;
+      if (started) activeDurations[d].textContent = formatDurationFromTo(started, null);
+    }
 
     // Last updated
     var now = new Date();
     lastUpdatedEl.textContent = "Updated " + now.toLocaleTimeString();
   }
 
-  // ── SSE Connection ────────────────────────────
+  // -- 1-second timer for live durations --------------------
+  setInterval(function () {
+    var activePhaseDurations = document.querySelectorAll(".phase-duration.active");
+    for (var i = 0; i < activePhaseDurations.length; i++) {
+      var started = activePhaseDurations[i].dataset.started;
+      if (started) activePhaseDurations[i].textContent = formatDurationFromTo(started, null);
+    }
+    var activeQuestionDurations = document.querySelectorAll(".question-duration.active");
+    for (var j = 0; j < activeQuestionDurations.length; j++) {
+      var qStarted = activeQuestionDurations[j].dataset.started;
+      if (qStarted) activeQuestionDurations[j].textContent = formatDurationFromTo(qStarted, null);
+    }
+  }, 1000);
+
+  // -- SSE Connection ---------------------------------------
   function setConnectionStatus(mode) {
     connDotEl.className = "connection-dot " + mode;
     switch (mode) {
@@ -909,7 +1920,7 @@ body.complete .agent-card {
     }, 15000);
   }
 
-  // ── Helpers ───────────────────────────────────
+  // -- Helpers ----------------------------------------------
   function escapeHtml(str) {
     if (!str) return "";
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -920,7 +1931,7 @@ body.complete .agent-card {
     return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  // ── Init ──────────────────────────────────────
+  // -- Init -------------------------------------------------
   connectSSE();
 
 })();
