@@ -91,6 +91,78 @@ For each assigned research question:
 
 ---
 
+## Incremental Write Protocol
+
+Write findings to disk after completing EACH research question — never accumulate
+all findings for a single large write at the end.
+
+After completing all Search-Assess-Refine passes for one research question:
+
+1. APPEND new claims to `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md`
+2. APPEND new sources to `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md`
+3. APPEND the iteration log entry to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log_[AgentID].md`
+4. APPEND discovered sources to `BASE_DIR/[TOPIC_SLUG]_Sources_[AgentID].md`
+5. OVERWRITE status JSON to `BASE_DIR/_status/[AgentID].json` (see Agent Status Protocol)
+
+### File Creation Convention
+
+- First write creates the file with a markdown header (e.g., `# Claims — [AgentID]`)
+- Subsequent writes append a section separator (`---`) followed by the new content
+- Files are always valid markdown at every intermediate point
+
+### Context Release
+
+After writing to disk, release detailed findings from working memory. Retain only:
+- Claim IDs and confidence levels (e.g., "C-01 HIGH, C-02 MEDIUM")
+- Source count and top source IDs
+- Brief gap summary (one line)
+
+This keeps the context window lean for subsequent research questions.
+
+---
+
+## Agent Status Protocol
+
+Maintain a status file at `BASE_DIR/_status/[AgentID].json`. This file is OVERWRITTEN
+(not appended) after each research question — it represents current state only.
+
+The `_status/` directory is created by the orchestrator before agents are deployed.
+
+### Status JSON Schema
+
+```json
+{
+  "agentId": "[AgentID]",
+  "engineId": "${ENGINE_ID}",
+  "phase": 2,
+  "status": "researching | writing | assessing | refining | complete | error",
+  "currentQuestion": "The research question currently being worked on",
+  "questionsCompleted": 2,
+  "questionsTotal": 5,
+  "activity": "searching | assessing | refining | writing | idle",
+  "webFetchesUsed": 4,
+  "webFetchCap": 10,
+  "claimsFound": 7,
+  "sourcesCollected": 4,
+  "iterationPass": 2,
+  "maxIterations": 3,
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+### When to Write Status
+
+- On agent start: status "researching", questionsCompleted 0, activity "searching"
+- After each Search pass: update activity to "searching"
+- After each Assess pass: update activity to "assessing"
+- After each Refine pass: update activity to "refining"
+- After writing files for a completed question: increment questionsCompleted,
+  update claimsFound and sourcesCollected totals, activity "writing"
+- On completion of all questions: status "complete", activity "idle"
+- On error or abort: status "error", add "message" field with explanation
+
+---
+
 ## File Isolation Protocol
 
 Each Phase 2 agent writes ONLY to its own files. No shared files during parallel research.
