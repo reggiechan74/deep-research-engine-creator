@@ -743,7 +743,56 @@ It guards against edge cases in Comprehensive tier with extensive follow-up roun
 
 **Change target:** `templates/dashboard.html.tmpl`
 
-**Expandable agent cards:** Each agent card gets a chevron button. Clicking it expands the card to reveal a tabbed detail view:
+#### Header Enhancements
+
+**Aggregate stats bar** in the header, below the engine name/topic/tier:
+
+```
+Claims: 24 total (5 pending, 3 investigating, 16 investigated)  |  Sources: 18  |  Web Fetches: 22/40 used
+```
+
+Computed by summing across all agent status data. Updates in real-time via SSE.
+
+**Phase duration tracking:** When a phase completes, show elapsed time next to the checkmark:
+
+```
+◇ Tier Detection ✓        ◇ Research Planning ✓ 2m 34s        ◇ Parallel Research ● 4m 12s...
+```
+
+Active phase shows a live counter. Completed phases show fixed duration. Requires the pipeline JSON to include `phaseStartedAt` timestamps (see Section 7h).
+
+#### Agent Card — Collapsed State (Default)
+
+Replaces the v1.8.0 compact view with a richer default:
+
+**Question tracker** replaces the progress bar. Each assigned research question shown as a single line:
+
+```
+patent-search-specialist                                    ⚠ 1
+Questions
+  ✓ What prior art exists for solid-state battery cathode designs?          1m 42s
+  ✓ Are there contradictory patents in the electrolyte space?               2m 08s
+  ● What is the IP landscape for lithium-metal anode tech?                  0m 55s...
+    └ Searching 'lithium metal anode patent holders 2024 site:patents.google.com'
+  ○ Who are the key patent holders in solid-state batteries?
+  ○ What freedom-to-operate risks exist?
+
+Web Fetches  ▪▪▪▪▪▪░░░░  6/10        Claims: 12    Sources: 8        ▶ expand
+```
+
+Key elements:
+- **Question status indicators:** `✓` complete (green), `●` active (cyan, pulsing), `○` pending (gray)
+- **Question text:** truncated with ellipsis if longer than card width
+- **Question timing:** elapsed time for completed questions; live counter for active question
+- **Current action:** shown as indented sub-line under the active question, updating in real-time
+- **Web Fetches:** full label, segmented meter (▪ = used, ░ = remaining), fraction `6/10`
+- **Stats row:** claims count, sources count
+- **Error/warning badge:** top-right corner of card, red count badge (e.g., `⚠ 1`) if the agent logged errors or aborted branches. Clicking it jumps to the error in the expanded Activity Log tab
+- **Expand chevron:** `▶ expand` to reveal tabbed detail view
+
+#### Agent Card — Expanded State
+
+Clicking `▶ expand` reveals a tabbed detail view below the question tracker:
 
 **Tab 1: Claims**
 - Table with columns: ID, Text (truncated), Confidence, Status, Sources
@@ -762,9 +811,12 @@ It guards against edge cases in Comprehensive tier with extensive follow-up roun
   - `fetch` → cyan icon, shows URL (truncated), status badge (success=green, blocked=rose)
   - `claim` → emerald icon, shows claim text
   - `assess` → amber icon, shows claim ID and result
+  - `write` → emerald icon, shows files written and counts
+  - `question_complete` → green divider with question text and duration
   - `error`/`abort` → rose icon, shows message
 - Auto-scrolls to show latest entry when new events arrive via SSE
 - Timestamps shown as relative ("3s ago", "1m ago")
+- Full log loaded via `GET /api/agent/:id/log` on tab open (SSE only sends last 50)
 
 **Tab 3: Sources**
 - List of URLs fetched by this agent, extracted from the action log (`fetch` entries)
@@ -775,7 +827,20 @@ It guards against edge cases in Comprehensive tier with extensive follow-up roun
 
 **Data source:** The dashboard server reads `_status/[AgentID]_claims.json` and `_status/[AgentID]_log.json` alongside the existing `_status/[AgentID].json`. All three are included in the SSE push and `/api/status` response.
 
-**Collapsed state (default):** Cards show the same compact view as v1.8.0, plus the new `currentAction` text replacing the static `currentQuestion` when `currentAction` is available. The `currentQuestion` is shown as a smaller label above `currentAction`.
+#### Collapsible Legend
+
+A `?` icon in the top-right corner of the header. Clicking it expands a legend panel:
+
+```
+Legend
+  Pipeline     ○ pending   ● active   ✓ complete   ✗ error
+  Activity     ■ searching  ■ assessing  ■ refining  ■ writing  ■ idle
+  Claims       ■ pending   ■ investigating   ■ investigated
+  Questions    ○ pending   ● active   ✓ complete
+  Web Fetches  ▪ used   ░ remaining
+```
+
+Each swatch uses the actual accent color from the CSS custom properties. Collapsed by default — experienced users won't need it after the first session.
 
 ### 7e: Dashboard Server Changes
 
@@ -826,15 +891,119 @@ BASE_DIR/_status/
 └── dashboard.html                    # Dashboard UI (enhanced)
 ```
 
+### 7h: Data Model Changes for Timing and Questions
+
+The question tracker and phase duration features require additional fields in the status and pipeline JSON files.
+
+**Agent status JSON — new `questions` array:**
+
+Replaces the flat `questionsCompleted`/`questionsTotal` counters with a structured array. Each entry tracks one assigned research question:
+
+```json
+{
+  "agentId": "[AgentID]",
+  "engineId": "${ENGINE_ID}",
+  "phase": 2,
+  "status": "researching",
+  "currentAction": "Searching 'solid-state battery cathode 2024'",
+  "activity": "searching",
+  "questions": [
+    {
+      "text": "What prior art exists for solid-state battery cathode designs?",
+      "status": "complete",
+      "startedAt": "2026-03-19T14:30:05Z",
+      "completedAt": "2026-03-19T14:31:47Z",
+      "durationMs": 102000
+    },
+    {
+      "text": "Are there contradictory patents in the electrolyte space?",
+      "status": "complete",
+      "startedAt": "2026-03-19T14:31:48Z",
+      "completedAt": "2026-03-19T14:33:56Z",
+      "durationMs": 128000
+    },
+    {
+      "text": "What is the IP landscape for lithium-metal anode tech?",
+      "status": "active",
+      "startedAt": "2026-03-19T14:33:57Z",
+      "completedAt": null,
+      "durationMs": null
+    },
+    {
+      "text": "Who are the key patent holders in solid-state batteries?",
+      "status": "pending",
+      "startedAt": null,
+      "completedAt": null,
+      "durationMs": null
+    }
+  ],
+  "webFetchesUsed": 6,
+  "webFetchCap": 10,
+  "claimsFound": 12,
+  "sourcesCollected": 8,
+  "iterationPass": 2,
+  "maxIterations": 3,
+  "errors": 0,
+  "aborts": 0,
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+The `questionsCompleted` and `questionsTotal` fields are removed — the dashboard derives them from `questions.filter(q => q.status === 'complete').length` and `questions.length`. The `currentQuestion` field is also removed — the active question is `questions.find(q => q.status === 'active').text`.
+
+New fields:
+- `questions[]` — structured array replacing flat counters
+- `errors` — count of error events in the action log (drives the error badge)
+- `aborts` — count of abort events in the action log
+
+**Pipeline JSON — phase timing:**
+
+Each phase object gains `startedAt` and `completedAt` timestamps:
+
+```json
+{
+  "phases": [
+    {
+      "phase": 0,
+      "label": "Tier Detection",
+      "status": "complete",
+      "startedAt": "2026-03-19T14:30:00Z",
+      "completedAt": "2026-03-19T14:30:02Z"
+    },
+    {
+      "phase": 1,
+      "label": "Research Planning",
+      "status": "complete",
+      "startedAt": "2026-03-19T14:30:02Z",
+      "completedAt": "2026-03-19T14:32:36Z"
+    },
+    {
+      "phase": 2,
+      "label": "Parallel Research",
+      "status": "in_progress",
+      "startedAt": "2026-03-19T14:32:37Z",
+      "completedAt": null
+    }
+  ]
+}
+```
+
+The orchestrator writes `startedAt` when setting a phase to `"in_progress"` and `completedAt` when setting it to `"complete"`. The dashboard computes duration client-side. For the active phase, it shows a live counter from `startedAt` to now.
+
+**Change target:** `templates/orchestrator-skill.md.tmpl` — Phase Transition Protocol section and `_pipeline.json` initial state.
+
+**Change target:** `templates/research-protocol.md.tmpl` — Agent Status Protocol section (replace flat counters with `questions` array).
+
 ### 7g: Impact on Templates and Generator
 
-These observability changes modify two template files:
+These observability changes modify four template files:
 
 | Template | Changes |
 |----------|---------|
-| `templates/research-protocol.md.tmpl` | Add `currentAction` to status schema, update "When to Write Status" rules, add claims JSON writing to Incremental Write Protocol, add Action Logging Protocol section |
-| `templates/dashboard-server.js.tmpl` | Update `getStatus()` to read claims and log files, filter out `_claims.json`/`_log.json` from agent ID parsing |
-| `templates/dashboard.html.tmpl` | Add expandable agent cards, claims tab, activity log tab, sources tab, currentAction display |
+| `templates/research-protocol.md.tmpl` | Replace flat question counters with `questions` array in status schema, add `currentAction`, `errors`, `aborts` fields, add claims JSON writing to Incremental Write Protocol, add Action Logging Protocol section |
+| `templates/orchestrator-skill.md.tmpl` | Add `startedAt`/`completedAt` timestamps to phase objects in Phase Transition Protocol and `_pipeline.json` initial state |
+| `templates/dashboard-server.js.tmpl` | Update `getStatus()` to read claims and log files, add `GET /api/agent/:id/log` endpoint, cap SSE log to 50 entries |
+| `templates/dashboard.html.tmpl` | Question tracker, aggregate stats bar, phase duration display, expandable cards with claims/activity log/sources tabs, error badges, legend panel, labeled WebFetch meter |
 
 The Python generator reads these templates as-is — no generator changes needed for the observability enhancements. The templates contain the protocol instructions that agents follow at runtime.
 
@@ -845,9 +1014,10 @@ The Python generator reads these templates as-is — no generator changes needed
 | `plugin/generator/generate.py` | New | Deterministic generator script |
 | `plugin/skills/engine-creator/SKILL.md` | Modified | Replace generation steps with script invocation, add _derived, bump to v1.9.0 |
 | `templates/engine-config-schema.json` | Modified | Add `_derived` to required + properties |
-| `templates/research-protocol.md.tmpl` | Modified | Add currentAction field, claims JSON writing, Action Logging Protocol section |
-| `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files in getStatus(), cap log entries in SSE |
-| `templates/dashboard.html.tmpl` | Modified | Expandable cards with claims/activity log tabs, currentAction display |
+| `templates/research-protocol.md.tmpl` | Modified | Replace flat counters with questions array, add currentAction/errors/aborts, claims JSON, Action Logging Protocol |
+| `templates/orchestrator-skill.md.tmpl` | Modified | Add startedAt/completedAt timestamps to phase transitions and _pipeline.json |
+| `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files, add /api/agent/:id/log endpoint, cap SSE log |
+| `templates/dashboard.html.tmpl` | Modified | Question tracker, stats bar, phase durations, expandable cards, legend, error badges |
 | `plugin/commands/test-engine.md` | Modified | Remove impossible-to-fail checks |
 | `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate with script + updated templates |
 | `plugin/.claude-plugin/plugin.json` | Modified | Version 1.9.0 |
@@ -858,7 +1028,6 @@ The Python generator reads these templates as-is — no generator changes needed
 
 | File | Reason |
 |------|--------|
-| `templates/orchestrator-skill.md.tmpl` | Phase 0 status init already present from v1.8.0 |
 | `templates/agent-template.md.tmpl` | Agent Constraints already present from v1.8.0 |
 | `templates/standards.md.tmpl` | No changes |
 | `templates/provenance.md.tmpl` | No changes |
