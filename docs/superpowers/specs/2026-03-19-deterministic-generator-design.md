@@ -883,12 +883,13 @@ The `fs.watch` handler already triggers on any `.json` file change, so claims an
 
 ```
 BASE_DIR/_status/
-├── _pipeline.json                    # Pipeline state (unchanged)
-├── [AgentID].json                    # Agent status with currentAction (enhanced)
-├── [AgentID]_claims.json             # Structured claims array (new)
-├── [AgentID]_log.json                # Append-only action log (new)
-├── server.js                         # Dashboard server (enhanced)
-└── dashboard.html                    # Dashboard UI (enhanced)
+├── _pipeline.json                         # Pipeline state with phase timing
+├── [AgentID].json                         # Agent status with questions array + currentAction
+├── [AgentID]_claims.json                  # Structured claims array (new)
+├── [AgentID]_log.json                     # Append-only action log (new)
+├── vvc-specialist_verification.json       # VVC verdict/correction tracking (new, Phase 5-6)
+├── server.js                              # Dashboard server (enhanced)
+└── dashboard.html                         # Dashboard UI (enhanced)
 ```
 
 ### 7h: Data Model Changes for Timing and Questions
@@ -994,16 +995,216 @@ The orchestrator writes `startedAt` when setting a phase to `"in_progress"` and 
 
 **Change target:** `templates/research-protocol.md.tmpl` — Agent Status Protocol section (replace flat counters with `questions` array).
 
+### 7i: VVC Verification Panel
+
+When the pipeline reaches Phase 5 (VVC-Verify), the dashboard transitions from the Phase 2 agent cards view to a dedicated VVC Verification Panel. This panel replaces the agent cards area — Phase 2 agents are done by then and their cards are no longer updating.
+
+**VVC panel appears only when:**
+- Engine has VVC enabled (`qualityFramework.vvc.enabled: true`)
+- `--no-vvc` flag was NOT passed
+- Pipeline has reached Phase 5
+
+**Data source:** The VVC agent writes `BASE_DIR/_status/vvc-specialist_verification.json`:
+
+```json
+{
+  "phase": 5,
+  "mode": "full",
+  "totalClaims": 47,
+  "verified": 34,
+  "claims": [
+    {
+      "id": "VC-01",
+      "text": "Toyota filed 3 solid-state battery patents in Q1 2024",
+      "confidence": "HIGH",
+      "sourceUrl": "https://patents.google.com/...",
+      "sourceQuote": "Three patent applications filed January-March 2024...",
+      "verdict": "CONFIRMED",
+      "recommendation": "KEEP",
+      "correctedText": null,
+      "correctionApplied": null
+    },
+    {
+      "id": "VC-02",
+      "text": "QuantumScape achieves 80% capacity retention after 800 cycles",
+      "confidence": "HIGH",
+      "sourceUrl": "https://quantumscape.com/resources/...",
+      "sourceQuote": "Testing showed 75% capacity retention after 700 cycles...",
+      "verdict": "OVERSTATED",
+      "recommendation": "REVISE",
+      "correctedText": "QuantumScape achieves approximately 75% capacity retention after 700 cycles",
+      "correctionApplied": null
+    },
+    {
+      "id": "VC-03",
+      "text": "Solid Power received $130M DOE grant in 2024",
+      "confidence": "MEDIUM",
+      "sourceUrl": "https://energy.gov/...",
+      "sourceQuote": null,
+      "verdict": "SOURCE_UNAVAILABLE",
+      "recommendation": "REMOVE",
+      "correctedText": null,
+      "correctionApplied": null
+    },
+    {
+      "id": "VC-04",
+      "text": "Pending verification...",
+      "confidence": "HIGH",
+      "sourceUrl": null,
+      "sourceQuote": null,
+      "verdict": null,
+      "recommendation": null,
+      "correctedText": null,
+      "correctionApplied": null
+    }
+  ],
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+**Phase 5 verdict field values:**
+- `CONFIRMED` — source supports the claim as stated
+- `PARAPHRASED` — source supports but claim rewords slightly (acceptable)
+- `OVERSTATED` — claim exaggerates what the source says
+- `UNDERSTATED` — claim undersells what the source says
+- `DISPUTED` — other credible sources contradict the claim
+- `UNSUPPORTED` — cited source does not support the claim
+- `SOURCE_UNAVAILABLE` — source URL returned 403/timeout/error
+
+**Phase 5 recommendation field values:**
+- `KEEP` — no changes needed (CONFIRMED, PARAPHRASED)
+- `REVISE` — rewrite claim to match source accurately (OVERSTATED, UNDERSTATED)
+- `DOWNGRADE` — lower confidence tier and add qualifying language
+- `REMOVE` — delete claim from report (UNSUPPORTED)
+- `REPLACE_SOURCE` — find alternative source for the claim
+
+**Phase 6 `correctionApplied` field** — set by the VVC agent during Phase 6 (correction pass):
+- `null` — Phase 6 has not processed this claim yet
+- `"applied"` — correction was applied to the report
+- `"kept"` — claim was kept unchanged (verdict was CONFIRMED/PARAPHRASED)
+- `"removed"` — claim was removed from the report
+- `"skipped"` — Phase 6 did not run (verify-only mode)
+
+**`mode` field** reflects the tier behavior:
+- `"full"` — Phases 5 + 6 (verify and correct)
+- `"verify-only"` — Phase 5 only (verdicts rendered, no corrections applied)
+
+#### VVC Panel Layout — Phase 5 (Verification)
+
+```
+VVC Verification                                          Phase 5 ● 2m 18s...
+Mode: Full (verify + correct)
+
+Summary: 47 claims  ██████████████████████████░░░░  34/47 verified
+  38 confirmed  ·  5 paraphrased  ·  2 overstated  ·  1 disputed  ·  1 unsupported  ·  0 unavailable
+
+┌──────┬──────────────────────────────────┬───────────┬───────────────┬──────────────┐
+│ ID   │ Claim                            │ Conf.     │ Verdict       │ Recommendation│
+├──────┼──────────────────────────────────┼───────────┼───────────────┼──────────────┤
+│VC-01 │ Toyota filed 3 solid-state...   │ HIGH      │ ✓ CONFIRMED   │ KEEP         │
+│VC-02 │ QuantumScape 80% capacity...    │ HIGH      │ ⚠ OVERSTATED  │ REVISE       │
+│VC-03 │ Solid Power $130M DOE grant...  │ MEDIUM    │ ✗ UNSUPPORTED │ REMOVE       │
+│VC-04 │ Samsung SDI partnership...      │ HIGH      │ ~ PARAPHRASED │ KEEP         │
+│VC-05 │ Market size $6.2B by 2030...    │ MEDIUM    │ ● verifying   │              │
+│VC-06 │ Pending                         │ LOW       │ ○             │              │
+└──────┴──────────────────────────────────┴───────────┴───────────────┴──────────────┘
+```
+
+**Expandable rows:** Clicking a row expands to show:
+- Source URL (linked)
+- Source quote (the relevant passage from the cited source)
+- Corrected text (if recommendation is REVISE, shows the proposed rewrite)
+
+#### VVC Panel Layout — Phase 6 (Correction)
+
+When Phase 6 begins, the table gains a sixth column showing the actual action taken:
+
+```
+VVC Correction                                            Phase 6 ● 1m 05s...
+Mode: Full (verify + correct)
+
+Summary: 47 claims verified → 42 kept · 3 revised · 1 removed · 1 source replaced
+                               ██████████████████████████████████████████████████
+
+┌──────┬──────────────────────────────┬───────────────┬──────────────┬──────────────┐
+│ ID   │ Claim                        │ Verdict       │ Recommend.   │ Applied      │
+├──────┼──────────────────────────────┼───────────────┼──────────────┼──────────────┤
+│VC-01 │ Toyota filed 3 solid-state...│ ✓ CONFIRMED   │ KEEP         │ ✓ kept       │
+│VC-02 │ QuantumScape 80% capacity... │ ⚠ OVERSTATED  │ REVISE       │ ✓ applied    │
+│VC-03 │ Solid Power $130M DOE...     │ ✗ UNSUPPORTED │ REMOVE       │ ✗ removed    │
+│VC-04 │ Samsung SDI partnership...   │ ~ PARAPHRASED │ KEEP         │ ✓ kept       │
+│VC-05 │ BYD blade battery tech...    │ ✓ CONFIRMED   │ KEEP         │ ● applying   │
+│VC-06 │ Pending                      │ ✓ CONFIRMED   │ KEEP         │ ○            │
+└──────┴──────────────────────────────┴───────────────┴──────────────┴──────────────┘
+```
+
+**Applied column color coding:**
+- `kept` → green (claim unchanged, verdict was positive)
+- `applied` → amber (claim was rewritten — expandable row shows before/after diff)
+- `removed` → rose (claim deleted from report)
+- `applying` → cyan pulsing (Phase 6 is processing this claim now)
+
+**Expandable rows in Phase 6:** For `applied` rows, show before/after:
+```
+  Before: "QuantumScape achieves 80% capacity retention after 800 cycles"
+  After:  "QuantumScape achieves approximately 75% capacity retention after 700 cycles"
+  Source: https://quantumscape.com/resources/...
+```
+
+#### VVC Panel — Verify-Only Mode
+
+When the engine's tier behavior is `"verify-only"` (Standard tier default), Phase 6 does not run. The panel shows:
+
+```
+VVC Verification (verify only — no corrections applied)    Phase 5 ✓ 3m 42s
+
+Summary: 47 claims verified
+  38 confirmed  ·  5 paraphrased  ·  2 overstated  ·  1 disputed  ·  1 unsupported  ·  0 unavailable
+
+[Same table as Phase 5, without the Recommendation and Applied columns]
+```
+
+The header explicitly states "verify only — no corrections applied" so the user understands that the verdicts are informational. The `correctionApplied` field for all claims is `"skipped"`.
+
+#### VVC Panel Transition
+
+- **Before Phase 5:** VVC panel is not visible. Agent cards for Phase 2 are shown.
+- **Phase 3/4 transition:** Agent cards collapse (Phase 2 agents are done). Pipeline visualization shows Phase 3/4 progressing. No agent detail view during synthesis/reporting — these are single-agent phases with no parallel activity to show.
+- **Phase 5 starts:** VVC panel appears, claims populate as they are verified.
+- **Phase 6 starts (full mode):** Table gains the "Applied" column, corrections populate.
+- **Pipeline complete:** VVC panel stays visible with final state. Completion banner appears.
+
+#### VVC Data Flow
+
+**Change target:** `templates/vvc-pipeline.md.tmpl`
+
+Add instructions for the VVC agent to write `_status/vvc-specialist_verification.json`:
+
+- After extracting claims from the draft report: write initial array with all claims, `verdict: null`
+- After verifying each claim: update that claim's verdict, recommendation, sourceQuote, correctedText
+- Overwrite the file after each claim verification (not batch — one claim at a time for live dashboard updates)
+- In Phase 6: update `correctionApplied` for each claim as corrections are applied
+
+**Change target:** `templates/dashboard-server.js.tmpl`
+
+The `getStatus()` function reads `_status/vvc-specialist_verification.json` and attaches it to the response under a `vvc` key (separate from the `agents` map):
+
+```javascript
+const vvcFile = path.join(STATUS_DIR, 'vvc-specialist_verification.json');
+status.vvc = readJsonSafe(vvcFile) || null;
+```
+
 ### 7g: Impact on Templates and Generator
 
-These observability changes modify four template files:
+These observability changes modify five template files:
 
 | Template | Changes |
 |----------|---------|
 | `templates/research-protocol.md.tmpl` | Replace flat question counters with `questions` array in status schema, add `currentAction`, `errors`, `aborts` fields, add claims JSON writing to Incremental Write Protocol, add Action Logging Protocol section |
 | `templates/orchestrator-skill.md.tmpl` | Add `startedAt`/`completedAt` timestamps to phase objects in Phase Transition Protocol and `_pipeline.json` initial state |
-| `templates/dashboard-server.js.tmpl` | Update `getStatus()` to read claims and log files, add `GET /api/agent/:id/log` endpoint, cap SSE log to 50 entries |
-| `templates/dashboard.html.tmpl` | Question tracker, aggregate stats bar, phase duration display, expandable cards with claims/activity log/sources tabs, error badges, legend panel, labeled WebFetch meter |
+| `templates/vvc-pipeline.md.tmpl` | Add instructions for VVC agent to write `_status/vvc-specialist_verification.json` with per-claim verdicts, recommendations, and correction status |
+| `templates/dashboard-server.js.tmpl` | Update `getStatus()` to read claims, log, and VVC verification files; add `GET /api/agent/:id/log` endpoint; cap SSE log to 50 entries |
+| `templates/dashboard.html.tmpl` | Question tracker, aggregate stats bar, phase duration display, expandable cards with claims/activity log/sources tabs, error badges, legend panel, labeled WebFetch meter, VVC Verification Panel with verdict/correction tracking |
 
 The Python generator reads these templates as-is — no generator changes needed for the observability enhancements. The templates contain the protocol instructions that agents follow at runtime.
 
@@ -1017,7 +1218,8 @@ The Python generator reads these templates as-is — no generator changes needed
 | `templates/research-protocol.md.tmpl` | Modified | Replace flat counters with questions array, add currentAction/errors/aborts, claims JSON, Action Logging Protocol |
 | `templates/orchestrator-skill.md.tmpl` | Modified | Add startedAt/completedAt timestamps to phase transitions and _pipeline.json |
 | `templates/dashboard-server.js.tmpl` | Modified | Read claims + log files, add /api/agent/:id/log endpoint, cap SSE log |
-| `templates/dashboard.html.tmpl` | Modified | Question tracker, stats bar, phase durations, expandable cards, legend, error badges |
+| `templates/vvc-pipeline.md.tmpl` | Modified | Add VVC verification JSON writing protocol for dashboard |
+| `templates/dashboard.html.tmpl` | Modified | Question tracker, stats bar, phase durations, expandable cards, legend, error badges, VVC panel |
 | `plugin/commands/test-engine.md` | Modified | Remove impossible-to-fail checks |
 | `plugin/examples/patent-intelligence-engine/` | Modified | Regenerate with script + updated templates |
 | `plugin/.claude-plugin/plugin.json` | Modified | Version 1.9.0 |
@@ -1031,7 +1233,6 @@ The Python generator reads these templates as-is — no generator changes needed
 | `templates/agent-template.md.tmpl` | Agent Constraints already present from v1.8.0 |
 | `templates/standards.md.tmpl` | No changes |
 | `templates/provenance.md.tmpl` | No changes |
-| `templates/vvc-pipeline.md.tmpl` | No changes |
 | `templates/command-template.md.tmpl` | No changes |
 | `templates/sources-command-template.md.tmpl` | No changes |
 | `templates/plugin-json.tmpl` | No changes |
