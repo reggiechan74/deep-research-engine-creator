@@ -168,7 +168,7 @@ Inform the user — this is NOT a question:
 ### Section 8: Advanced Configuration
 
 1. AskUserQuestion: "Configure advanced settings?" Yes or No (use defaults).
-2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 2), max WebFetch calls per agent (1-50, default 10), max follow-up agents for Comprehensive tier (1-5, default 2), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000, provenance: 5000), custom hooks, MCP server integrations.
+2. If yes: max iterations (1-5, default 3), exploration depth (1-10, default 2), max WebFetch calls per agent (1-50, default 10), max follow-up agents for Comprehensive tier (1-5, default 2), token budgets (planning: 2000, research: 15000, synthesis: 8000, reporting: 10000, vvc: 8000, provenance: 5000), dashboard port (1024-65535, default 3847), custom hooks, MCP server integrations.
 3. If no: use all defaults.
 
 ### Section 9: Custom Prompts
@@ -266,7 +266,9 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 8e -- vvc-pipeline.md (only when VVC enabled).** Read `vvc-pipeline.md.tmpl`. Replace placeholders (claim types, verification scope, tier behavior, correction rules, VVC budget). Write to `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md`.
 
-Steps 8a-8e are independent and can be executed in any order.
+**Step 8f -- Dashboard files.** Read `dashboard-server.js.tmpl`, replace `{{dashboardPort}}` with `advanced.dashboardPort ?? 3847`. Write to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`. Copy `dashboard.html.tmpl` unchanged (no placeholders) to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`.
+
+Steps 8a-8f are independent and can be executed in any order.
 
 #### Placeholder Derivation Rules
 
@@ -326,6 +328,7 @@ Some placeholders are not direct config fields but are derived from config value
 | `{{vvcArgumentHint}}` | If `qualityFramework.vvc.enabled` is true: `" [--no-vvc]"`; otherwise: empty string. |
 | `{{comprehensiveFollowUpAgentCap}}` | From `advanced.comprehensiveFollowUpAgentCap` (default: 2). Maximum agents to deploy in Phase 3.5 gap follow-up. |
 | `{{provenanceBudget}}` | From `advanced.tokenBudgets.provenance` (default: 5000). |
+| `{{dashboardPort}}` | From `advanced.dashboardPort` (default: 3847). Port for the research dashboard SSE server. |
 | `{{vvcClaimTaxonomySummary}}` | When VVC enabled, expand to exactly: `### Claim Taxonomy (VVC)\n\nWhen VVC is active, tag every factual claim in reports. See \`${CLAUDE_SKILL_DIR}/vvc-pipeline.md\` for the full claim taxonomy, verification scope, and verification process.\n\nClaim types: \`[VC]\` Verifiable Claim (requires verification), \`[PO]\` Professional Opinion (no verification), \`[IE]\` Inferred/Extrapolated (no verification).` When VVC disabled: empty string. Distinct from `{{vvcClaimTaxonomyBlock}}` which is the full canonical table used in vvc-pipeline.md.tmpl. |
 
 Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
@@ -366,6 +369,8 @@ Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`:
 | `agent-template.md.tmpl` | Per-agent definition |
 | `plugin-json.tmpl` | Plugin manifest |
 | `readme-template.md.tmpl` | Plugin README |
+| `dashboard-server.js.tmpl` | Dashboard SSE server (Node.js, zero dependencies) |
+| `dashboard.html.tmpl` | Live research dashboard (self-contained HTML) |
 | `engine-config-schema.json` | Config validation schema |
 | `preset-schema.json` | Domain preset validation schema |
 | `plugin-manifest-schema.json` | Plugin manifest validation schema |
