@@ -411,3 +411,35 @@ class TestExtensionMode:
         assert not (skill_dir / "provenance.md").exists()
         assert not (skill_dir / "dashboard-server.js").exists()
         assert not (skill_dir / "dashboard.html").exists()
+
+
+class TestEndToEnd:
+    def test_generates_patent_engine(self, tmp_path):
+        """Full end-to-end: load real patent config, generate, verify."""
+        config_path = os.path.join(
+            os.path.dirname(__file__), '..', '..', 'examples',
+            'patent-intelligence-engine', 'engine-config.json'
+        )
+        config = generate.load_config(config_path)
+        generate.validate(config)
+        placeholders = generate.derive_placeholders(config)
+        output_dir = str(tmp_path / "patent-output")
+        os.makedirs(output_dir)
+        generate.generate_files(config, placeholders, output_dir)
+        generate.verify_output(output_dir, config)
+
+        # Spot-check key files
+        skill_dir = os.path.join(output_dir, "skills", "patent-intelligence-engine")
+        assert os.path.exists(os.path.join(skill_dir, "SKILL.md"))
+        assert os.path.exists(os.path.join(skill_dir, "vvc-pipeline.md"))
+        assert os.path.exists(os.path.join(skill_dir, "dashboard-server.js"))
+        assert os.path.exists(os.path.join(output_dir, "agents", "patent-search-specialist.md"))
+        assert os.path.exists(os.path.join(output_dir, "agents", "vvc-specialist.md"))
+
+        # Verify no unresolved placeholders
+        for root, _, files in os.walk(output_dir):
+            for fn in files:
+                if fn.endswith(('.md', '.json', '.js', '.html')):
+                    content = open(os.path.join(root, fn)).read()
+                    remaining = re.findall(r'\{\{[a-zA-Z0-9_-]+\}\}', content)
+                    assert remaining == [], f"Unresolved in {fn}: {remaining}"
