@@ -10,6 +10,8 @@ Generated research engines have three architectural gaps:
 
 1. **Silent write failure.** Phase 2 agents accumulate all findings in their context window and attempt a single large file write at the end. When the output exceeds the model's output token limit, the write silently fails — nothing is written to disk, no error is surfaced, and the orchestrator proceeds as if the agent succeeded. All research from that agent is lost.
 
+   **Note (2026-03-19):** Claude Opus 4.6 default output limits increased to 64k tokens (128k upper bound). While this reduces the frequency of silent write failures for typical research budgets (18k per agent), the incremental write protocol remains necessary for: (a) crash recovery — partial findings are preserved on disk, (b) observability — status updates and claims tracking depend on per-question writes, (c) context management — releasing findings from working memory keeps the agent sharp for subsequent questions, (d) future-proofing — token budgets are user-configurable and could exceed even 128k for specialized domains.
+
 2. **Zero observability.** Backgrounded agents are a black box. The only way to check progress is to `ls` the output directory for new files or interrupt Claude to ask for a status update. There is no way to distinguish a stuck agent from one that is mid-research.
 
 3. **Rabbit-holing via sub-agent spawning.** While search iteration depth is capped (`maxIterations`, `explorationDepth`, WebFetch cap), nothing prevents a Phase 2 agent from spawning its own sub-agents via the Agent tool. This opens an uncontrolled recursion path that bypasses all depth limiting.
