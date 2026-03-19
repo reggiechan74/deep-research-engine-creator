@@ -247,7 +247,7 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Extension mode:** read `extension-skill.md.tmpl`, replace placeholders, write single file to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
-**Self-contained mode:** execute Steps 8a-8e below. Placeholder substitution rules apply to all sub-steps:
+**Self-contained mode:** execute Steps 8a-8f below. Placeholder substitution rules apply to all sub-steps:
 - Simple values: direct substitution
 - Arrays (`{{reportSections}}`, `{{preferredSites}}`): markdown numbered list
 - Objects (`{{tierConfigTable}}`): markdown table rows
@@ -266,7 +266,12 @@ Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "key
 
 **Step 8e -- vvc-pipeline.md (only when VVC enabled).** Read `vvc-pipeline.md.tmpl`. Replace placeholders (claim types, verification scope, tier behavior, correction rules, VVC budget). Write to `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md`.
 
-**Step 8f -- Dashboard files.** Read `dashboard-server.js.tmpl`, replace `{{dashboardPort}}` with `advanced.dashboardPort ?? 3847`. Write to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`. Copy `dashboard.html.tmpl` unchanged (no placeholders) to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`.
+**Step 8f -- Dashboard files (REQUIRED).** These files MUST be included in every generated engine — the orchestrator references them at runtime.
+
+1. Read `dashboard-server.js.tmpl`, replace `{{dashboardPort}}` with `advanced.dashboardPort ?? 3847`. Write to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`.
+2. Read `dashboard.html.tmpl` (no placeholders to replace). Write unchanged to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`.
+
+Both files are static assets that the orchestrator copies to `BASE_DIR/_status/` at runtime to serve the live research dashboard. Without them, the dashboard launch in Phase 0 will fail.
 
 Steps 8a-8f are independent and can be executed in any order.
 
@@ -341,8 +346,17 @@ Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
 
 After all files written:
 
-1. List all generated files with paths relative to OUTPUT_DIR and approximate line counts.
-2. Suggest: "Run `/test-engine {OUTPUT_DIR}` to validate against schema and check for placeholder residue."
+1. **Verify critical files exist.** Before reporting success, confirm these files are present:
+   - `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/provenance.md`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`
+   - `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md` (only when VVC enabled)
+   If any are missing, generate them now before proceeding.
+2. List all generated files with paths relative to OUTPUT_DIR and approximate line counts.
+3. Suggest: "Run `/test-engine {OUTPUT_DIR}` to validate against schema and check for placeholder residue."
 3. Copy the install command to the user's project for immediate use:
    - Create `.claude/commands/` directory in the user's project if it doesn't exist.
    - Copy `${CLAUDE_PLUGIN_ROOT}/commands/install-local-plugin.md` to `.claude/commands/install-local-plugin.md`.
