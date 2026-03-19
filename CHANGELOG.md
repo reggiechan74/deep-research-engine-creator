@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.9.0] - 2026-03-19
+
+### Added
+- **Deterministic Python generator** (`plugin/generator/generate.py`) -- replaces LLM-driven file generation with a deterministic script. Zero dependencies (Python 3 stdlib only). Validates config, applies 90+ placeholder derivation rules, reads templates, writes all output files
+- **`_derived` config section** -- LLM pre-computes creative content (agent examples, body blocks, first actions, scope discipline) during wizard, stores in engine-config.json for deterministic substitution
+- **Generator test suite** (`plugin/generator/tests/test_generate.py`) -- unit tests for config loading, validation, placeholder derivation, file generation, extension mode, and end-to-end patent engine generation
+- **Extension mode support** in generator -- single-SKILL.md output from extension template
+
+### Changed
+- SKILL.md Generation Protocol reduced from 9 steps + 74 derivation rules to 3 steps (output dir, write config, run script)
+- `/test-engine` simplified: removed 5 checks made impossible by deterministic generation (placeholder residue, line count, per-fetch hashing, shared file writes, dashboard assets)
+- `engine-config-schema.json` now requires `_derived` top-level key
+
+### Removed
+- LLM-driven file generation (Steps 1-9 with manual placeholder substitution) -- replaced by `generate.py`
+- Placeholder Derivation Rules prose table in SKILL.md -- rules now implemented as Python code
+
 ## [1.8.0] - 2026-03-19
 
 ### Added

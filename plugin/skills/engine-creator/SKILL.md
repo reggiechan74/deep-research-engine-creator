@@ -5,7 +5,7 @@ description: >-
   "build a research plugin", "customize deep research", "make a domain-specific
   research tool", "design a research pipeline", "create engine", or wants to
   create specialized deep-research engines as standalone Claude Code plugins.
-version: 1.8.0
+version: 1.9.0
 ---
 
 # Engine Creator
@@ -205,6 +205,30 @@ After all sections complete:
 
 ---
 
+## Derived Content Generation
+
+Before preview, compute creative/contextual content that requires LLM judgment
+and store in config._derived:
+
+1. For each agent in agentPipeline.agents:
+   - Determine isVvcAgent (id === "vvc-specialist")
+   - Generate agentExamplesBlock: 3 domain-specific examples using <example> XML blocks
+     - VVC agent: verification-specific examples
+     - Research agents: research-specific examples with domain terms
+   - Generate agentBodyBlock:
+     - VVC agent: Verification Protocol, WebFetch Budget, Output Format, Context Discipline
+     - Research agents: Search Protocol, Confidence Scoring, Output Format, Context Discipline
+   - Generate agentFirstActionsBlock:
+     - VVC agent: read vvc-pipeline.md, standards.md, draft report
+     - Research agents: read standards.md, research-protocol.md, research outline
+2. Generate scopeDisciplineBlock: both standalone and --extend variants,
+   incorporating domain-specific terminology
+3. Set operationalLessons: "No entries yet -- update after first research run with `/post-mortem`."
+
+Store all values in engine-config.json under "_derived" key.
+
+---
+
 ## Preview Protocol
 
 Present to user before generating:
@@ -223,140 +247,32 @@ Ask: "Ready to generate? Confirm or choose a section to modify." AskUserQuestion
 
 ## Generation Protocol
 
-Execute sequentially after user confirms.
+Execute after user confirms.
 
 **Step 1 -- Output directory.** Ask where to save. Default: `./generated-engines/{{engineName}}/`. Store as `OUTPUT_DIR`.
 
-**Step 2 -- Create directories.** Under `OUTPUT_DIR`: `.claude-plugin/`, `commands/`, `agents/`, `skills/{skillDirName}/` (skillDirName = engineMeta.name).
+**Step 2 -- Write engine-config.json.** Write the assembled config (including `_derived` section) as formatted JSON to `{OUTPUT_DIR}/engine-config.json`.
 
-**Step 3 -- plugin.json.** Read `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/plugin-json.tmpl`, replace placeholders from engineMeta, write to `{OUTPUT_DIR}/.claude-plugin/plugin.json`.
-Replace `{{engineDescription}}` with `engineMeta.description` (default: "A domain-specialized research engine for {domain}").
-Replace `{{authorName}}` with `engineMeta.author.name` (default: empty string).
-Replace `{{authorEmail}}` with `engineMeta.author.email`. **If the email value is empty or `engineMeta.author.email` is absent, remove the entire `"email": "{{authorEmail}}"` line from the generated plugin.json output** (including the trailing comma if it becomes the last property in the author object). Do not emit `"email": ""` — an empty string fails email format validation.
-Replace `{{keywords}}` with `engineMeta.keywords` formatted as `"keyword1", "keyword2", "keyword3"` (quoted, comma-separated).
+**Step 3 -- Generate engine files.** Run the generator script:
 
-**Step 4 -- engine-config.json.** Write assembled config as formatted JSON to `{OUTPUT_DIR}/engine-config.json`.
+    python3 ${CLAUDE_PLUGIN_ROOT}/generator/generate.py {OUTPUT_DIR}/engine-config.json {OUTPUT_DIR}
 
-**Step 5 -- /research command.** Read `command-template.md.tmpl`, replace placeholders. For `{{tierSummary}}`, generate markdown table from agentPipeline.tiers. Write to `{OUTPUT_DIR}/commands/research.md`.
+The script reads engine-config.json (including _derived content), loads all templates,
+performs placeholder substitution, and writes every output file deterministically.
 
-**Step 6 -- /sources command.** Read `sources-command-template.md.tmpl`, replace placeholders. Format `{{sourceHierarchyTable}}` and `{{searchTemplatesTable}}` as markdown tables. Write to `{OUTPUT_DIR}/commands/sources.md`.
-
-**Step 7 -- Agent files.** For EACH agent in `agentPipeline.agents`: determine `isVvcAgent` = (`agent.id === "vvc-specialist"`). Pre-compute `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}` based on `isVvcAgent` (see Placeholder Derivation Rules for expansion logic). If `isVvcAgent`, also compute `{{vvcWebFetchCap}}` = `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Read `agent-template.md.tmpl`, replace with agent-specific values including pre-computed blocks. Cycle `{{color}}` through blue, magenta, yellow. Insert `{{promptOverride}}` from prompts.agentOverrides[agentId] as "## Custom Instructions" if present. Format `{{sourceHierarchy}}` and `{{searchTemplates}}` as text blocks (skip `{{searchTemplates}}` for VVC agent). Write to `{OUTPUT_DIR}/agents/{agentId}.md`.
-
-**Step 8 -- Skill files.** Select template set by mode.
-
-**Extension mode:** read `extension-skill.md.tmpl`, replace placeholders, write single file to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
-
-**Self-contained mode:** execute Steps 8a-8f below. Placeholder substitution rules apply to all sub-steps:
-- Simple values: direct substitution
-- Arrays (`{{reportSections}}`, `{{preferredSites}}`): markdown numbered list
-- Objects (`{{tierConfigTable}}`): markdown table rows
-- Nested (`{{agentDeploymentBlocks}}`): one block per agent with ID, role, model, specialization, tools, prompt override
-- `{{subAgentList}}`: research-planning-specialist, synthesis-specialist, research-reporting-specialist, plus custom agents
-- `{{fileStructure}}`: per-agent file entries (Claims, Bibliography, Sources, Methodology_Log)
-- Missing optionals: sensible defaults or empty string
-
-**Step 8a -- Orchestrator SKILL.md.** Read `orchestrator-skill.md.tmpl`. Replace placeholders (engine metadata, tier config, phase overview, agent roster, domain preamble, Phase 0 flags including `--no-vvc`, execution strategy pointers, `{{maxWebFetches}}`). Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
-
-**Step 8b -- standards.md.** Read `standards.md.tmpl`. Replace placeholders (confidence scoring, source hierarchy, citation standard, validation rules, evidence rules, verification protocol). Replace `{{vvcClaimTaxonomySummary}}` with the VVC claim taxonomy summary (brief cross-reference to vvc-pipeline.md) when VVC is enabled, or empty string when VVC is disabled. This is distinct from `{{vvcClaimTaxonomyBlock}}` used in Step 8e for the full canonical table in vvc-pipeline.md. Write to `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`.
-
-**Step 8c -- research-protocol.md.** Read `research-protocol.md.tmpl`. Replace placeholders (search templates, preferred sites, maxIterations, maxWebFetches, explorationDepth, per-agent file naming, context discipline, token budgets). Write to `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`.
-
-**Step 8d -- provenance.md.** Read `provenance.md.tmpl`. Replace placeholders (audit tier behavior, reverifiable default, chain format). Write to `{OUTPUT_DIR}/skills/{skillDirName}/provenance.md`.
-
-**Step 8e -- vvc-pipeline.md (only when VVC enabled).** Read `vvc-pipeline.md.tmpl`. Replace placeholders (claim types, verification scope, tier behavior, correction rules, VVC budget). Write to `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md`.
-
-**Step 8f -- Dashboard files (REQUIRED).** These files MUST be included in every generated engine — the orchestrator references them at runtime.
-
-1. Read `dashboard-server.js.tmpl`, replace `{{dashboardPort}}` with `advanced.dashboardPort ?? 3847`. Write to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`.
-2. Read `dashboard.html.tmpl` (no placeholders to replace). Write unchanged to `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`.
-
-Both files are static assets that the orchestrator copies to `BASE_DIR/_status/` at runtime to serve the live research dashboard. Without them, the dashboard launch in Phase 0 will fail.
-
-Steps 8a-8f are independent and can be executed in any order.
-
-#### Placeholder Derivation Rules
-
-Some placeholders are not direct config fields but are derived from config values. Apply these rules:
-
-| Placeholder | Derivation Rule |
-|---|---|
-| `{{quickTierDescription}}` | Build from `tiers.quick.agents`: "Single-agent lookup using [first agent's role]" |
-| `{{standardTierDescription}}` | Build from `tiers.standard.agents`: "[N] agents: [role1], [role2]" |
-| `{{deepTierDescription}}` | Build from `tiers.deep.agents`: "Full pipeline with [N] agents: [role1], [role2], [role3]" |
-| `{{comprehensiveTierDescription}}` | Build from `tiers.comprehensive.agents` + followUpRound: "All [N] agents + follow-up round" |
-| `{{agentSpecialization}}` | Concatenate all agent `specialization` strings, joined by "; " |
-| `{{quickAgentId}}` | Fully qualified agent name: `{{engineName}}:[first agent ID from tiers.quick.agents]`. Example: `patent-intelligence-engine:patent-search-specialist` |
-| `{{tierConfigTable}}` | Build markdown table rows from `tiers` config, one row per tier, columns: Tier, Planning (Yes/No), Research Agents (fully qualified: `{{engineName}}:[agentId]`), Synthesis (Yes/No), Report (Inline/Full), Provenance ({{provenanceTierColumn}}), User Gate. For the Comprehensive tier row, append " + gap follow-up" after the agent count in the Research Agents column. |
-| `{{agentDeploymentBlocks}}` | For each agent in `agents` array, generate a deployment block: "#### Agent: [role]\n\nDeploy **{{engineName}}:[id]** (model: [model], type: {{engineName}}:[id]) with specialization:\n\n[specialization]\n\n[promptOverride if present]". **Important:** Custom agents defined in the plugin's `agents/` directory MUST use the fully qualified `{{engineName}}:[agentId]` format. Built-in pipeline agents (research-planning-specialist, synthesis-specialist, research-reporting-specialist) do NOT get the prefix. |
-| `{{subAgentList}}` | "- research-planning-specialist\n- synthesis-specialist\n- research-reporting-specialist\n" + one line per custom agent: "- {{engineName}}:[id] ([role])". If VVC enabled, also append: "- vvc-specialist (Verification, Validation & Correction Specialist)" |
-| `{{fileStructure}}` | For each agent, generate two lines: "├── [TOPIC_SLUG]_Claims_[agentId].md\n├── [TOPIC_SLUG]_[agentId]_Bibliography.md" |
-| `{{verificationModeInstructions}}` | Expand from `citationManagement.verificationMode`: "none" → "Source verification is disabled. Trust agent-reported citations without independent verification."; "spot-check" → "Verify a random sample of HIGH-confidence citations (minimum 3 or 20% of HIGH citations, whichever is greater). Record verification results in Methodology_Log.md."; "comprehensive" → "Verify every cited source. Check URL accessibility, confirm source content supports the claim, and record all results in a dedicated verification pass." |
-| `{{deadLinkInstructions}}` | Expand from `citationManagement.deadLinkHandling`: "flag-only" → "Mark dead links with [DEAD LINK] tag in the bibliography. Do not attempt recovery."; "archive-fallback" → "Attempt Wayback Machine retrieval at https://web.archive.org/web/*/[URL]. If archived version found, use it and note [ARCHIVED: date] in bibliography. If not found, mark as [DEAD LINK]."; "exclude-from-high" → "Downgrade any claim that relies solely on unreachable sources from HIGH to MEDIUM confidence. Note the downgrade reason in the claims table." |
-| `{{verificationReportConfig}}` | If `verificationReport.enabled` is true: "Generate a standalone Citation Verification Report. Scope: [scope value]. Include summary statistics, per-citation verification table, issues found, and remediation recommendations." If false: "Verification report generation is disabled." |
-| `{{operationalLessons}}` | Default: "No entries yet — update after first research run with `/post-mortem`." |
-| `{{maxIterations}}` | From `advanced.maxIterationsPerQuestion` (default: 3) |
-| `{{explorationDepth}}` | From `advanced.explorationDepth` (default: 2) |
-| `{{planningBudget}}` | From `advanced.tokenBudgets.planning` (default: 2000) |
-| `{{researchBudget}}` | From `advanced.tokenBudgets.research` (default: 15000) |
-| `{{synthesisBudget}}` | From `advanced.tokenBudgets.synthesis` (default: 8000) |
-| `{{reportingBudget}}` | From `advanced.tokenBudgets.reporting` (default: 10000) |
-| `{{pipelinePhaseCount}}` | If `qualityFramework.vvc.enabled` is true: "seven"; otherwise: "five" |
-| `{{pipelinePhaseDescription}}` | If VVC enabled: "seven-phase"; otherwise: "five-phase" |
-| `{{phase4Name}}` | If VVC enabled: "Draft Reporting"; otherwise: "Professional Reporting" |
-| `{{phase4Description}}` | If VVC enabled: "Draft report generation with claim tagging for VVC verification"; otherwise: "Comprehensive report generation with consolidated bibliography" |
-| `{{phase4ReportType}}` | If VVC enabled: "draft"; otherwise: "final" |
-| `{{phase4OutputFile}}` | If VVC enabled: "Draft_Report.md"; otherwise: "Comprehensive_Report.md" |
-| `{{vvcPhaseLines}}` | If VVC enabled: "6. **Phase 5: VVC-Verify** -- Verify draft report claims against cited sources, produce verification report\n7. **Phase 6: VVC-Correct** -- Implement corrections, produce final Comprehensive Report + correction log"; otherwise: empty string |
-| `{{vvcClaimTaxonomyBlock}}` | If VVC enabled: generate "### Claim Type Taxonomy" section listing each claimType from config (tag, label, description, requiresVerification) plus "### VVC Verification Scope" table showing HIGH/MEDIUM/LOW/SPECULATIVE percentages; otherwise: empty string |
-| `{{vvcClaimTaggingInstructions}}` | If VVC enabled: "- **CLAIM TAGGING (REQUIRED):** Tag every factual assertion with its claim type: `[VC]` for verifiable claims with cited sources, `[PO]` for professional opinions/analytical judgments, `[IE]` for inferences/extrapolations. Place tags at the end of each claim sentence before the citation. Example: 'Toyota invested $142M in solid-state battery research [VC][^3]'. This tagging is essential for the VVC verification phase."; otherwise: empty string |
-| `{{vvcVerifyPhaseBlock}}` | If VVC enabled AND tier behavior is "verify-only" or "full": generate complete Phase 5 VVC-Verify section with instructions to deploy **vvc-specialist** to: read draft report + all bibliographies, extract all [VC] claims with cited sources and confidence tiers, apply verification scope ({HIGH}% HIGH, {MEDIUM}% MEDIUM, {LOW}% LOW, {SPECULATIVE}% SPECULATIVE), per-claim protocol (locate source → extract quote → analyze alignment → classify as CONFIRMED/PARAPHRASED/OVERSTATED/UNDERSTATED/DISPUTED/UNSUPPORTED/SOURCE_UNAVAILABLE → recommend KEEP/REVISE/DOWNGRADE/REMOVE/REPLACE_SOURCE → write corrected text per recommendation rules), corrected text rules (KEEP: "---", REVISE: rewritten claim reflecting accurate source content, DOWNGRADE: claim with qualifying language and lowered confidence tier, REMOVE: "[REMOVE]", REPLACE_SOURCE: corrected claim text citing new source + replacement source URL found during verification), output `_VVC_Verification_Report.md` with summary stats + per-claim table including Corrected Text and New Source columns; otherwise: empty string |
-| `{{vvcCorrectPhaseBlock}}` | If VVC enabled AND tier behavior is "full": generate complete Phase 6 VVC-Correct section with instructions to deploy **vvc-specialist** (second pass) to: read verification report per-claim table, apply corrected text mechanically into draft report (REVISE/DOWNGRADE: substitute Corrected Text verbatim, REMOVE: delete claim and adjust surrounding narrative for coherence, REPLACE_SOURCE: substitute Corrected Text and update bibliography with New Source), preserve all KEEP/CONFIRMED claims unchanged, NO independent rewriting or source searching — all corrections come from the Phase 5 verification table, output `_Comprehensive_Report.md` (final) + `_VVC_Correction_Log.md` + Verification Statement appendix + **Add Provenance Appendix** summarizing the hash chain from `BASE_DIR/[TOPIC_SLUG]_Provenance_Log.md`: chain integrity status, total events, unique domains, and independent verification instructions; if tier behavior is "verify-only": empty string (Phase 4 draft becomes final with verification report alongside) |
-| `{{vvcFileStructure}}` | If VVC enabled: "├── [TOPIC_SLUG]_Draft_Report.md\n├── [TOPIC_SLUG]_VVC_Verification_Report.md\n├── [TOPIC_SLUG]_VVC_Correction_Log.md  # When tier behavior is 'full'"; otherwise: empty string |
-| `{{vvcFeatureBullets}}` | If VVC enabled: "- **Claim verification, not just citations (VVC)** -- citations are URLs; they don't prove the AI read the source correctly. VVC extracts every [VC]-tagged claim, re-fetches the cited source, and checks: (1) Is the source credible? (2) Was it accurately represented? Failed claims are auto-corrected or flagged. Citations can hallucinate. Verified claims can't.\n- **Claim type taxonomy** -- claims tagged as [VC] (verifiable), [PO] (professional opinion), or [IE] (inferred) to focus verification effort\n- **Tier-aware VVC** -- Quick: no VVC, Standard: verify-only, Deep/Comprehensive: full verify+correct"; otherwise: empty string |
-| `{{vvcBudgetLine}}` | If VVC enabled: "VVC:            {vvcBudget} tokens output max (verification + correction combined)"; otherwise: empty string. Default vvcBudget: from `advanced.tokenBudgets.vvc` (default: 8000) |
-| `{{vvcSubAgentNote}}` | If VVC enabled: "The vvc-specialist is a pipeline agent that runs in Phases 5-6 (post-reporting). It does NOT participate in Phase 2 research."; otherwise: empty string |
-| `{{vvcExtensionOverride}}` | If VVC enabled: generate "#### VVC Configuration Override" section listing: enabled, claim types, verification scope (HIGH%, MEDIUM%, LOW%, SPECULATIVE%), tier behavior per tier; otherwise: empty string |
-| `{{vvcTierNote}}` | If VVC enabled: "**VVC:** Quick: none | Standard: verify-only | Deep: full | Comprehensive: full"; otherwise: empty string |
-| `{{vvcReadmeSection}}` | If VVC enabled: generate "## Verification, Validation & Correction (VVC)" section. Lead with the key distinction: every research tool cites sources, but a citation is just a URL -- it doesn't mean the AI read the source correctly. VVC goes further by extracting claims, re-fetching sources, and verifying both source credibility and accurate representation. Then describe claim types, verification scope, and tier behavior; otherwise: empty string |
-| `{{agentPrefix}}` | From `agentPipeline.agents[i].id`: first character, uppercased |
-| `{{auditTierBehavior}}` | From `qualityFramework.provenance.auditPhase.tiers`: generate "Standard: run \| Deep: run \| Comprehensive: run" from tier list |
-| `{{provenanceTierColumn}}` | From `qualityFramework.provenance.auditPhase.tiers`: "Hash-only" for Quick, "Hash + Audit" for tiers in audit list |
-| `{{reverifiableDefault}}` | From `qualityFramework.provenance.reverifiableDefault`: if true, invert the --reverifiable flag logic (snapshots kept by default, `--no-snapshots` to skip) |
-| `{{scopeDisciplineBlock}}` | Always generate the following conditional block (both modes included in template output): "**If CONTEXT_MODE is standalone (default -- no `--extend` flag):**\n\n### Scope Discipline\n\nYour research scope is LIMITED to the user's stated topic.\n\n- Do NOT read files outside BASE_DIR\n- Do NOT reference prior research runs, their files, or their findings\n- Do NOT incorporate project context from CLAUDE.md into research scope\n- Do NOT use observation history or session context to expand the topic\n- Generate ALL research questions strictly from the user's topic string and your domain expertise in {domain}\n- If the topic is ambiguous, interpret it as a general domain question -- do not assume it relates to any specific project or prior work\n- Every section in the outline must map directly to the stated topic. Remove any section that requires project-specific knowledge to justify.\n\n**If CONTEXT_MODE is extend (`--extend` flag present):**\n\n### Scope Discipline\n\nThis research EXTENDS prior work in this project. You may:\n\n- Read prior research files in the working directory for context\n- Reference project context from CLAUDE.md to inform research scope\n- Build on findings from previous research runs\n- Frame new research questions that deepen or broaden prior findings\n\nClearly mark which sections build on prior work vs. new investigation." |
-| `{{maxWebFetches}}` | From `advanced.maxWebFetchesPerAgent` (default: 10) |
-| `{{isVvcAgent}}` | `true` when the agent being generated has `id === "vvc-specialist"`; `false` for all other agents. Applied per-agent in Step 7 loop. Not emitted into templates directly — used to select which pre-computed block to emit for `{{agentExamplesBlock}}`, `{{agentBodyBlock}}`, and `{{agentFirstActionsBlock}}`. |
-| `{{agentExamplesBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: three VVC-specific examples using structured `<example>` XML blocks with `user:`, `assistant:`, and `<commentary>` elements (per design spec section 1a) — covering claim verification, correction application, and combined Phase 5-6 operation. Otherwise: existing three research examples with `{{agentId}}`, `{{agentRole}}`, `{{domain}}` substituted using the same `<example>` XML block format. |
-| `{{agentBodyBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: expand to the exact structure from the design spec section 1c — `## Verification Protocol` (h2) pointing to `${CLAUDE_SKILL_DIR}/vvc-pipeline.md`, `### WebFetch Budget` with `{{vvcWebFetchCap}}` cap and tier prioritization, `## Output Format` (h2) with verification detail tables and 450-token chat limit, `## Context Discipline` (h2) with sequential claim processing rules. Use h2 for main sections (Verification Protocol, Output Format, Context Discipline) and h3 only for WebFetch Budget subsection. Otherwise: existing Search Protocol + Confidence Scoring + Output Format + Context Discipline with all current placeholders substituted. |
-| `{{agentFirstActionsBlock}}` | Pre-computed in Step 7 per agent. When `isVvcAgent`: First Actions reading vvc-pipeline.md, standards.md, and draft report. Otherwise: existing First Actions reading standards.md, research-protocol.md, and research outline. |
-| `{{vvcWebFetchCap}}` | `min(advanced.maxWebFetchesPerAgent * 3, 50)`. Default: 30 (when base cap is 10). Used only in VVC agent body block. |
-| `{{vvcArgumentHint}}` | If `qualityFramework.vvc.enabled` is true: `" [--no-vvc]"`; otherwise: empty string. |
-| `{{comprehensiveFollowUpAgentCap}}` | From `advanced.comprehensiveFollowUpAgentCap` (default: 2). Maximum agents to deploy in Phase 3.5 gap follow-up. |
-| `{{provenanceBudget}}` | From `advanced.tokenBudgets.provenance` (default: 5000). |
-| `{{dashboardPort}}` | From `advanced.dashboardPort` (default: 3847). Port for the research dashboard SSE server. |
-| `{{vvcClaimTaxonomySummary}}` | When VVC enabled, expand to exactly: `### Claim Taxonomy (VVC)\n\nWhen VVC is active, tag every factual claim in reports. See \`${CLAUDE_SKILL_DIR}/vvc-pipeline.md\` for the full claim taxonomy, verification scope, and verification process.\n\nClaim types: \`[VC]\` Verifiable Claim (requires verification), \`[PO]\` Professional Opinion (no verification), \`[IE]\` Inferred/Extrapolated (no verification).` When VVC disabled: empty string. Distinct from `{{vvcClaimTaxonomyBlock}}` which is the full canonical table used in vvc-pipeline.md.tmpl. |
-
-Write to `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`.
-
-**Step 9 -- README.md.** Read `readme-template.md.tmpl`, replace placeholders. Format `{{agentTable}}`, `{{sourceTable}}` as markdown tables. Format `{{sampleQuestions}}` as numbered list, `{{qualitySummary}}` as brief text. Write to `{OUTPUT_DIR}/README.md`.
+If the script exits with error code 1 (validation), review the error message and fix
+the config. Re-run the script.
+If exit code 2 (template error), report the error to the user.
+If exit code 0, proceed to Post-Generation.
 
 ---
 
 ## Post-Generation
 
-After all files written:
+After the generator script completes successfully:
 
-1. **Verify critical files exist.** Before reporting success, confirm these files are present:
-   - `{OUTPUT_DIR}/skills/{skillDirName}/SKILL.md`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/standards.md`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/research-protocol.md`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/provenance.md`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/dashboard-server.js`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/dashboard.html`
-   - `{OUTPUT_DIR}/skills/{skillDirName}/vvc-pipeline.md` (only when VVC enabled)
-   If any are missing, generate them now before proceeding.
-2. List all generated files with paths relative to OUTPUT_DIR and approximate line counts.
-3. Suggest: "Run `/test-engine {OUTPUT_DIR}` to validate against schema and check for placeholder residue."
+1. The script has already verified all files exist and printed a summary.
+2. Suggest: "Run `/test-engine {OUTPUT_DIR}` to validate config semantics."
 3. Copy the install command to the user's project for immediate use:
    - Create `.claude/commands/` directory in the user's project if it doesn't exist.
    - Copy `${CLAUDE_PLUGIN_ROOT}/commands/install-local-plugin.md` to `.claude/commands/install-local-plugin.md`.
@@ -368,7 +284,7 @@ After all files written:
 
 ## Template Reference
 
-Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`:
+Templates at `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/`. The generator script (`generate.py`) handles all placeholder substitution automatically:
 
 | Template | Purpose |
 |---|---|

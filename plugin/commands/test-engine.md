@@ -88,19 +88,14 @@ Perform multi-level structural validation on `engine-config.json`:
 - All 5 tiers (tier1 through tier5)
 - Each tier has non-empty `name` and `sources` array
 
-**4f: Unresolved placeholder scan.** Scan ALL `.md` and `.json` files in the engine directory (excluding `engine-config-schema.json` and `preset-schema.json`):
-- Search for pattern `\{\{[a-zA-Z0-9_-]+\}\}` (double-brace placeholders with letters, digits, underscores, hyphens)
-- Record FAIL with list of files and unresolved placeholders if any found
-- This catches generation failures where template substitution was incomplete
+**4f: Domain preset validation (if presets used).** If the engine was generated from a domain preset, validate the preset file against `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/preset-schema.json`. Report any structural violations.
 
-**4g: Domain preset validation (if presets used).** If the engine was generated from a domain preset, validate the preset file against `${CLAUDE_PLUGIN_ROOT}/skills/engine-creator/templates/preset-schema.json`. Report any structural violations.
-
-**4h: Citation management validation (if present).** If `qualityFramework.citationManagement` exists:
+**4g: Citation management validation (if present).** If `qualityFramework.citationManagement` exists:
 - Verify `verificationMode` is one of: "none", "spot-check", "comprehensive"
 - Verify `deadLinkHandling` is one of: "flag-only", "archive-fallback", "exclude-from-high"
 - If `sourceFreshnessThreshold` is "custom", verify `sourceFreshnessCustomYears` is present and valid
 
-**4i: VVC configuration validation (if present).** If `qualityFramework.vvc` exists:
+**4h: VVC configuration validation (if present).** If `qualityFramework.vvc` exists:
 - Verify `enabled` is a boolean
 - If `enabled` is true:
   - Verify `claimTypes` is a non-empty array where each element has `tag` (2-4 uppercase letters), `label`, `description`, and `requiresVerification` (boolean)
@@ -111,7 +106,7 @@ Perform multi-level structural validation on `engine-config.json`:
   - **CRITICAL:** Verify `vvc-specialist` does NOT appear in any tier's `agents` array (`agentPipeline.tiers.{quick,standard,deep,comprehensive}.agents`). The VVC agent is a pipeline agent (Phases 5-6), NOT a Phase 2 research agent.
   - If `advanced.tokenBudgets` exists, verify `vvc` field is present with a positive integer value
 
-**4j: Provenance configuration validation.** Verify `qualityFramework.provenance` exists and:
+**4i: Provenance configuration validation.** Verify `qualityFramework.provenance` exists and:
 - `enabled` is `true`
 - `hashAlgorithm` is `"sha256"`
 - `auditPhase.tiers` is a non-empty array of valid tier names (subset of: "standard", "deep", "comprehensive")
@@ -120,21 +115,13 @@ Perform multi-level structural validation on `engine-config.json`:
 - Verify `Bash` is in the `commands/research.md` `allowed-tools` frontmatter
 - Read agent `.md` files and verify they reference `${CLAUDE_SKILL_DIR}/standards.md` as a first action
 
-**4k: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
+**4j: Status protocol present.** Grep `skills/*/research-protocol.md` for "Incremental Write Protocol" and "Agent Status Protocol". Must find both.
 
-**4l: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
+**4k: Agent constraints present.** Grep all agent `.md` files in `agents/` for "Do NOT spawn sub-agents". Must find the phrase in every agent file.
 
-**4m: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
+**4l: Pipeline status initialization.** Grep `skills/*/SKILL.md` for `_status/` directory creation and `_pipeline.json`. Must find both.
 
-**4n: Status protocol present.** Grep `skills/*/research-protocol.md` for "Incremental Write Protocol" and "Agent Status Protocol". Must find both.
-
-**4o: Agent constraints present.** Grep all agent `.md` files in `agents/` for "Do NOT spawn sub-agents". Must find the phrase in every agent file.
-
-**4p: Dashboard assets present.** Verify `dashboard-server.js` and `dashboard.html` exist in the engine's skill directory (`skills/*/`).
-
-**4q: Pipeline status initialization.** Grep `skills/*/SKILL.md` for `_status/` directory creation and `_pipeline.json`. Must find both.
-
-**4r: Output verification.** Grep `skills/*/SKILL.md` for "Phase 2 Output Verification" or "verify output". Must find at least one match.
+**4m: Output verification.** Grep `skills/*/SKILL.md` for "Phase 2 Output Verification" or "verify output". Must find at least one match.
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 
