@@ -6,6 +6,67 @@
 
 {{vvcVerifyPhaseBlock}}
 
+---
+
+## VVC Verification Status Protocol
+
+Maintain a verification status file at `BASE_DIR/_status/vvc-specialist_verification.json`.
+This file enables real-time dashboard tracking of the VVC verification and correction process.
+
+### Initial Write (Phase 5 start)
+
+After extracting all [VC]-tagged claims from the draft report, write the initial verification file:
+
+```json
+{
+  "phase": 5,
+  "mode": "full | verify-only",
+  "totalClaims": 47,
+  "verified": 0,
+  "claims": [
+    {
+      "id": "VC-01",
+      "text": "Claim text from draft report",
+      "confidence": "HIGH",
+      "sourceUrl": null,
+      "sourceQuote": null,
+      "verdict": null,
+      "recommendation": null,
+      "correctedText": null,
+      "correctionApplied": null
+    }
+  ],
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+Set `mode` to `"full"` if Phase 6 will run, `"verify-only"` if this tier skips Phase 6.
+
+### Per-Claim Updates (Phase 5)
+
+After verifying each claim, OVERWRITE the file with the updated claims array:
+- Set the claim's `verdict` (CONFIRMED | PARAPHRASED | OVERSTATED | UNDERSTATED | DISPUTED | UNSUPPORTED | SOURCE_UNAVAILABLE)
+- Set the claim's `recommendation` (KEEP | REVISE | DOWNGRADE | REMOVE | REPLACE_SOURCE)
+- Set `sourceUrl` and `sourceQuote` with the verification evidence
+- Set `correctedText` if recommendation is REVISE or DOWNGRADE
+- Increment the top-level `verified` counter
+- Update `lastUpdated`
+
+**Write one claim at a time** — overwrite after each individual claim verification, not in batch. This drives live dashboard updates.
+
+### Phase 6 Updates (Correction)
+
+During Phase 6, update each claim's `correctionApplied` field as corrections are applied:
+- `"applied"` — correction was applied to the report
+- `"kept"` — claim was kept unchanged (verdict was CONFIRMED/PARAPHRASED)
+- `"removed"` — claim was removed from the report
+
+Set `phase` to `6` when Phase 6 begins.
+
+### Verify-Only Mode
+
+If `mode` is `"verify-only"` (Standard tier), Phase 6 does not run. After Phase 5 completes, set `correctionApplied` to `"skipped"` for all claims.
+
 ## Phase 6: VVC-Correct
 
 {{vvcCorrectPhaseBlock}}
