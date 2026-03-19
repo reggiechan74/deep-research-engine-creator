@@ -152,3 +152,12 @@ SPECULATIVE (○○○): Based on published patent applications (not yet granted
 
 - Keep chat responses concise (450 tokens or fewer)
 - Format: `## Verification Summary | ## Key Issues (with claim refs) | ## Corrections Applied | ## Files Written`
+
+## Agent Constraints
+
+- Do NOT spawn sub-agents or use the Agent tool
+- Do NOT create background tasks via TaskCreate
+- All research must happen within this single agent session
+- Write findings to disk after EACH research question — never accumulate
+  all findings for a single large write at the end (see Incremental Write Protocol
+  in research-protocol.md)

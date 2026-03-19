@@ -32,6 +32,8 @@ Verify these files exist in the engine directory:
 - `skills/*/standards.md`
 - `skills/*/research-protocol.md`
 - `skills/*/provenance.md`
+- `skills/*/dashboard-server.js`
+- `skills/*/dashboard.html`
 - `skills/*/vvc-pipeline.md` (when `qualityFramework.vvc.enabled` is true in engine-config.json)
 - `README.md`
 - One `.md` file in `agents/` for each agent defined in `agentPipeline.agents`
@@ -118,11 +120,21 @@ Perform multi-level structural validation on `engine-config.json`:
 - Verify `Bash` is in the `commands/research.md` `allowed-tools` frontmatter
 - Read agent `.md` files and verify they reference `${CLAUDE_SKILL_DIR}/standards.md` as a first action
 
-**4h: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
+**4k: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
 
-**4i: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
+**4l: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
 
-**4j: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
+**4m: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
+
+**4n: Status protocol present.** Grep `skills/*/research-protocol.md` for "Incremental Write Protocol" and "Agent Status Protocol". Must find both.
+
+**4o: Agent constraints present.** Grep all agent `.md` files in `agents/` for "Do NOT spawn sub-agents". Must find the phrase in every agent file.
+
+**4p: Dashboard assets present.** Verify `dashboard-server.js` and `dashboard.html` exist in the engine's skill directory (`skills/*/`).
+
+**4q: Pipeline status initialization.** Grep `skills/*/SKILL.md` for `_status/` directory creation and `_pipeline.json`. Must find both.
+
+**4r: Output verification.** Grep `skills/*/SKILL.md` for "Phase 2 Output Verification" or "verify output". Must find at least one match.
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Departure+Mono&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep: #0c1017;
+  --bg-surface: #141a23;
+  --border: #1e2733;
+  --border-active: #2a3444;
+  --text-primary: #e2e8f0;
+  --text-muted: #64748b;
+  --accent-search: #22d3ee;
+  --accent-assess: #f59e0b;
+  --accent-refine: #a78bfa;
+  --accent-write: #34d399;
+  --accent-complete: #4ade80;
+  --accent-error: #fb7185;
+  --font-display: 'Departure Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  --font-body: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+}
+
+::selection {
+  background: var(--accent-search);
+  color: var(--bg-deep);
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background-color: var(--bg-deep);
+  background-image: radial-gradient(circle, #1a2230 1px, transparent 1px);
+  background-size: 24px 24px;
+  min-height: 100vh;
+  transition: background 600ms ease;
+}
+
+body.complete {
+  background-color: #0c1017;
+  background-image:
+    linear-gradient(135deg, #0c1017 0%, #0a1f1a 100%),
+    radial-gradient(circle, #1a2230 1px, transparent 1px);
+  background-blend-mode: normal;
+}
+
+/* ── Header ─────────────────────────────────────── */
+
+.header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.header-topic {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.tier-badge {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid var(--border-active);
+  border-radius: 3px;
+  color: var(--accent-search);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.header-time {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: auto;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.header-time .elapsed-value {
+  color: var(--text-primary);
+}
+
+.complete-label {
+  display: none;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--accent-complete);
+  letter-spacing: 0.06em;
+}
+
+body.complete .complete-label { display: inline; }
+body.complete .live-timer { display: none; }
+
+/* ── Pipeline ───────────────────────────────────── */
+
+.pipeline-section {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.pipeline-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: min-content;
+}
+
+.phase-unit {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.phase-node-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.phase-diamond {
+  width: 24px;
+  height: 24px;
+  transform: rotate(45deg);
+  border: 2px solid var(--border);
+  background: transparent;
+  position: relative;
+  transition: all 300ms ease;
+  flex-shrink: 0;
+}
+
+.phase-diamond.pending {
+  border-color: var(--border);
+  background: transparent;
+}
+
+.phase-diamond.in_progress {
+  border-color: var(--accent-search);
+  background: var(--accent-search);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.phase-diamond.complete {
+  border-color: var(--accent-complete);
+  background: var(--accent-complete);
+}
+
+.phase-diamond.complete::after {
+  content: "\2713";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: rotate(-45deg) translate(-50%, -50%);
+  transform-origin: 0 0;
+  font-size: 11px;
+  color: var(--bg-deep);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.phase-diamond.error {
+  border-color: var(--accent-error);
+  background: var(--accent-error);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(34, 211, 238, 0.3); }
+  50% { box-shadow: 0 0 14px 5px rgba(34, 211, 238, 0.5); }
+}
+
+.phase-label {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phase-connector {
+  width: 36px;
+  height: 2px;
+  background: var(--border-active);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  align-self: center;
+  margin-bottom: 22px; /* align with diamond center, above label */
+}
+
+.phase-connector.active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 8px;
+  height: 2px;
+  background: var(--accent-search);
+  border-radius: 1px;
+  animation: travel-dot 1.5s linear infinite;
+}
+
+@keyframes travel-dot {
+  0% { left: -8px; }
+  100% { left: 100%; }
+}
+
+/* ── Agent Cards ────────────────────────────────── */
+
+.agents-section {
+  padding: 24px;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.agent-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-active);
+  border-radius: 4px;
+  padding: 16px;
+  transition: opacity 300ms ease, border-color 300ms ease;
+  animation: slideIn 400ms ease both;
+}
+
+body.complete .agent-card {
+  opacity: 0.7;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.agent-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.agent-id {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  white-space: nowrap;
+  transition: color 300ms ease;
+}
+
+.activity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color 300ms ease;
+}
+
+/* ── Progress Bar ───────────────────────────────── */
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 400ms ease, background-color 300ms ease;
+}
+
+.progress-text {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* ── WebFetch Meter ─────────────────────────────── */
+
+.wf-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.wf-label {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.wf-meter {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.wf-block {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--border);
+  transition: background-color 300ms ease;
+}
+
+.wf-block.filled {
+  background: var(--accent-search);
+}
+
+/* ── Stats Row ──────────────────────────────────── */
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.stat-item .stat-value {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Current Question ───────────────────────────── */
+
+.current-question {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.4;
+}
+
+/* ── Footer ─────────────────────────────────────── */
+
+.footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-left, .footer-right {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.connection-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  transition: background-color 300ms ease;
+}
+
+.connection-dot.connected { background: var(--accent-complete); }
+.connection-dot.polling { background: var(--accent-assess); }
+.connection-dot.disconnected { background: var(--accent-error); }
+
+/* ── Empty State ────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.empty-state .spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-search);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ─────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .pipeline-track {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .phase-connector {
+    width: 2px;
+    height: 20px;
+    margin-bottom: 0;
+    margin-left: 0;
+  }
+
+  .phase-connector.active::after {
+    width: 2px;
+    height: 8px;
+    left: 0;
+    top: -8px;
+    animation: travel-dot-v 1.5s linear infinite;
+  }
+
+  @keyframes travel-dot-v {
+    0% { top: -8px; }
+    100% { top: 100%; }
+  }
+
+  .phase-unit {
+    flex-direction: column;
+  }
+
+  .agents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    padding: 16px;
+  }
+
+  .agents-section, .pipeline-section {
+    padding: 16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="header">
+  <span class="header-title" id="engine-name">---</span>
+  <span class="header-topic" id="topic">---</span>
+  <span class="tier-badge" id="tier-badge">---</span>
+  <span class="header-time">
+    <span class="live-timer"><span class="elapsed-value" id="elapsed">00:00:00</span></span>
+    <span class="complete-label" id="complete-label">RESEARCH COMPLETE <span id="final-time"></span></span>
+  </span>
+</header>
+
+<section class="pipeline-section">
+  <div class="pipeline-track" id="pipeline-track">
+    <div class="empty-state" id="pipeline-empty">
+      <div class="spinner"></div>
+      <div>Waiting for pipeline data...</div>
+    </div>
+  </div>
+</section>
+
+<section class="agents-section">
+  <div class="agents-grid" id="agents-grid">
+    <!-- Agent cards rendered dynamically -->
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-left">
+    <span id="last-updated">---</span>
+  </div>
+  <div class="footer-right">
+    <span class="connection-dot disconnected" id="conn-dot"></span>
+    <span id="conn-label">Connecting...</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── State ──────────────────────────────────────
+  let lastStatus = null;
+  let timerInterval = null;
+  let eventSource = null;
+  let pollInterval = null;
+  let isComplete = false;
+
+  // ── DOM refs ───────────────────────────────────
+  const $ = (id) => document.getElementById(id);
+  const engineNameEl = $("engine-name");
+  const topicEl = $("topic");
+  const tierBadgeEl = $("tier-badge");
+  const elapsedEl = $("elapsed");
+  const completeLabelEl = $("complete-label");
+  const finalTimeEl = $("final-time");
+  const pipelineTrackEl = $("pipeline-track");
+  const pipelineEmptyEl = $("pipeline-empty");
+  const agentsGridEl = $("agents-grid");
+  const lastUpdatedEl = $("last-updated");
+  const connDotEl = $("conn-dot");
+  const connLabelEl = $("conn-label");
+
+  // ── Color mapping ─────────────────────────────
+  function activityToColor(activity) {
+    switch ((activity || "").toLowerCase()) {
+      case "searching": return "var(--accent-search)";
+      case "assessing": return "var(--accent-assess)";
+      case "refining":  return "var(--accent-refine)";
+      case "writing":   return "var(--accent-write)";
+      case "idle":      return "var(--accent-complete)";
+      case "error":     return "var(--accent-error)";
+      default:          return "var(--text-muted)";
+    }
+  }
+
+  function activityToLabel(activity) {
+    if (!activity) return "---";
+    return activity.charAt(0).toUpperCase() + activity.slice(1);
+  }
+
+  // ── Elapsed time ──────────────────────────────
+  function formatElapsed(startedAt) {
+    if (!startedAt) return "00:00:00";
+    var diff = Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+    var h = String(Math.floor(diff / 3600)).padStart(2, "0");
+    var m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+    var s = String(diff % 60).padStart(2, "0");
+    return h + ":" + m + ":" + s;
+  }
+
+  function startTimer(startedAt) {
+    if (timerInterval) clearInterval(timerInterval);
+    if (!startedAt || isComplete) return;
+    timerInterval = setInterval(function () {
+      elapsedEl.textContent = formatElapsed(startedAt);
+    }, 1000);
+    elapsedEl.textContent = formatElapsed(startedAt);
+  }
+
+  // ── WebFetch Meter ────────────────────────────
+  function createWebFetchMeter(used, cap) {
+    if (!cap || cap <= 0) return "";
+    var html = '<div class="wf-row"><span class="wf-label">WF</span><div class="wf-meter">';
+    for (var i = 0; i < cap; i++) {
+      html += '<div class="wf-block' + (i < used ? " filled" : "") + '"></div>';
+    }
+    html += "</div></div>";
+    return html;
+  }
+
+  // ── Pipeline ──────────────────────────────────
+  function renderPipeline(phases) {
+    if (!phases || phases.length === 0) {
+      pipelineEmptyEl.style.display = "";
+      return;
+    }
+    pipelineEmptyEl.style.display = "none";
+
+    var html = "";
+    for (var i = 0; i < phases.length; i++) {
+      var p = phases[i];
+      var status = p.status || "pending";
+      var label = p.label || p.name || ("Phase " + (p.phase !== undefined ? p.phase : i));
+
+      if (i > 0) {
+        var prevStatus = phases[i - 1].status || "pending";
+        var connActive = (prevStatus === "complete" && status === "in_progress") ? " active" : "";
+        html += '<div class="phase-connector' + connActive + '"></div>';
+      }
+
+      html += '<div class="phase-unit"><div class="phase-node-wrap">';
+      html += '<div class="phase-diamond ' + status + '"></div>';
+      html += '<div class="phase-label">' + escapeHtml(label) + '</div>';
+      html += '</div></div>';
+    }
+
+    pipelineTrackEl.innerHTML = html;
+  }
+
+  // ── Agent Cards ───────────────────────────────
+  var renderedAgentIds = [];
+
+  function renderAgentCards(agents) {
+    if (!agents || Object.keys(agents).length === 0) {
+      agentsGridEl.innerHTML = "";
+      renderedAgentIds = [];
+      return;
+    }
+
+    var ids = Object.keys(agents).sort();
+
+    // Determine if we need to rebuild or just update
+    var needsRebuild = ids.length !== renderedAgentIds.length;
+    if (!needsRebuild) {
+      for (var k = 0; k < ids.length; k++) {
+        if (ids[k] !== renderedAgentIds[k]) { needsRebuild = true; break; }
+      }
+    }
+
+    if (needsRebuild) {
+      var html = "";
+      for (var i = 0; i < ids.length; i++) {
+        html += buildAgentCard(ids[i], agents[ids[i]], i);
+      }
+      agentsGridEl.innerHTML = html;
+      renderedAgentIds = ids;
+    } else {
+      for (var j = 0; j < ids.length; j++) {
+        updateAgentCard(ids[j], agents[ids[j]]);
+      }
+    }
+  }
+
+  function buildAgentCard(id, a, index) {
+    var color = activityToColor(a.activity);
+    var pct = a.questionsTotal > 0 ? Math.round((a.questionsCompleted / a.questionsTotal) * 100) : 0;
+    var delay = index * 150;
+
+    var html = '<div class="agent-card" id="card-' + escapeAttr(id) + '" style="animation-delay:' + delay + 'ms; border-left-color:' + color + '">';
+    html += '<div class="agent-card-header">';
+    html += '<span class="agent-id">' + escapeHtml(id) + '</span>';
+    html += '<span class="activity-badge" id="badge-' + escapeAttr(id) + '" style="color:' + color + '">';
+    html += '<span class="activity-dot" style="background-color:' + color + '"></span>';
+    html += activityToLabel(a.activity);
+    html += '</span></div>';
+
+    html += '<div class="progress-row">';
+    html += '<div class="progress-track"><div class="progress-fill" id="pfill-' + escapeAttr(id) + '" style="width:' + pct + '%;background-color:' + color + '"></div></div>';
+    html += '<span class="progress-text">' + (a.questionsCompleted || 0) + '/' + (a.questionsTotal || 0) + '</span>';
+    html += '</div>';
+
+    html += createWebFetchMeter(a.webFetchesUsed || 0, a.webFetchCap || 0);
+
+    html += '<div class="stats-row">';
+    html += '<span class="stat-item">claims: <span class="stat-value">' + (a.claimsFound || 0) + '</span></span>';
+    html += '<span class="stat-item">sources: <span class="stat-value">' + (a.sourcesCollected || 0) + '</span></span>';
+    html += '</div>';
+
+    html += '<div class="current-question" id="cq-' + escapeAttr(id) + '" title="' + escapeAttr(a.currentQuestion || "") + '">' + escapeHtml(a.currentQuestion || "---") + '</div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  function updateAgentCard(id, a) {
+    var card = document.getElementById("card-" + id);
+    if (!card) return;
+
+    var color = activityToColor(a.activity);
+    var pct = a.questionsTotal > 0 ? Math.round((a.questionsCompleted / a.questionsTotal) * 100) : 0;
+
+    card.style.borderLeftColor = color;
+
+    var badge = document.getElementById("badge-" + id);
+    if (badge) {
+      badge.style.color = color;
+      var dot = badge.querySelector(".activity-dot");
+      if (dot) dot.style.backgroundColor = color;
+      badge.lastChild.textContent = activityToLabel(a.activity);
+    }
+
+    var pfill = document.getElementById("pfill-" + id);
+    if (pfill) {
+      pfill.style.width = pct + "%";
+      pfill.style.backgroundColor = color;
+    }
+
+    var progText = card.querySelector(".progress-text");
+    if (progText) progText.textContent = (a.questionsCompleted || 0) + "/" + (a.questionsTotal || 0);
+
+    // Update WebFetch meter
+    var wfRow = card.querySelector(".wf-row");
+    if (wfRow) {
+      var blocks = wfRow.querySelectorAll(".wf-block");
+      var used = a.webFetchesUsed || 0;
+      for (var b = 0; b < blocks.length; b++) {
+        if (b < used) {
+          blocks[b].classList.add("filled");
+        } else {
+          blocks[b].classList.remove("filled");
+        }
+      }
+    }
+
+    var statsValues = card.querySelectorAll(".stat-value");
+    if (statsValues.length >= 2) {
+      statsValues[0].textContent = a.claimsFound || 0;
+      statsValues[1].textContent = a.sourcesCollected || 0;
+    }
+
+    var cq = document.getElementById("cq-" + id);
+    if (cq) {
+      cq.textContent = a.currentQuestion || "---";
+      cq.title = a.currentQuestion || "";
+    }
+  }
+
+  // ── Main Render ───────────────────────────────
+  function render(status) {
+    if (!status) return;
+    lastStatus = status;
+
+    var pipeline = status.pipeline;
+    var agents = status.agents || {};
+
+    // Header
+    if (pipeline) {
+      engineNameEl.textContent = pipeline.engineId || "Research Engine";
+      topicEl.textContent = pipeline.topic || "";
+      tierBadgeEl.textContent = (pipeline.tier || "standard").toUpperCase();
+
+      if (!isComplete && pipeline.startedAt) {
+        startTimer(pipeline.startedAt);
+      }
+
+      // Check completion
+      var allComplete = false;
+      if (pipeline.phases && pipeline.phases.length > 0) {
+        allComplete = pipeline.phases.every(function (p) { return p.status === "complete"; });
+      }
+
+      if (allComplete && !isComplete) {
+        isComplete = true;
+        document.body.classList.add("complete");
+        if (timerInterval) clearInterval(timerInterval);
+        var finalElapsed = formatElapsed(pipeline.startedAt);
+        finalTimeEl.textContent = finalElapsed;
+
+        // Fill all agent progress bars to 100%
+        var allCards = document.querySelectorAll(".progress-fill");
+        for (var c = 0; c < allCards.length; c++) {
+          allCards[c].style.width = "100%";
+          allCards[c].style.backgroundColor = "var(--accent-complete)";
+        }
+      }
+
+      renderPipeline(pipeline.phases);
+    }
+
+    renderAgentCards(agents);
+
+    // Last updated
+    var now = new Date();
+    lastUpdatedEl.textContent = "Updated " + now.toLocaleTimeString();
+  }
+
+  // ── SSE Connection ────────────────────────────
+  function setConnectionStatus(mode) {
+    connDotEl.className = "connection-dot " + mode;
+    switch (mode) {
+      case "connected":
+        connLabelEl.textContent = "SSE connected";
+        break;
+      case "polling":
+        connLabelEl.textContent = "Polling";
+        break;
+      case "disconnected":
+        connLabelEl.textContent = "Disconnected";
+        break;
+    }
+  }
+
+  function connectSSE() {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+
+    try {
+      eventSource = new EventSource("/api/events");
+    } catch (e) {
+      fallbackPoll();
+      return;
+    }
+
+    eventSource.onopen = function () {
+      setConnectionStatus("connected");
+      // If we were polling, stop
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    };
+
+    eventSource.onmessage = function (event) {
+      try {
+        var data = JSON.parse(event.data);
+        render(data);
+      } catch (e) {
+        // ignore parse errors
+      }
+    };
+
+    eventSource.onerror = function () {
+      eventSource.close();
+      eventSource = null;
+      setConnectionStatus("disconnected");
+      // Attempt reconnect after 3s, then fall back to polling
+      setTimeout(function () {
+        if (!eventSource) fallbackPoll();
+      }, 3000);
+    };
+  }
+
+  function fallbackPoll() {
+    if (pollInterval) return;
+    setConnectionStatus("polling");
+
+    function doPoll() {
+      fetch("/api/status")
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          setConnectionStatus("polling");
+          render(data);
+        })
+        .catch(function () {
+          setConnectionStatus("disconnected");
+        });
+    }
+
+    doPoll();
+    pollInterval = setInterval(doPoll, 3000);
+
+    // Try to re-establish SSE every 15s
+    setInterval(function () {
+      if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
+        connectSSE();
+      }
+    }, 15000);
+  }
+
+  // ── Helpers ───────────────────────────────────
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function escapeAttr(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  // ── Init ──────────────────────────────────────
+  connectSSE();
+
+})();
+</script>
+
+</body>
+</html>

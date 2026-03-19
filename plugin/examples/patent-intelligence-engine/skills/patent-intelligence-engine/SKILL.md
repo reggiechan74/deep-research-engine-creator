@@ -62,6 +62,63 @@ BASE_DIR    = "./research-reports/${RUN_TS}_${TOPIC_SLUG}"
 ENGINE_ID   = "patent-intelligence-engine"
 ```
 
+### Status Directory & Pipeline State
+
+Create `BASE_DIR/_status/` directory. Write `BASE_DIR/_status/_pipeline.json` with initial pipeline state. Substitute all runtime variables (ENGINE_ID, TOPIC_SLUG, detected tier, agent IDs for this tier):
+
+```json
+{
+  "engineId": "${ENGINE_ID}",
+  "topic": "${TOPIC_SLUG}",
+  "tier": "${DETECTED_TIER}",
+  "currentPhase": 0,
+  "phaseLabel": "Tier Detection",
+  "phases": [],
+  "agents": [],
+  "dashboardUrl": null,
+  "startedAt": "ISO-8601 timestamp",
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+**Phases array** -- build at Phase 0 based on detected tier and VVC config:
+
+| Phase | Label | Include When |
+|-------|-------|-------------|
+| 0 | Tier Detection | Always |
+| 1 | Research Planning | Always |
+| 2 | Parallel Research | Always |
+| 2.5 | Batch Source Hashing | Always |
+| 3 | Research Synthesis | Always |
+| 3.5 | Comprehensive Follow-Up | Comprehensive tier only |
+| 4 | If `--no-vvc` or VVC disabled: "Professional Reporting"; otherwise: "Draft Reporting" | Always |
+| 4.5 | Provenance Audit | Standard, Deep, Comprehensive |
+| 5 | VVC-Verify | VVC enabled AND --no-vvc not set |
+| 6 | VVC-Correct | VVC enabled AND --no-vvc not set |
+
+All phases start with status `"pending"` except Phase 0 which is `"complete"`. The `agents` array lists only Phase 2 research agent IDs for the detected tier.
+
+### Phase Transition Protocol
+
+Before each phase begins, update `_pipeline.json`:
+- Set `currentPhase` and `phaseLabel` to the new phase
+- Set the phase's status to `"in_progress"`
+- Update `lastUpdated` timestamp
+
+After each phase completes:
+- Set the phase's status to `"complete"`
+- Update `lastUpdated` timestamp
+
+### Research Dashboard (Standard, Deep, Comprehensive tiers only)
+
+Skip this step for Quick tier.
+
+1. Copy `${CLAUDE_SKILL_DIR}/dashboard-server.js` and `${CLAUDE_SKILL_DIR}/dashboard.html` to `BASE_DIR/_status/`
+2. Run `node BASE_DIR/_status/server.js` in background via Bash tool
+3. Capture the dashboard URL from stdout
+4. Update `_pipeline.json` with `dashboardUrl`
+5. Print to user: "Research dashboard: http://localhost:<port>"
+
 All files live under `BASE_DIR`. Never restate the prompt in chat; write long data to files and keep chat responses concise.
 
 ---
@@ -117,6 +174,29 @@ Deploy **patent-intelligence-engine:ip-landscape-mapper** — filing trends, top
 6. Run contrarian sweep: search for refutations, critiques, failure cases, contradictory data
 7. Recursive web exploration up to 5 levels deep from seed URLs
 
+### Phase 2 Output Verification
+
+After all Phase 2 agents complete, verify output before proceeding to Phase 2.5:
+
+1. For each deployed agent, check:
+   a. `BASE_DIR/_status/[AgentID].json` exists
+   b. Status file shows status `"complete"` (not `"error"` or `"researching"`)
+   c. `BASE_DIR/[TOPIC_SLUG]_Claims_[AgentID].md` exists and is non-empty
+   d. `BASE_DIR/[TOPIC_SLUG]_[AgentID]_Bibliography.md` exists and is non-empty
+
+2. Classify each agent's outcome:
+   - **HEALTHY**: status "complete" + non-empty output files
+   - **PARTIAL**: status "complete" but some output files missing/empty (possible write failure)
+   - **FAILED**: status "error" or status file missing entirely
+   - **EMPTY**: status file exists but no output files at all
+
+3. Decision logic:
+   - All HEALTHY: proceed to Phase 2.5
+   - Mix of HEALTHY + PARTIAL/FAILED: log warnings, proceed with available data
+   - All FAILED/EMPTY: halt pipeline, inform user: "All Phase 2 agents failed to produce output. Check the dashboard for error details. No research data available for synthesis."
+
+4. Log verification results to `BASE_DIR/[TOPIC_SLUG]_Methodology_Log.md` (this becomes the first entry in the consolidated methodology log)
+
 ### Phase 2.5: Batch Source Hashing
 
 After all Phase 2 agents complete, deploy a **general-purpose** batch hashing agent. Agent FIRST ACTION: Read `${CLAUDE_SKILL_DIR}/provenance.md` and execute the batch hashing protocol.
@@ -154,6 +234,11 @@ VVC specialist reads `${CLAUDE_SKILL_DIR}/vvc-pipeline.md` for full instructions
 
 ```
 ./research-reports/${RUN_TS}_${TOPIC_SLUG}/
+├── _status/
+│   ├── _pipeline.json
+│   ├── [AgentID].json                              # Per-agent status
+│   ├── server.js                                   # Dashboard server
+│   └── dashboard.html                              # Dashboard UI
 ├── [TOPIC_SLUG]_Research_Outline.md
 ├── [TOPIC_SLUG]_Claims_[AgentID].md              # Per-agent
 ├── [TOPIC_SLUG]_Sources_[AgentID].md              # Per-agent

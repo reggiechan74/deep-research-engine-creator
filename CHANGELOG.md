@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.8.0] - 2026-03-19
+
+### Added
+- **Incremental Write Protocol** -- agents now write findings to disk after each research question instead of accumulating all findings for a single write at the end. Prevents silent data loss when output exceeds the model's token limit
+- **Agent Status Protocol** -- agents maintain structured JSON status files (`_status/[AgentID].json`) with real-time progress: questions completed, activity state, WebFetch budget usage, claims/sources counts
+- **Live Research Dashboard** -- real-time web dashboard ("Dark Ops Console" aesthetic) showing pipeline phases, agent progress, and activity states. Node.js SSE server with `fs.watch` for instant updates. Launched automatically for Standard/Deep/Comprehensive tiers
+- **Phase 2 Output Verification** -- orchestrator verifies agent output files exist and are non-empty before proceeding to synthesis. Classifies agents as HEALTHY/PARTIAL/FAILED/EMPTY and halts pipeline if all agents failed
+- **Agent Constraints** -- explicit no-spawn rule prevents Phase 2 agents from creating sub-agents or background tasks, closing an uncontrolled recursion path
+- **Pipeline state tracking** -- `_pipeline.json` tracks all phase transitions with tier-aware phase inclusion (VVC phases, comprehensive follow-up, provenance audit)
+- `dashboardPort` advanced config option (default: 3847)
+- Dashboard template files: `dashboard-server.js.tmpl`, `dashboard.html.tmpl`
+- Test checks 4n-4r for observability validation
+
+### Fixed
+- Duplicate test check IDs (4h/4i/4j appeared twice) renumbered to 4k/4l/4m
+
+### Changed
+- Template count increased from 11 to 13 `.tmpl` files
+- Patent Intelligence Engine example regenerated with observability features
+
 ## [1.7.0] - 2026-03-18
 
 ### Fixed

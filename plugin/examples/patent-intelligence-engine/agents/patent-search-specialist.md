@@ -113,3 +113,12 @@ Before starting research, read these reference files:
 - Summarize sources immediately; per-source abstracts of 120 words or fewer
 - Operate in passes: (1) initial sweep + notes, (2) synthesis of top claims/gaps, (3) targeted follow-up
 - Use structured outputs (tables, bullet summaries, query logs) to minimize token footprint
+
+## Agent Constraints
+
+- Do NOT spawn sub-agents or use the Agent tool
+- Do NOT create background tasks via TaskCreate
+- All research must happen within this single agent session
+- Write findings to disk after EACH research question — never accumulate
+  all findings for a single large write at the end (see Incremental Write Protocol
+  in research-protocol.md)
