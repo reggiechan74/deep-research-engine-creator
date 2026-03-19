@@ -104,6 +104,48 @@ This keeps the context window lean for subsequent research questions.
 
 ---
 
+## Agent Status Protocol
+
+Maintain a status file at `BASE_DIR/_status/[AgentID].json`. This file is OVERWRITTEN
+(not appended) after each research question — it represents current state only.
+
+The `_status/` directory is created by the orchestrator before agents are deployed.
+
+### Status JSON Schema
+
+```json
+{
+  "agentId": "[AgentID]",
+  "engineId": "${ENGINE_ID}",
+  "phase": 2,
+  "status": "researching | writing | assessing | refining | complete | error",
+  "currentQuestion": "The research question currently being worked on",
+  "questionsCompleted": 2,
+  "questionsTotal": 5,
+  "activity": "searching | assessing | refining | writing | idle",
+  "webFetchesUsed": 4,
+  "webFetchCap": 10,
+  "claimsFound": 7,
+  "sourcesCollected": 4,
+  "iterationPass": 2,
+  "maxIterations": 3,
+  "lastUpdated": "ISO-8601 timestamp"
+}
+```
+
+### When to Write Status
+
+- On agent start: status "researching", questionsCompleted 0, activity "searching"
+- After each Search pass: update activity to "searching"
+- After each Assess pass: update activity to "assessing"
+- After each Refine pass: update activity to "refining"
+- After writing files for a completed question: increment questionsCompleted,
+  update claimsFound and sourcesCollected totals, activity "writing"
+- On completion of all questions: status "complete", activity "idle"
+- On error or abort: status "error", add "message" field with explanation
+
+---
+
 ## File Isolation Protocol
 
 Each Phase 2 agent writes ONLY to its own files. No shared files during parallel research.
