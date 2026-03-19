@@ -118,11 +118,11 @@ Perform multi-level structural validation on `engine-config.json`:
 - Verify `Bash` is in the `commands/research.md` `allowed-tools` frontmatter
 - Read agent `.md` files and verify they reference `${CLAUDE_SKILL_DIR}/standards.md` as a first action
 
-**4h: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
+**4k: SKILL.md line count.** Count lines in `skills/*/SKILL.md`. Must be under 200 lines.
 
-**4i: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
+**4l: No per-fetch hashing.** Grep all files in `skills/*/` for "After each WebFetch". Must find 0 matches.
 
-**4j: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
+**4m: No shared file writes.** Grep all files in `skills/*/` and `agents/` for "Shared_Sources". Must find 0 matches.
 
 Record PASS if all sub-checks pass, FAIL with details of which sub-checks failed.
 
