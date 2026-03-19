@@ -1,0 +1,113 @@
+// Research Dashboard Server
+// Zero-dependency Node.js server using built-in http, fs, path modules.
+// Serves dashboard HTML and provides SSE endpoint for real-time status updates.
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const STATUS_DIR = __dirname;
+const DASHBOARD_HTML = path.join(STATUS_DIR, 'dashboard.html');
+const PIPELINE_FILE = path.join(STATUS_DIR, '_pipeline.json');
+const DEFAULT_PORT = {{dashboardPort}};
+const SHUTDOWN_DELAY_MS = 5 * 60 * 1000;
+
+let shutdownScheduled = false;
+
+function readJsonSafe(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function getStatus() {
+  const pipeline = readJsonSafe(PIPELINE_FILE);
+  const agents = {};
+  try {
+    for (const file of fs.readdirSync(STATUS_DIR)) {
+      if (file.endsWith('.json') && !file.startsWith('_')) {
+        const data = readJsonSafe(path.join(STATUS_DIR, file));
+        if (data) agents[file.replace('.json', '')] = data;
+      }
+    }
+  } catch { /* directory read failed */ }
+  return { pipeline, agents };
+}
+
+const sseClients = new Set();
+
+function broadcastStatus() {
+  const status = getStatus();
+  const data = `data: ${JSON.stringify(status)}\n\n`;
+  for (const res of sseClients) {
+    try { res.write(data); } catch { sseClients.delete(res); }
+  }
+  if (!shutdownScheduled && status.pipeline && status.pipeline.phases) {
+    const allComplete = status.pipeline.phases.every(p => p.status === 'complete');
+    if (allComplete) {
+      shutdownScheduled = true;
+      console.log('Pipeline complete. Server will shut down in 5 minutes.');
+      setTimeout(() => process.exit(0), SHUTDOWN_DELAY_MS);
+    }
+  }
+}
+
+let debounceTimer = null;
+try {
+  fs.watch(STATUS_DIR, (eventType, filename) => {
+    if (filename && filename.endsWith('.json')) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(broadcastStatus, 100);
+    }
+  });
+} catch (err) {
+  console.error('Warning: could not watch status directory:', err.message);
+}
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/' || req.url === '/index.html') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    try {
+      res.end(fs.readFileSync(DASHBOARD_HTML, 'utf8'));
+    } catch {
+      res.end('<h1>Dashboard not found</h1>');
+    }
+  } else if (req.url === '/api/status') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify(getStatus()));
+  } else if (req.url === '/api/events') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.write(`data: ${JSON.stringify(getStatus())}\n\n`);
+    sseClients.add(res);
+    req.on('close', () => sseClients.delete(res));
+  } else {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+});
+
+function tryListen(port) {
+  server.once('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      tryListen(port + 1);
+    } else {
+      console.error(`Server error: ${err.message}`);
+      process.exit(1);
+    }
+  });
+  server.listen(port, () => {
+    console.log(`Research dashboard: http://localhost:${port}`);
+  });
+}
+
+tryListen(DEFAULT_PORT);
