@@ -97,6 +97,15 @@ def substitute(template, placeholders):
     return result
 
 
+def read_template(name):
+    """Read a template file from the templates directory."""
+    path = os.path.join(TEMPLATE_DIR, name)
+    if not os.path.exists(path):
+        error_exit(f"Template not found: {path}", code=2)
+    with open(path, 'r') as f:
+        return f.read()
+
+
 def derive_placeholders(config):
     """Apply all mechanical derivation rules. Returns flat dict."""
     p = {}
@@ -597,10 +606,135 @@ def derive_placeholders(config):
     return p
 
 
+AGENT_COLORS = ["blue", "magenta", "yellow"]
+
+
+def _write_file(path, content):
+    """Write content to path, creating parent dirs as needed."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
+        f.write(content)
+
+
 def generate_files(config, placeholders, output_dir):
     """Create directories, read templates, substitute, write output files."""
-    # Placeholder — implemented in Task 3
-    pass
+    engine_name = config["engineMeta"]["name"]
+    mode = config["engineMeta"].get("mode", "self-contained")
+    vvc_enabled = config.get("qualityFramework", {}).get("vvc", {}).get("enabled", False)
+    agents = config.get("agentPipeline", {}).get("agents", [])
+    derived = config.get("_derived", {})
+    overrides = config.get("prompts", {}).get("agentOverrides", {})
+    skill_dir = os.path.join(output_dir, "skills", engine_name)
+
+    # Create directory structure
+    for d in [".claude-plugin", "commands", "agents", os.path.join("skills", engine_name)]:
+        os.makedirs(os.path.join(output_dir, d), exist_ok=True)
+
+    # --- plugin.json ---
+    tmpl = read_template("plugin-json.tmpl")
+    content = substitute(tmpl, placeholders)
+    # Remove empty email line
+    if not placeholders.get("authorEmail"):
+        content = re.sub(r'\n\s*"email":\s*"",?\n', '\n', content)
+        # Clean trailing comma before closing brace in author object
+        content = re.sub(r',(\s*\})', r'\1', content)
+    _write_file(os.path.join(output_dir, ".claude-plugin", "plugin.json"), content)
+
+    # --- engine-config.json ---
+    _write_file(
+        os.path.join(output_dir, "engine-config.json"),
+        json.dumps(config, indent=2, ensure_ascii=False)
+    )
+
+    # --- commands ---
+    research_tmpl = read_template("command-template.md.tmpl")
+    _write_file(
+        os.path.join(output_dir, "commands", "research.md"),
+        substitute(research_tmpl, placeholders)
+    )
+
+    sources_tmpl = read_template("sources-command-template.md.tmpl")
+    _write_file(
+        os.path.join(output_dir, "commands", "sources.md"),
+        substitute(sources_tmpl, placeholders)
+    )
+
+    # --- agent files ---
+    agent_tmpl = read_template("agent-template.md.tmpl")
+    for i, agent in enumerate(agents):
+        aid = agent["id"]
+        color = AGENT_COLORS[i % len(AGENT_COLORS)]
+        tools_list = agent.get("tools", ["Read", "Write", "Edit", "Bash", "WebSearch", "WebFetch", "Glob", "Grep"])
+        if isinstance(tools_list, list):
+            tools_str = "\n".join(f"  - {t}" for t in tools_list)
+        else:
+            tools_str = str(tools_list)
+
+        # Build per-agent placeholders
+        agent_ph = dict(placeholders)
+        agent_ph["agentId"] = aid
+        agent_ph["agentRole"] = agent["role"]
+        agent_ph["agentSpecialization"] = agent.get("specialization", "")
+        agent_ph["model"] = agent.get("model", "sonnet")
+        agent_ph["color"] = color
+        agent_ph["tools"] = tools_str
+
+        # Per-agent derived blocks
+        agent_ph["agentExamplesBlock"] = derived.get("agentExamplesBlocks", {}).get(aid, "")
+        agent_ph["agentBodyBlock"] = derived.get("agentBodyBlocks", {}).get(aid, "")
+        agent_ph["agentFirstActionsBlock"] = derived.get("agentFirstActionsBlocks", {}).get(aid, "")
+
+        # Prompt override
+        override = overrides.get(aid, "")
+        if override:
+            agent_ph["promptOverride"] = f"## Custom Instructions\n\n{override}"
+        else:
+            agent_ph["promptOverride"] = ""
+
+        # VVC agent uses vvcWebFetchCap
+        if aid == "vvc-specialist":
+            agent_ph["maxWebFetches"] = placeholders.get("vvcWebFetchCap", placeholders.get("maxWebFetches", "10"))
+
+        _write_file(
+            os.path.join(output_dir, "agents", f"{aid}.md"),
+            substitute(agent_tmpl, agent_ph)
+        )
+
+    # --- skill files ---
+    if mode == "extension":
+        # Extension mode: single SKILL.md from extension template
+        ext_tmpl = read_template("extension-skill.md.tmpl")
+        _write_file(os.path.join(skill_dir, "SKILL.md"), substitute(ext_tmpl, placeholders))
+    else:
+        # Self-contained mode: full set of skill files
+        orch_tmpl = read_template("orchestrator-skill.md.tmpl")
+        _write_file(os.path.join(skill_dir, "SKILL.md"), substitute(orch_tmpl, placeholders))
+
+        standards_tmpl = read_template("standards.md.tmpl")
+        _write_file(os.path.join(skill_dir, "standards.md"), substitute(standards_tmpl, placeholders))
+
+        rp_tmpl = read_template("research-protocol.md.tmpl")
+        _write_file(os.path.join(skill_dir, "research-protocol.md"), substitute(rp_tmpl, placeholders))
+
+        prov_tmpl = read_template("provenance.md.tmpl")
+        _write_file(os.path.join(skill_dir, "provenance.md"), substitute(prov_tmpl, placeholders))
+
+        # VVC pipeline (only when enabled)
+        if vvc_enabled:
+            vvc_tmpl = read_template("vvc-pipeline.md.tmpl")
+            _write_file(os.path.join(skill_dir, "vvc-pipeline.md"), substitute(vvc_tmpl, placeholders))
+
+        # Dashboard files
+        ds_tmpl = read_template("dashboard-server.js.tmpl")
+        _write_file(os.path.join(skill_dir, "dashboard-server.js"), substitute(ds_tmpl, placeholders))
+
+        # Dashboard HTML — copy verbatim (no substitution)
+        dash_html = read_template("dashboard.html.tmpl")
+        _write_file(os.path.join(skill_dir, "dashboard.html"), dash_html)
+
+    # --- README ---
+    readme_tmpl = read_template("readme-template.md.tmpl")
+    _write_file(os.path.join(output_dir, "README.md"), substitute(readme_tmpl, placeholders))
 
 
 def verify_output(output_dir, config):

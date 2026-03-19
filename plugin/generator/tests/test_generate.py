@@ -266,3 +266,101 @@ class TestDerivePlaceholders:
         assert "research-planning-specialist" in p["subAgentList"]
         assert "synthesis-specialist" in p["subAgentList"]
         assert "test-engine:research-agent" in p["subAgentList"]
+
+
+class TestGenerateFiles:
+    def _generate(self, tmp_path, config=None):
+        """Helper: write config, run generate_files, return output dir."""
+        config = config or make_minimal_config()
+        config_path = tmp_path / "engine-config.json"
+        config_path.write_text(json.dumps(config))
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        placeholders = generate.derive_placeholders(config)
+        generate.generate_files(config, placeholders, str(output_dir))
+        return output_dir
+
+    def test_creates_directory_structure(self, tmp_path):
+        out = self._generate(tmp_path)
+        assert (out / ".claude-plugin").is_dir()
+        assert (out / "commands").is_dir()
+        assert (out / "agents").is_dir()
+        assert (out / "skills" / "test-engine").is_dir()
+
+    def test_creates_plugin_json(self, tmp_path):
+        out = self._generate(tmp_path)
+        pj = json.loads((out / ".claude-plugin" / "plugin.json").read_text())
+        assert pj["name"] == "test-engine"
+
+    def test_creates_research_command(self, tmp_path):
+        out = self._generate(tmp_path)
+        content = (out / "commands" / "research.md").read_text()
+        assert "description:" in content  # YAML frontmatter
+
+    def test_creates_agent_files(self, tmp_path):
+        out = self._generate(tmp_path)
+        assert (out / "agents" / "research-agent.md").exists()
+        content = (out / "agents" / "research-agent.md").read_text()
+        assert "Research Analyst" in content
+
+    def test_creates_skill_files(self, tmp_path):
+        out = self._generate(tmp_path)
+        skill_dir = out / "skills" / "test-engine"
+        assert (skill_dir / "SKILL.md").exists()
+        assert (skill_dir / "standards.md").exists()
+        assert (skill_dir / "research-protocol.md").exists()
+        assert (skill_dir / "provenance.md").exists()
+        assert (skill_dir / "dashboard-server.js").exists()
+        assert (skill_dir / "dashboard.html").exists()
+
+    def test_skips_vvc_pipeline_when_disabled(self, tmp_path):
+        out = self._generate(tmp_path)
+        assert not (out / "skills" / "test-engine" / "vvc-pipeline.md").exists()
+
+    def test_creates_vvc_pipeline_when_enabled(self, tmp_path):
+        config = make_minimal_config()
+        config["qualityFramework"]["vvc"] = {
+            "enabled": True,
+            "claimTypes": [
+                {"tag": "VC", "label": "Verifiable Claim", "description": "Factual", "requiresVerification": True}
+            ],
+            "verificationScope": {"HIGH": 100, "MEDIUM": 100, "LOW": 100, "SPECULATIVE": 100},
+            "tierBehavior": {"quick": "none", "standard": "verify-only", "deep": "full", "comprehensive": "full"}
+        }
+        config["advanced"]["tokenBudgets"]["vvc"] = 8000
+        config["agentPipeline"]["agents"].append({
+            "id": "vvc-specialist", "role": "VVC Specialist",
+            "subagentType": "general-purpose", "specialization": "Verify claims"
+        })
+        config["_derived"]["agentExamplesBlocks"]["vvc-specialist"] = "VVC examples"
+        config["_derived"]["agentBodyBlocks"]["vvc-specialist"] = "VVC body"
+        config["_derived"]["agentFirstActionsBlocks"]["vvc-specialist"] = "VVC first actions"
+        out = self._generate(tmp_path, config)
+        assert (out / "skills" / "test-engine" / "vvc-pipeline.md").exists()
+        assert (out / "agents" / "vvc-specialist.md").exists()
+
+    def test_creates_readme(self, tmp_path):
+        out = self._generate(tmp_path)
+        assert (out / "README.md").exists()
+
+    def test_no_unresolved_placeholders(self, tmp_path):
+        out = self._generate(tmp_path)
+        for root, _, files in os.walk(str(out)):
+            for fn in files:
+                if fn.endswith(('.md', '.json', '.js', '.html')):
+                    content = open(os.path.join(root, fn)).read()
+                    remaining = re.findall(r'\{\{[a-zA-Z0-9_-]+\}\}', content)
+                    assert remaining == [], f"Unresolved in {fn}: {remaining}"
+
+    def test_plugin_json_no_empty_email(self, tmp_path):
+        config = make_minimal_config()
+        # No email in author
+        out = self._generate(tmp_path, config)
+        pj_text = (out / ".claude-plugin" / "plugin.json").read_text()
+        assert '"email"' not in pj_text
+
+    def test_dashboard_port_substituted(self, tmp_path):
+        out = self._generate(tmp_path)
+        content = (out / "skills" / "test-engine" / "dashboard-server.js").read_text()
+        assert "3847" in content
+        assert "{{dashboardPort}}" not in content
