@@ -739,8 +739,54 @@ def generate_files(config, placeholders, output_dir):
 
 def verify_output(output_dir, config):
     """Post-generation check: all expected files exist and are non-empty."""
-    # Placeholder — implemented in Task 4
-    pass
+    engine_name = config["engineMeta"]["name"]
+    mode = config["engineMeta"].get("mode", "self-contained")
+    vvc_enabled = config.get("qualityFramework", {}).get("vvc", {}).get("enabled", False)
+    agents = config.get("agentPipeline", {}).get("agents", [])
+
+    expected = [
+        ".claude-plugin/plugin.json",
+        "engine-config.json",
+        "commands/research.md",
+        "commands/sources.md",
+        "README.md",
+    ]
+
+    # Agent files
+    for agent in agents:
+        expected.append(f"agents/{agent['id']}.md")
+
+    # Skill files
+    skill_prefix = f"skills/{engine_name}"
+    expected.append(f"{skill_prefix}/SKILL.md")
+
+    if mode != "extension":
+        expected.extend([
+            f"{skill_prefix}/standards.md",
+            f"{skill_prefix}/research-protocol.md",
+            f"{skill_prefix}/provenance.md",
+            f"{skill_prefix}/dashboard-server.js",
+            f"{skill_prefix}/dashboard.html",
+        ])
+        if vvc_enabled:
+            expected.append(f"{skill_prefix}/vvc-pipeline.md")
+
+    missing = []
+    empty = []
+    for rel in expected:
+        path = os.path.join(output_dir, rel)
+        if not os.path.exists(path):
+            missing.append(rel)
+        elif os.path.getsize(path) == 0:
+            empty.append(rel)
+
+    if missing or empty:
+        msgs = []
+        if missing:
+            msgs.append(f"Missing files: {', '.join(missing)}")
+        if empty:
+            msgs.append(f"Empty files: {', '.join(empty)}")
+        error_exit("; ".join(msgs), code=2)
 
 
 def print_summary(output_dir):

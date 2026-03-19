@@ -364,3 +364,50 @@ class TestGenerateFiles:
         content = (out / "skills" / "test-engine" / "dashboard-server.js").read_text()
         assert "3847" in content
         assert "{{dashboardPort}}" not in content
+
+
+class TestVerifyOutput:
+    def test_passes_when_all_files_exist(self, tmp_path):
+        config = make_minimal_config()
+        config_path = tmp_path / "engine-config.json"
+        config_path.write_text(json.dumps(config))
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        placeholders = generate.derive_placeholders(config)
+        generate.generate_files(config, placeholders, str(output_dir))
+        generate.verify_output(str(output_dir), config)  # Should not raise
+
+    def test_fails_when_file_missing(self, tmp_path):
+        config = make_minimal_config()
+        config_path = tmp_path / "engine-config.json"
+        config_path.write_text(json.dumps(config))
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        placeholders = generate.derive_placeholders(config)
+        generate.generate_files(config, placeholders, str(output_dir))
+        # Delete a required file
+        os.remove(os.path.join(str(output_dir), "skills", "test-engine", "dashboard-server.js"))
+        with pytest.raises(SystemExit) as exc_info:
+            generate.verify_output(str(output_dir), config)
+        assert exc_info.value.code == 2
+
+
+class TestExtensionMode:
+    def test_extension_mode_creates_single_skill_file(self, tmp_path):
+        config = make_minimal_config()
+        config["engineMeta"]["mode"] = "extension"
+        config["engineMeta"]["baseSkillPath"] = "/path/to/base/skill"
+        config_path = tmp_path / "engine-config.json"
+        config_path.write_text(json.dumps(config))
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        placeholders = generate.derive_placeholders(config)
+        generate.generate_files(config, placeholders, str(output_dir))
+        skill_dir = output_dir / "skills" / "test-engine"
+        assert (skill_dir / "SKILL.md").exists()
+        # Extension mode should NOT have these files
+        assert not (skill_dir / "standards.md").exists()
+        assert not (skill_dir / "research-protocol.md").exists()
+        assert not (skill_dir / "provenance.md").exists()
+        assert not (skill_dir / "dashboard-server.js").exists()
+        assert not (skill_dir / "dashboard.html").exists()
